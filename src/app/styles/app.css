@@ -54,3 +54,58 @@ details[open] summary {
   border-bottom-right-radius: 4px;
   border-bottom-left-radius: 4px;
 }
+
+input, select {
+  font-size: 0.75rem;
+  padding: 0.25em;
+}
+
+.code {
+  flex-direction: column;
+  gap: 0.25em;
+  display: grid;
+}
+
+.code > div,
+.code > textarea {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1em;
+  padding: 0.5em;
+  padding-left: 1.5em;
+  margin: 0;
+  border: 1px solid lightgray;
+  line-height: var(--line-height);
+  overflow: hidden;
+  tab-size: 2;
+}
+.code > textarea {
+  background: transparent;
+  color: transparent;
+  caret-color: black;
+}
+
+.code span {
+  position: relative;
+}
+
+.code .indicator {
+  position: absolute;
+  z-index: 1;
+  background: red;
+  border-radius: 3px;
+  width: 0.75em;
+  height: 0.75em;
+  top: 0.125em;
+  left: -1em;
+}
+
+textarea {
+  resize: none;
+}
+
+.no-pointer-event {
+  pointer-events: none;
+}

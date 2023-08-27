@@ -1,7 +1,7 @@
 import { helper } from '@ember/component/helper';
 
 const formaters = Object.freeze([3, 2, 1, 0].map(x =>
-  new Intl.NumberFormat(undefined, {
+  new Intl.NumberFormat('en-US', {
     maximumFractionDigits: x,
     minimumFractionDigits: x
   })

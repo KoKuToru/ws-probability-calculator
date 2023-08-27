@@ -4,7 +4,7 @@
     {{on "keydown" this.onKeyDown}}
     {{on "keydown" this.updateCode}}
     {{on "change" this.store}}
-  >{{this.code}}</textarea>
+  >{{this.state.code}}</textarea>
   <div>{{#each this.codeByLine as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
 </div>
 

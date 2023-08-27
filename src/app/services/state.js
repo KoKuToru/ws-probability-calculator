@@ -3,6 +3,8 @@ import { registerDestructor } from '@ember/destroyable';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 
+const CURRENT_VERSION = 1;
+
 const DEFAULT_CODE =
 `attack 3
   this will do 3 dmg + trigger, opponent checks up to 3(+trigger) cards and might cancel with a cx
@@ -39,11 +41,21 @@ export default class StateService extends Service {
 
   @action store() {
     const params = new URLSearchParams();
+    params.set('v', CURRENT_VERSION);
     this.code && params.set('code', serializeCode(this.code));
     window.history.pushState('', '', `?${params}`);
   }
   @action restore() {
+    if (!location.search) {
+      return;
+    }
     const params = new URLSearchParams(location.search);
+    const version = params.get('v');
+    if (version != 1) {
+      alert('incompatible version');
+      window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
+      return;
+    }
     this.code = params.get('code') && deserializeCode(params.get('code'));
 
   }

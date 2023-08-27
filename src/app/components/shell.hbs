@@ -1,11 +1,15 @@
-<Section @caption="Code" @open={{true}}>
-  <Code />
-</Section>
+{{#if this.state.loaded}}
+  <Section @caption="Code" @open={{true}}>
+    <Code />
+  </Section>
 
-<Section @caption="Overview" class="result">
-  <Overview />
-</Section>
+  <Section @caption="Overview" class="result">
+    <Overview />
+  </Section>
 
-<Section @caption="Details" @open={{true}}>
-  <Details />
-</Section>
+  <Section @caption="Details" @open={{true}}>
+    <Details />
+  </Section>
+{{else}}
+  Loading..
+{{/if}}

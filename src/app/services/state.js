@@ -18,11 +18,17 @@ the following commands are supported:
   * burn dmg`;
 
 class Private {
+  @tracked loaded = false;
   @tracked code;
+  @tracked overview_data;
 }
 
 export default class StateService extends Service {
   #private = new Private();
+
+  get loaded() {
+    return this.#private.loaded;
+  }
 
   get code() {
     return this.#private.code ?? DEFAULT_CODE;
@@ -47,22 +53,28 @@ export default class StateService extends Service {
     window.history.pushState('', '', `?${await serializeState(data)}`);
   }
   @action async restore() {
-    if (!location.search) {
-      return;
-    }
     try {
-      const d = await deserializeState(location.search?.slice(1));
-      if (d.version != 1) {
-        alert('incompatible version');
+      if (!location.search) {
+        return;
+      }
+      try {
+        const d = await deserializeState(location.search?.slice(1));
+        if (d.version != 1) {
+          alert('incompatible version');
+          window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
+          return;
+        }
+
+        this.code = d.code;
+      } catch {
+        alert('incompatible state');
         window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
         return;
       }
-
-      this.code = d.code;
-    } catch {
-      alert('incompatible state');
-      window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
-      return;
+    } finally {
+      if (!this.#private.loaded) {
+        this.#private.loaded = true;
+      }
     }
   }
 }

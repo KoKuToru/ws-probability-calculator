@@ -1,0 +1,9 @@
+<div
+  class="result-table"
+  {{did-insert this.setWidth this.data}}
+  {{did-update this.setWidth this.data}}
+>
+  {{#each this.data as |x|}}
+    <div class={{x.class}}>{{x.value}}</div>
+  {{/each}}
+</div>

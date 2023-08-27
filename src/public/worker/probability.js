@@ -1,4 +1,40 @@
-export default class Probability {
+export class ProbabilityDouble {
+  #f;
+
+  constructor(a, b) {
+    this.#f = a / b;
+  }
+
+  get numerator() {
+    return this.#f
+  }
+
+  get denominator() {
+    return 1.;
+  }
+
+  mul(other) {
+    return new ProbabilityDouble(this.#f * other.numerator, 1.);
+  }
+
+  add(other) {
+    return new ProbabilityDouble(this.#f + other.numerator, 1.);
+  }
+
+  toJSON() {
+    return [this.numerator.toString(), this.denominator.toString()];
+  }
+
+  toNumber() {
+    return this.#f;
+  }
+
+  toString() {
+    return this.toNumber().toString();
+  }
+};
+
+export class ProbabilityExact {
   #a;
   #b;
 
@@ -36,21 +72,21 @@ export default class Probability {
 
   mul(other) {
     // https://www.matematikazasite.com/en/how-to-simplify-fractions-before-multiplying/
-    const a = new Probability(this.numerator, other.denominator);
-    const b = new Probability(other.numerator, this.denominator);
-    return new Probability(a.numerator * b.numerator, a.denominator * b.denominator);
+    const a = new ProbabilityExact(this.numerator, other.denominator);
+    const b = new ProbabilityExact(other.numerator, this.denominator);
+    return new ProbabilityExact(a.numerator * b.numerator, a.denominator * b.denominator);
   }
 
   add(other) {
     if (this.denominator === other.denominator) {
-      return new Probability(
+      return new ProbabilityExact(
         this.numerator + other.numerator,
         this.denominator,
         false
       );
     }
     // could be improved with LCM..
-    return new Probability(
+    return new ProbabilityExact(
       this.numerator * other.denominator + other.numerator * this.denominator,
       this.denominator * other.denominator
     )
@@ -92,3 +128,5 @@ export default class Probability {
     return `${t}\u2044${b}`;
   }
 };
+
+export default ProbabilityExact;

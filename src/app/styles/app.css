@@ -16,24 +16,22 @@ body {
 details {
   border: 1px solid #aaa;
   border-radius: 4px;
-  padding: 0.5em 0.5em 0;
+  /*padding: 0.5em 0.5em 0;*/
 
   flex-shrink: 0;
 }
 
-details[open] {
+/*details[open] {
   padding: 0.5em;
-}
+}*/
 
 summary {
   font-weight: bold;
-  margin: -0.5em -0.5em 0;
   padding: 0.5em;
 }
 
 details[open] summary {
   border-bottom: 1px solid #aaa;
-  margin-bottom: 0.5em;
 }
 
 .result {
@@ -81,7 +79,8 @@ select {
   line-height: var(--line-height);
   overflow: hidden;
   tab-size: 2;
-  word-wrap:break-word
+  word-wrap:break-word;
+  margin: 0.5rem;
 }
 
 .code > textarea {
@@ -131,8 +130,8 @@ textarea {
   grid-template-columns: repeat(var(--columns), min-content);
   white-space: nowrap;
   border: 1px solid lightgray;
-  margin: 0.5rem;
   border-radius: 4px;
+  margin: 0.5rem;
 }
 
 .details > div {

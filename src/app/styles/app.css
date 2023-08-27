@@ -147,15 +147,15 @@ textarea {
 }
 
 .details > div {
-  padding: 0.25rem;
+  padding: 3px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   background-color: white;
-  min-width: 3ch;
-  min-height: 3ch;
-  font-family: 'Courier New', Courier, monospace;
+  min-width: 20px;
+  min-height: 20px;
+  font-family: monospace;
   font-size: 10px;
 }
 .overview > div {
@@ -164,9 +164,9 @@ textarea {
 }
 
 .details > div.corner {
-  font-size: 0.6em;
+  font-size: 0.75em;
   min-height: 1.5rem;
-  min-width: 5rem;
+  min-width: 4rem;
 }
 .overview > div.corner {
   min-width: 1.5rem;

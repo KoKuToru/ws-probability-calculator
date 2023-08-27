@@ -37,7 +37,7 @@ export default class OverviewTable extends Component {
         value: col,
       });
     }
-    for (const row of Array(50 - 1).fill(null).map((_, i) => i + 1)) {
+    for (const row of Array(50).fill(null).map((_, i) => i + 1)) {
       data.push({
         class: 'header row',
         header: true,

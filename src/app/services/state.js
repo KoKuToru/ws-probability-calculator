@@ -2,6 +2,7 @@ import Service from '@ember/service';
 import { registerDestructor } from '@ember/destroyable';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import ResultMap from 'ws/utils/result-map';
 
 const CURRENT_VERSION = 1;
 
@@ -20,7 +21,7 @@ the following commands are supported:
 class Private {
   @tracked loaded = false;
   @tracked code;
-  @tracked overview_data;
+  @tracked result = new ResultMap(9+1, 50+1);
 }
 
 export default class StateService extends Service {
@@ -35,6 +36,13 @@ export default class StateService extends Service {
   }
   set code(code) {
     this.#private.code = code;
+  }
+
+  get result() {
+    return this.#private.result;
+  }
+  set result(v) {
+    this.#private.result = v;
   }
 
   constructor(...args) {

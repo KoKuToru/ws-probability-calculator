@@ -2,6 +2,9 @@
   class="overview details"
   {{did-insert this.setWidth this.data}}
   {{did-update this.setWidth this.data}}
+
+  {{did-insert this.calculate this.state.code}}
+  {{did-update this.calculate this.state.code}}
 >
   {{#each this.data as |x|}}
     {{#if x.corner}}
@@ -16,8 +19,10 @@
             />
         </svg>
       </div>
-    {{else}}
+    {{else if x.header}}
       <div class={{x.class}}>{{x.value}}</div>
+    {{else}}
+      <div class={{this.getCellClass x.value}}>{{this.getCellValue x.value}}</div>
     {{/if}}
   {{/each}}
 </div>

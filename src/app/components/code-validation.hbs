@@ -1,1 +1,10 @@
-<span><div class="indicator {{this.class}}"></div></span><span class="no-pointer-event {{this.class}}">{{@value}}</span>
+<span
+  {{did-insert this.updateTabSpacing this.spaceCount}}
+  {{did-update this.updateTabSpacing this.spaceCount}}
+><div class="indicator {{this.class}}"></div></span>{{!--
+--}}<span class="no-pointer-event text {{this.class}}"
+  {{did-insert this.updateTabSpacing this.spaceCount}}
+  {{did-update this.updateTabSpacing this.spaceCount}}
+>
+  {{~this.value~}}
+</span>

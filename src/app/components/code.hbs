@@ -1,11 +1,11 @@
 <div class="code">
-  <div>{{#each this.codeByLine as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
   <textarea
     {{on "input" this.updateCode}}
     {{on "keydown" this.onKeyDown}}
     {{on "keydown" this.updateCode}}
     {{on "change" this.store}}
   >{{this.code}}</textarea>
+  <div>{{#each this.codeByLine as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
 </div>
 
 

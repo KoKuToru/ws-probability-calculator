@@ -78,7 +78,8 @@ select {
   border: 1px solid lightgray;
   line-height: var(--line-height);
   overflow: hidden;
-  tab-size: 2;
+  --tab-size: 2;
+  tab-size: var(--tab-size);
   word-wrap:break-word;
   margin: 0.5rem;
 }
@@ -88,6 +89,18 @@ select {
   color: transparent;
   caret-color: black;
   z-index: 1;
+}
+
+.code > textarea:focus + div > span.text {
+  --space-count: 0;
+  padding-left: calc(1ch * var(--space-count));
+}
+
+.code > textarea:not(:focus) + div > span.text {
+  --space-count: 0;
+  padding-left: calc(1ch * var(--space-count));
+  /*text-indent: calc(1ch * var(--space-count));*/
+  display:inline-block;
 }
 
 .code span {

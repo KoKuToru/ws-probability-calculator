@@ -40,24 +40,18 @@ export default class StateService extends Service {
   }
 
   @action async store() {
-    const params = new URLSearchParams();
     const data = {
       'version': 1,
       'code': this.code
     };
-    params.set('d', await serializeState(data));
-    window.history.pushState('', '', `?${params}`);
+    window.history.pushState('', '', `?${await serializeState(data)}`);
   }
   @action async restore() {
     if (!location.search) {
       return;
     }
-    const params = new URLSearchParams(location.search);
-    if (!params.has('d')) {
-      return;
-    }
     try {
-      const d = await deserializeState(params.get('d'));
+      const d = await deserializeState(location.search?.slice(1));
       if (d.version != 1) {
         alert('incompatible version');
         window.history.pushState('', '', `?v=${CURRENT_VERSION}`);

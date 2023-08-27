@@ -1,29 +1,49 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { registerDestructor } from '@ember/destroyable';
 
 export default class Code extends Component {
   @tracked code;
 
   constructor(...args) {
     super(...args);
+
+    this.restore();
+    window.addEventListener('popstate', this.restore);
+    registerDestructor(this, () => window.removeEventListener('popstate', this.restore));
+  }
+
+  @action restore() {
     // load code from url
     const params = new URLSearchParams(location.search);
     let code = deserializeCode(params.get('code'));
     if (!code) {
-      code = 'attack 3\nburn 1';
+      code = `attack 3
+  this will do 3 dmg + trigger, opponent checks up to 3(+trigger) cards and might cancel with a cx
+burn 1
+  this will do 1 dmg, opponent checks up to 1 cards and might cancel with a cx
+
+only code with a check-mark will be executed from top to bottom
+
+the following commands are supported:
+  * attack dmg
+  * burn dmg`;
+
     }
     this.code = code;
   }
 
-  @action updateCode(e) {
-    this.code = e.target.value;
-
+  @action store() {
     const params = new URLSearchParams(location.search);
     params.set('code', serializeCode(this.code));
 
     // store code in url
     window.history.pushState('', '', `?${params}`);
+  }
+
+  @action updateCode(e) {
+    this.code = e.target.value;
   }
 
   get codeByLine() {
@@ -60,6 +80,9 @@ function serializeCode(code) {
 }
 
 function deserializeCode(encoded) {
+  if (!encoded) {
+    return null;
+  }
   try {
     encoded = base64ToString(encoded);
     const words_serialized_split_idx = encoded.indexOf('\u0001');

@@ -81,11 +81,14 @@ select {
   line-height: var(--line-height);
   overflow: hidden;
   tab-size: 2;
+  word-wrap:break-word
 }
+
 .code > textarea {
   background: transparent;
   color: transparent;
   caret-color: black;
+  z-index: 1;
 }
 
 .code span {

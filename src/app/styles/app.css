@@ -111,7 +111,7 @@ textarea {
   pointer-events: none;
 }
 
-.result-table {
+.details {
   display: inline-grid;
   grid-template-columns: repeat(var(--columns), min-content);
   white-space: nowrap;
@@ -120,7 +120,7 @@ textarea {
   border-radius: 4px;
 }
 
-.result-table > div {
+.details > div {
   padding: 0.25rem;
   position: relative;
   display: flex;
@@ -128,12 +128,12 @@ textarea {
   justify-content: flex-end;
 }
 
-.result-table > div.corner {
+.details > div.corner {
   font-size: 0.75em;
   min-height: 1.5rem;
   min-width: 5rem;
 }
-.result-table > div.corner svg {
+.details > div.corner svg {
   position: absolute;
   left: 0;
   top: 0;
@@ -141,26 +141,26 @@ textarea {
   height: 100%;
   pointer-events: none;
 }
-.result-table > div.corner > span:first-child {
+.details > div.corner > span:first-child {
   position: absolute;
   left: 0.25rem;
   bottom: 0;
 }
-.result-table > div.corner > span:not(:first-child) {
+.details > div.corner > span:not(:first-child) {
   position: absolute;
   right: 0.25rem;
   top: 0;
 }
 
-.result-table > div.header {
+.details > div.header {
   text-align: center;
   justify-content: center;
 }
 
-.result-table > div:not(.header.row) {
+.details > div:not(.header.row) {
   border-left: 1px solid gray;
 }
 
-.result-table > div:not(.header.col) {
+.details > div:not(.header.col) {
   border-top: 1px solid black;
 }

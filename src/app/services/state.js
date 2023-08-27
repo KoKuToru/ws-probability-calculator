@@ -39,85 +39,92 @@ export default class StateService extends Service {
     this.restore();
   }
 
-  @action store() {
+  @action async store() {
     const params = new URLSearchParams();
-    params.set('v', CURRENT_VERSION);
-    this.code && params.set('code', serializeCode(this.code));
+    const data = {
+      'version': 1,
+      'code': this.code
+    };
+    params.set('d', await serializeState(data));
     window.history.pushState('', '', `?${params}`);
   }
-  @action restore() {
+  @action async restore() {
     if (!location.search) {
       return;
     }
     const params = new URLSearchParams(location.search);
-    const version = params.get('v');
-    if (version != 1) {
-      alert('incompatible version');
+    if (!params.has('d')) {
+      return;
+    }
+    try {
+      const d = await deserializeState(params.get('d'));
+      if (d.version != 1) {
+        alert('incompatible version');
+        window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
+        return;
+      }
+
+      this.code = d.code;
+    } catch {
+      alert('incompatible state');
       window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
       return;
     }
-    this.code = params.get('code') && deserializeCode(params.get('code'));
-
   }
 }
 
-function serializeCode(code) {
-  // very simple dictionary compression
-  const words = [];
-  const serialized = code.replace(/([\w]+|[^\w]+)/gm, (match, p) => {
-    let idx = words.indexOf(p);
-    if (idx < 0) {
-      idx = words.length;
-      words[idx] = p;
-    }
-    return String.fromCodePoint(idx);
+async function serializeState(data) {
+  data = JSON.stringify(data);
+
+  const b64 = [
+    await blobToBase64(new Blob(['\u0000', data])),
+    await blobToBase64(new Blob(['\u0001', await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream('deflate-raw'))).blob()])),
+  ].reduce((p, c) => p.length < c.length ? p : c);
+
+  return b64 // convert to base64url
+    .replace(/[+]/g, '-')
+    .replace(/[/]/g, '_')
+    .replace(/[=]/g, '.');
+}
+
+async function deserializeState(b64) {
+  b64 = b64 // convert from base64url
+    .replace(/[-]/g, '+')
+    .replace(/[_]/g, '/')
+    .replace(/[.]/g, '=');
+
+  const buffer = await base64ToBlob(b64).then(x => x.arrayBuffer());
+
+  const marker = (new Int8Array(buffer, 0, 1))[0];
+  const blob = new Blob([new Int8Array(buffer, 1)]);
+
+  let json;
+
+  switch (marker) {
+    case 0:
+      json = await blob.text();
+      break;
+    case 1:
+      json = await new Response(blob.stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()
+      break;
+    default:
+      throw new Error('marker?');
+  }
+
+  return JSON.parse(json);
+}
+
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',', 2).pop())
+    reader.onerror = (err) => reject(err)
+    reader.readAsDataURL(blob)
   });
-  return stringToBase64(words.join('\u0000') + '\u0001' + serialized);
 }
 
-function deserializeCode(encoded) {
-  if (!encoded) {
-    return null;
-  }
-  try {
-    encoded = base64ToString(encoded);
-    const words_serialized_split_idx = encoded.indexOf('\u0001');
-    if (words_serialized_split_idx < 0) {
-      return null;
-    }
-    const words = encoded.slice(0, words_serialized_split_idx).split('\u0000');
-    const serialized = encoded.slice(words_serialized_split_idx + 1);
-    const decoded = serialized
-      .split('')
-      .map((x) => words[x.codePointAt(0)])
-      .join('');
-    return decoded;
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-}
-
-function base64ToString(base64) {
-  const binString = atob(
-    base64
-      //base64url
-      .replace(/[-]/g, '+')
-      .replace(/[_]/g, '/')
-      .replace(/[.]/g, '='),
-  );
-  const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
-  return new TextDecoder().decode(bytes);
-}
-
-function stringToBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  const binString = Array.from(bytes, (x) => String.fromCodePoint(x)).join('');
-  return (
-    btoa(binString)
-      //base64url
-      .replace(/[+]/g, '-')
-      .replace(/[/]/g, '_')
-      .replace(/[=]/g, '.')
-  );
+async function base64ToBlob(b64) {
+  const resp = await fetch(`data:application/octet-binary;base64,${b64}`);
+  const blob = await resp.blob();
+  return blob;
 }

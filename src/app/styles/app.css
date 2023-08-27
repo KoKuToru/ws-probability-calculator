@@ -71,7 +71,7 @@ select {
   grid-row-start: 1;
   white-space: pre-wrap;
   font-family: "Courier New", Courier, monospace;
-  font-size: 1em;
+  font-size: 14px;
   padding: 0.5em;
   padding-left: 1.5em;
   margin: 0;
@@ -143,7 +143,6 @@ textarea {
   grid-template-columns: repeat(var(--columns), min-content);
   white-space: nowrap;
   border: 1px solid lightgray;
-  border-radius: 4px;
   margin: 0.5rem;
 }
 
@@ -156,6 +155,8 @@ textarea {
   background-color: white;
   min-width: 3ch;
   min-height: 3ch;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
 }
 .overview > div {
   align-items: center;
@@ -163,7 +164,7 @@ textarea {
 }
 
 .details > div.corner {
-  font-size: 0.75em;
+  font-size: 0.6em;
   min-height: 1.5rem;
   min-width: 5rem;
 }

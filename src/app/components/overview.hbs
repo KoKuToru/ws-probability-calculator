@@ -12,17 +12,31 @@
         <span>ds</span>
         <span>cx</span>
         <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-            <line
-                x1="0" y1="0" x2="1" y2="1"
-                stroke="black"
-                vector-effect="non-scaling-stroke"
-            />
+          <line
+              x1="0" y1="0" x2="1" y2="1"
+              stroke="black"
+              vector-effect="non-scaling-stroke"
+          />
         </svg>
       </div>
     {{else if x.header}}
       <div class={{x.class}}>{{x.value}}</div>
     {{else}}
-      <div class={{this.getCellClass x.value}}>{{this.getCellValue x.value}}</div>
+      {{#let (this.getCellClass x.value) as |class|}}
+        {{#if class}}
+          <div class={{class}}>{{this.getCellValue x.value}}</div>
+        {{else}}
+          <div>
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+              <line
+                  x1="0" y1="1" x2="1" y2="0"
+                  stroke="lightgray"
+                  vector-effect="non-scaling-stroke"
+              />
+            </svg>
+          </div>
+        {{/if}}
+      {{/let}}
     {{/if}}
   {{/each}}
 </div>

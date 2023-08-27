@@ -94,13 +94,25 @@ select {
 
 .code .indicator {
   position: absolute;
-  z-index: 1;
-  background: red;
   border-radius: 3px;
   width: 0.75em;
   height: 0.75em;
   top: 0.125em;
   left: -1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.code .bad {
+  color: gray;
+}
+.code .indicator.ok {
+  background-color: #54b27cDF;
+  color: white;
+}
+.code .indicator.ok::after {
+  content: '✓';
 }
 
 textarea {

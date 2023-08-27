@@ -90,15 +90,18 @@ export default class OverviewTable extends Component {
     this.#abort_controller = new AbortController();
 
     const signal = this.#abort_controller.signal;
-    // calculate all
-    for (let ds = 1; ds <= 50; ++ds)
-    for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
+    const calc = async (cx, ds) => {
+      if (signal.aborted) {
+        return;
+      }
+
       // search free worker
       const free = (await Promise.race(WORKERS.map(x => x.promise.then(() => [x.promise]))))[0];
-      const worker = WORKERS.find(x => x.promise === free);
       if (signal.aborted) {
-        break;
+        return;
       }
+      const worker = WORKERS.find(x => x.promise === free);
+
       // send request
       const channel = new MessageChannel();
       worker.promise = new Promise(r => channel.port1.onmessage = this.#onmessage.bind(this, r, signal, cx, ds));
@@ -107,6 +110,18 @@ export default class OverviewTable extends Component {
         op_size: ds,
         code: '3'
       }, [ channel.port2 ]);
+    };
+
+    // calculate all
+    const priority = new Set([...this.state.selected, '0,50']);
+    for (const value of priority) {
+      await calc(...value.split(',').map(x => parseInt(x)));
+    }
+    for (let ds = 1; ds <= 50; ++ds)
+    for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
+      if (!priority.has([cx, ds].join())) {
+        await calc(cx, ds);
+      }
     }
   }
 

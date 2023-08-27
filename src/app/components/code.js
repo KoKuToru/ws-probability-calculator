@@ -39,7 +39,7 @@ export default class Code extends Component {
         '\t',
         target.selectionStart,
         target.selectionStart,
-        'end'
+        'end',
       );
     }
   }
@@ -68,7 +68,10 @@ function deserializeCode(encoded) {
     }
     const words = encoded.slice(0, words_serialized_split_idx).split('\u0000');
     const serialized = encoded.slice(words_serialized_split_idx + 1);
-    const decoded = serialized.split('').map(x => words[x.codePointAt(0)]).join('');
+    const decoded = serialized
+      .split('')
+      .map((x) => words[x.codePointAt(0)])
+      .join('');
     return decoded;
   } catch (e) {
     console.error(e);
@@ -79,10 +82,10 @@ function deserializeCode(encoded) {
 function base64ToString(base64) {
   const binString = atob(
     base64
-    //base64url
-    .replace(/[-]/g, '+')
-    .replace(/[_]/g, '/')
-    .replace(/[.]/g, '=')
+      //base64url
+      .replace(/[-]/g, '+')
+      .replace(/[_]/g, '/')
+      .replace(/[.]/g, '='),
   );
   const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
   return new TextDecoder().decode(bytes);
@@ -90,10 +93,12 @@ function base64ToString(base64) {
 
 function stringToBase64(text) {
   const bytes = new TextEncoder().encode(text);
-  const binString = Array.from(bytes, (x) => String.fromCodePoint(x)).join("");
-  return btoa(binString)
-    //base64url
-    .replace(/[+]/g, '-')
-    .replace(/[/]/g, '_')
-    .replace(/[=]/g, '.');
+  const binString = Array.from(bytes, (x) => String.fromCodePoint(x)).join('');
+  return (
+    btoa(binString)
+      //base64url
+      .replace(/[+]/g, '-')
+      .replace(/[/]/g, '_')
+      .replace(/[=]/g, '.')
+  );
 }

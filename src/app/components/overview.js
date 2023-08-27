@@ -108,7 +108,9 @@ export default class OverviewTable extends Component {
       worker.postMessage({
         op_cx: cx,
         op_size: ds,
-        code: '3'
+        code: [
+          '3', '3', '3',
+        ]
       }, [ channel.port2 ]);
     };
 

@@ -1,8 +1,8 @@
 import Component from '@glimmer/component';
 
 const syntax = [
-  /^attack\s+([0-9]+)\s*$/g,
-  /^burn\s+([0-9]+)\s*$/g
+  /^(attack)\s+([0-9]+)\s*$/g,
+  /^(burn)\s+([0-9]+)\s*$/g
 ];
 
 export default class CodeValidation extends Component {

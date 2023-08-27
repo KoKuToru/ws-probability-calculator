@@ -207,7 +207,7 @@ textarea {
 .details > .header.col {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 3;
   border-bottom: 1px solid black;
   margin-bottom: -1px;
 }
@@ -215,7 +215,28 @@ textarea {
 .details > .header.row:not(.col) {
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 2;
   border-right: 1px solid black;
   margin-right: -1px;
+}
+
+.selectable {
+  cursor: pointer;
+}
+.selectable.selected {
+  font-weight: bold;
+}
+
+.selectable.selected::after {
+  display: block;
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: rgb(71 99 255 / 0.4);
+  mix-blend-mode: multiply;
+  z-index: 1;
 }

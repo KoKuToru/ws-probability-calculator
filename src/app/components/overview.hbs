@@ -24,7 +24,11 @@
     {{else}}
       {{#let (this.getCellClass x.value) as |class|}}
         {{#if class}}
-          <div class={{class}}>{{this.getCellValue x.value}}</div>
+          <div
+            class={{class}}
+            tabindex="0"
+            {{on "click" (fn this.toggleCell x.value)}}
+          >{{this.getCellValue x.value}}</div>
         {{else}}
           <div>
             <svg viewBox="0 0 1 1" preserveAspectRatio="none">

@@ -58,7 +58,11 @@ export default class OverviewTable extends Component {
       return undefined;
     }
     const idx = Math.min(Math.floor(value.mean * COLORS.length / this.max_mean), COLORS.length - 1);
-    return `color-${idx}`;
+    const cls = ['selectable', `color-${idx}`];
+    if (this.state.isSelected([value.x, value.y].join())) {
+      cls.push('selected');
+    }
+    return cls.join(' ');
   }
   @action getCellValue(value) {
     value = this.state.result.get(...value);
@@ -66,6 +70,9 @@ export default class OverviewTable extends Component {
       return undefined;
     }
     return formatNumber(value.mean);
+  }
+  @action toggleCell(value) {
+    this.state.toggleSelected(value.join());
   }
 
   #last_code;
@@ -112,6 +119,8 @@ export default class OverviewTable extends Component {
     if (data.mean > this.max_mean) {
       this.max_mean = data.mean;
     }
+    data.x = x;
+    data.y = y;
     this.state.result.set(x, y, data);
   }
 }

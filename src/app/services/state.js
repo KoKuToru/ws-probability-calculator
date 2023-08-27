@@ -21,6 +21,7 @@ the following commands are supported:
 class Private {
   @tracked loaded = false;
   @tracked code;
+  @tracked selected = new Set();
   @tracked result = new ResultMap(9+1, 50+1);
 }
 
@@ -45,6 +46,20 @@ export default class StateService extends Service {
     this.#private.result = v;
   }
 
+  isSelected(k) {
+    return this.#private.selected.has(k);
+  }
+
+  toggleSelected(k) {
+    if (this.#private.selected.has(k)) {
+      this.#private.selected.delete(k);
+    } else {
+      this.#private.selected.add(k);
+    }
+    this.#private.selected = this.#private.selected;
+    this.store();
+  }
+
   constructor(...args) {
     super(...args);
 
@@ -56,7 +71,8 @@ export default class StateService extends Service {
   @action async store() {
     const data = {
       'version': 1,
-      'code': this.code
+      'code': this.#private.code,
+      'selected': [...this.#private.selected]
     };
     window.history.pushState('', '', `?${await serializeState(data)}`);
   }
@@ -73,7 +89,8 @@ export default class StateService extends Service {
           return;
         }
 
-        this.code = d.code;
+        this.#private.code = d.code;
+        this.#private.selected = new Set(d.selected ?? []);
       } catch {
         alert('incompatible state');
         window.history.pushState('', '', `?v=${CURRENT_VERSION}`);

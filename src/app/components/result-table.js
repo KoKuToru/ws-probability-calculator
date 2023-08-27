@@ -32,7 +32,11 @@ export default class ResultTable extends Component {
 
   get data() {
     const data = [];
-    data.push({ header: true, class: 'header col row' });
+    data.push({
+      header: true,
+      corner: true,
+      class: 'header col row corner',
+    });
     for (const col of [0, 1, 2, 3, 4, 5, 6, 7]) {
       data.push({
         header: true,

@@ -1,5 +1,7 @@
 import Component from '@glimmer/component';
 import { formatNumber } from 'ws/helpers/format-number';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
 
 export const COLORS = [
   '#e1645dDF',
@@ -23,39 +25,51 @@ export const COLORS = [
 }
 
 export default class ResultTable extends Component {
+  @service state;
+
   setWidth(e, [data]) {
     e.style.setProperty(
       '--columns',
-      data.reduce((p, c) => p + (c.header ?? 0), 0),
+      data.length + 1,
     );
   }
 
-  get data() {
-    const data = [];
-    data.push({
-      header: true,
-      corner: true,
-      class: 'header col row corner',
-    });
-    for (const col of [0, 1, 2, 3, 4, 5, 6, 7]) {
-      data.push({
-        header: true,
-        class: 'header col',
-        value: `≥ ${col}`,
-      });
-    }
-    for (const row of ['3 / 29', '2 / 25']) {
-      data.push({
-        class: 'header row',
-        value: row,
-      });
-      for (const col of [0, 1, 2, 3, 4, 5, 6, 7]) {
-        data.push({
-          class: `color-${col}`,
-          value: formatNumber(Math.random() * 100),
-        });
+  get rows() {
+    const selected = this.state.selected.map(x => x.split(',').map(x => parseInt(x))).sort((a, b) => {
+      for (let i = 0; i < Math.max(a.length, b.length); ++i) {
+        if (a[i] < b[i]) {
+          return -1;
+        }
+        if (a[i] > b[i]) {
+          return 1;
+        }
       }
+      return 0;
+    });
+    return selected;
+  }
+
+  get cols() {
+    return Array(this.rows.reduce((p, c) => Math.max(p, this.state.result.get(...c)?.dmg?.length ?? 0), 0)).fill().map((_,i) => i);
+  }
+
+  @action getCellValue(x, y) {
+    const res = this.state.result.get(...x);
+    if (!res) {
+      return null;
     }
-    return data;
+    if (y == 0) {
+      return res.dmg[0] * 100;
+    }
+    const v = res.dmg.slice(y).reduce((p, c) => p + c, 0);
+    return v * 100;
+  }
+  @action getCellClass(v) {
+    v ??= null;
+    if (v === null) {
+      return null;
+    }
+    const idx = Math.min(Math.floor(v * COLORS.length / 100.), COLORS.length - 1);
+    return `color-${idx}`;
   }
 }

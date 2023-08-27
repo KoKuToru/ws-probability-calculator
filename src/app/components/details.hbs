@@ -1,23 +1,52 @@
 <div
   class="details"
-  {{did-insert this.setWidth this.data}}
-  {{did-update this.setWidth this.data}}
+  {{did-insert this.setWidth this.cols}}
+  {{did-update this.setWidth this.cols}}
 >
-  {{#each this.data as |x|}}
-    {{#if x.corner}}
-      <div class={{x.class}}>
-        <span>cx / ds</span>
-        <span>dmg</span>
-        <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-            <line
-                x1="0" y1="0" x2="1" y2="1"
-                stroke="black"
-                vector-effect="non-scaling-stroke"
-            />
-        </svg>
-      </div>
-    {{else}}
-      <div class={{x.class}}>{{x.value}}</div>
-    {{/if}}
+  <div class="header col row corner">
+    <span>cx / ds</span>
+    <span>dmg</span>
+    <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+        <line
+            x1="0" y1="0" x2="1" y2="1"
+            stroke="black"
+            vector-effect="non-scaling-stroke"
+        />
+    </svg>
+  </div>
+  {{#each this.cols key="@index" as |col|}}
+    <div class="header col">
+      {{#if col}}
+        ≥ {{col}}
+      {{else}}
+        {{col}}
+      {{/if}}
+    </div>
+  {{/each}}
+
+
+  {{#each this.rows as |row|}}
+    <div class="header row">{{get row "0"}} / {{get row "1"}}</div>
+    {{#each this.cols key="@index" as |col|}}
+      {{#let (this.getCellValue row col) as |value|}}
+        {{#let (this.getCellClass value) as |class|}}
+          {{#if class}}
+            <div class={{class}}>
+              {{format-number value 5}}
+            </div>
+          {{else}}
+            <div>
+              <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+                <line
+                    x1="0" y1="1" x2="1" y2="0"
+                    stroke="lightgray"
+                    vector-effect="non-scaling-stroke"
+                />
+              </svg>
+            </div>
+          {{/if}}
+        {{/let}}
+      {{/let}}
+    {{/each}}
   {{/each}}
 </div>

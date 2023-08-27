@@ -21,7 +21,14 @@ the following commands are supported:
 class Private {
   @tracked loaded = false;
   @tracked code;
-  @tracked selected = new Set();
+  @tracked selected = new Set([
+    '8,30',
+    '8,25',
+    '8,20',
+    '6,30',
+    '6,25',
+    '6,20'
+  ]);
   @tracked result = new ResultMap(9+1, 50+1);
 }
 
@@ -44,6 +51,14 @@ export default class StateService extends Service {
   }
   set result(v) {
     this.#private.result = v;
+  }
+
+  get selected() {
+    return [...this.#private.selected];
+  }
+
+  get hasSelected() {
+    return Boolean(this.#private.selected.size);
   }
 
   isSelected(k) {

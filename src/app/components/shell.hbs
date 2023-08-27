@@ -6,10 +6,11 @@
   <Section @caption="Overview" class="result">
     <Overview />
   </Section>
-
-  <Section @caption="Details" @open={{true}}>
-    <Details />
-  </Section>
+  {{#if this.state.hasSelected}}
+    <Section @caption="Probability" class="probability">
+      <Details />
+    </Section>
+  {{/if}}
 {{else}}
   Loading..
 {{/if}}

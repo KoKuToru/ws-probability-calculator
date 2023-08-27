@@ -126,12 +126,17 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  background-color: white;
 }
 
 .details > div.corner {
   font-size: 0.75em;
   min-height: 1.5rem;
   min-width: 5rem;
+}
+.overview > div.corner {
+  min-width: 1.5rem;
+  min-height: 1rem;
 }
 .details > div.corner svg {
   position: absolute;
@@ -163,4 +168,20 @@ textarea {
 
 .details > div:not(.header.col) {
   border-top: 1px solid black;
+}
+
+.details > .header.col {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid black;
+  margin-bottom: -1px;
+}
+
+.details > .header.row:not(.col) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-right: 1px solid black;
+  margin-right: -1px;
 }

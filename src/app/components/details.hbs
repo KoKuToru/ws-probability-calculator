@@ -26,12 +26,22 @@
 
 
   {{#each this.rows as |row|}}
-    <div class="header row">{{get row "0"}} / {{get row "1"}}</div>
+    <div
+      class="header row"
+      data-x={{get row "0"}}
+      data-y={{get row "1"}}
+    >
+      {{get row "0"}} / {{get row "1"}}
+    </div>
     {{#each this.cols key="@index" as |col|}}
       {{#let (this.getCellValue row col) as |value|}}
         {{#let (this.getCellClass value) as |class|}}
           {{#if class}}
-            <div class={{class}}>
+            <div
+              class={{class}}
+              data-x={{get row "0"}}
+              data-y={{get row "1"}}
+            >
               {{format-number value 5}}
             </div>
           {{else}}

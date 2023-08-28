@@ -35,17 +35,21 @@ export default class OverviewTable extends Component {
         header: true,
         column: true,
         class: 'header col',
+        x: col,
         value: col,
       });
     }
     for (const row of Array(50).fill(null).map((_, i) => i + 1)) {
       data.push({
         class: 'header row',
+        y: row,
         header: true,
         value: row,
       });
       for (const col of columns) {
         data.push({
+          x: col,
+          y: row,
           value: [col, row],
         });
       }

@@ -20,17 +20,25 @@
         </svg>
       </div>
     {{else if x.header}}
-      <div class={{x.class}}>{{x.value}}</div>
+      <div
+        class={{x.class}}
+        data-x={{x.x}}
+        data-y={{x.y}}
+      >
+        {{x.value}}
+      </div>
     {{else}}
       {{#let (this.getCellClass x.value) as |class|}}
         {{#if class}}
           <div
             class={{class}}
+            data-x={{x.x}}
+            data-y={{x.y}}
             tabindex="0"
             {{on "click" (fn this.toggleCell x.value)}}
           >{{this.getCellValue x.value}}</div>
         {{else}}
-          <div>
+          <div data-x={{x.x}} data-y={{x.y}}>
             <svg viewBox="0 0 1 1" preserveAspectRatio="none">
               <line
                   x1="0" y1="1" x2="1" y2="0"

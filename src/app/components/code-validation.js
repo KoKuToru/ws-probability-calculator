@@ -24,6 +24,7 @@ export default class CodeValidation extends Component {
       switch (value[i]) {
         case '\t':
           count += 2;
+          break;
         default:
           if (!/\s/.exec(value[i])) {
             break loop;

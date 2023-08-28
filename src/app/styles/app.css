@@ -11,6 +11,8 @@ body {
 
   --line-height: 1.25;
   line-height: var(--line-height);
+
+  font-family: sans-serif;
 }
 
 details {

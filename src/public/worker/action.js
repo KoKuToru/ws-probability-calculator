@@ -1,5 +1,5 @@
-import soulAttack from './actions/soul-attack.js';
-import extraAttack from './actions/extra-attack.js';
+import attack from './actions/attack.js';
+import burn from './actions/burn.js';
 
 export default class Action {
   static dummy_func = function* (state) { yield state; };
@@ -12,12 +12,12 @@ export default class Action {
     this.#func = func ?? Action.dummy_func;
   }
 
-  soulAttack(soul) {
-    return new Action(this, soulAttack(soul));
+  attack(soul) {
+    return new Action(this, attack(soul));
   }
 
-  extraAttack(soul) {
-    return new Action(this, extraAttack(soul));
+  burn(soul) {
+    return new Action(this, burn(soul));
   }
 
   *execute(state) {

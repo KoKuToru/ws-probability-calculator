@@ -5,11 +5,16 @@ import State from './state.js';
 self.addEventListener('message', function(e) {
   const data = e.data;
   let action = new Action();
+
+  const allowed_actions = new Set(Object.getOwnPropertyNames(Action.prototype));
+  allowed_actions.delete('constructor');
+  allowed_actions.delete('execute');
+
   for (const code of data.code) {
-    if (code.endsWith('!')) {
-      action = action.extraAttack(parseInt(code));
+    if (allowed_actions.has(code[0])) {
+      action = action[code[0]](...code.slice(1));
     } else {
-      action = action.soulAttack(parseInt(code));
+      console.error(`unknown action ${code[0]}`);
     }
   }
   // execute

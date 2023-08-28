@@ -1,9 +1,7 @@
 import State from '../state.js';
 import Probability from '../probability.js';
 
-export function* _soulAttack(soul, state) {
-  check_trigger:
-  for (const trigger of [true, false]) {
+export function* _burn(soul, state) {
     let op_cx = state.op_cx;
     let op_size = state.op_size;
     let op_deck = state.op_deck;
@@ -12,30 +10,12 @@ export function* _soulAttack(soul, state) {
     let my_size = state.my_size;
     let my_deck = state.my_deck;
 
-    let dmg = soul + trigger;
+    let dmg = soul;
     let c_dmg = 0;
 
-    if (
-      ( trigger && my_trg <= 0) || // i can't trigger
-      (!trigger && my_size <= my_trg) // i must trigger
-    ) {
-      continue;
-    }
+    let probability = new Probability(1, 1);
 
-    // trigger check
-    let probability = trigger
-      ? new Probability(my_trg, my_size)
-      : new Probability(my_size - my_trg, my_size);
-    my_size -= 1;
-    if (trigger) {
-      my_trg -= 1;
-    }
-    if (my_size <= 0) {
-      // reshuffle
-      throw new Error("not implemented");
-    }
-
-    for (let n = 0; n < soul + trigger; ++n) {
+    for (let n = 0; n < soul; ++n) {
       if (op_cx > 0) {
         // cancel
         const pc = probability.mul(new Probability(op_cx, op_size));
@@ -53,7 +33,7 @@ export function* _soulAttack(soul, state) {
       }
       if (op_size <= op_cx) {
         // nothing to "not cancel"
-        continue check_trigger;
+        return;
       }
       probability = probability.mul(new Probability(op_size - op_cx, op_size));
       op_size -= 1;
@@ -69,9 +49,8 @@ export function* _soulAttack(soul, state) {
 
     // attack state
     yield new State({ ...state, op_cx, op_size, my_trg, my_size, op_deck, my_deck }, { dmg, probability });
-  }
 }
 
-export default function soulAttack(soul) {
-  return _soulAttack.bind(null, soul);
+export default function burn(soul) {
+  return _burn.bind(null, soul);
 }

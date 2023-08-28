@@ -1,6 +1,6 @@
 const syntax = [
-  /^(attack)\s+([0-9]+)\s*$/g,
-  /^(burn)\s+([0-9]+)\s*$/g
+  [/^(attack)\s+([0-9]+)\s*$/g, parseInt],
+  [/^(burn)\s+([0-9]+)\s*$/g, parseInt]
 ];
 
 export default function parse(code) {
@@ -25,14 +25,14 @@ export default function parse(code) {
 
     text = text.slice(offset);
 
-    for (const s of syntax) {
+    for (const [s, ...p] of syntax) {
       s.lastIndex = 0; //< reset the regex
       const m = s.exec(text);
       if (m) {
         return {
           text,
           indent,
-          code: m.slice(1)
+          code: [m[1], ...m.slice(2).map((x, i) => p[i] ? p[i](x) : x)]
         };
       }
     }

@@ -8,15 +8,15 @@ const CURRENT_VERSION = 1;
 
 const DEFAULT_CODE =
 `attack 3
-  this will do 3 dmg + trigger, opponent checks up to 3(+trigger) cards and might cancel with a cx
+\tthis will do 3 dmg + trigger, opponent checks up to 3(+trigger) cards and might cancel with a cx
 burn 1
-  this will do 1 dmg, opponent checks up to 1 cards and might cancel with a cx
+\tthis will do 1 dmg, opponent checks up to 1 cards and might cancel with a cx
 
 only code with a check-mark will be executed from top to bottom
 
 the following commands are supported:
-  * attack dmg
-  * burn dmg`;
+\t* attack dmg
+\t* burn dmg`;
 
 class Private {
   @tracked loaded = false;

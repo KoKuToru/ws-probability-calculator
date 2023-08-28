@@ -37,11 +37,7 @@
       {{#let (this.getCellValue row col) as |value|}}
         {{#let (this.getCellClass value) as |class|}}
           {{#if class}}
-            <div
-              class={{class}}
-              data-x={{get row "0"}}
-              data-y={{get row "1"}}
-            >
+            <div class={{class}}>
               {{format-number value 5}}
             </div>
           {{else}}

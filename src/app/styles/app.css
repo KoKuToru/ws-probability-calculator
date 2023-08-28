@@ -260,9 +260,10 @@ textarea {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  background: rgb(71 99 255 / 0.4);
+  /*background: rgb(71 99 255 / 0.4);*/
   mix-blend-mode: multiply;
   z-index: 1;
+  border: 2px solid rgb(71 99 255 / 1.0);
 }
 
 .probability > div {

@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
+import parseCode from 'ws/utils/code-parser';
 
 export default class Code extends Component {
   @service state;
@@ -13,8 +14,8 @@ export default class Code extends Component {
     this.state.code = e.target.value;
   }
 
-  get codeByLine() {
-    return this.state.code.split('\n');
+  get codeParsed() {
+    return parseCode(this.state.code);
   }
 
   @action onKeyDown(e) {

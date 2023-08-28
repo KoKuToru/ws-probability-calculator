@@ -4,6 +4,7 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { COLORS } from './details';
 import { tracked } from '@glimmer/tracking';
+import parseCode from 'ws/utils/code-parser';
 
 const PARALLE_SIZE = (navigator.hardwareConcurrency ?? 2) - 1;
 const WORKERS = Array(PARALLE_SIZE).fill(null).map(x => new Worker('/worker/worker.js', {type: 'module'}));
@@ -75,11 +76,16 @@ export default class OverviewTable extends Component {
     this.state.toggleSelected(value.join());
   }
 
-  #last_code;
+  #last_code = [];
   #abort_controller = new AbortController();
   @action async calculate(el, [code]) {
     el;
-    if (this.#last_code === code) {
+
+    code = parseCode(code).filter(x => x.code).map(x => x.code);
+    if (
+      code.length === this.#last_code.length &&
+      code.every((x, i) => x.length === this.#last_code[i]?.length && x.every((y, j) => y === this.#last_code[i][j]))
+    ) {
       return;
     }
     this.#abort_controller.abort();

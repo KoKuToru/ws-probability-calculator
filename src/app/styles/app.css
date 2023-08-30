@@ -376,3 +376,19 @@ textarea {
   left: unset;
   bottom: unset;
 }
+
+.header-info {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  color: lightgray;
+  padding: 0.5rem;
+  text-align: right;
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: multiply;
+}
+h1, h2 {
+  margin: 0;
+  padding: 0;
+}

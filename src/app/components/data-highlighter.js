@@ -29,6 +29,8 @@ export default class DataHighlighterComponent extends Component {
     const x = parseInt(element.dataset.x);
     const y = parseInt(element.dataset.y);
 
+    document.querySelector(`[data-x="${x}"][data-y="${y}"]`).scrollIntoViewIfNeeded?.(true);
+
     this.#style.textContent = `
 [data-x="${x}"][data-y="${y}"]::after,
 [data-x="${x}"]:not([data-y])::after,

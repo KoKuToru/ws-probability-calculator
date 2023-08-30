@@ -60,7 +60,7 @@ export default class ResultTable extends Component {
     }
     let v;
     if (y == 0) {
-      v = res.dmg[0] * 100;
+      v = res.dmg[0];
     } else {
       v = res.dmg.slice(y).reduce((p, c) => p + c, 0);
     }

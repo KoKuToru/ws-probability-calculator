@@ -1,6 +1,13 @@
-<details open={{this.open}} ...attributes>
-  <summary>{{@caption}}</summary>
+<div
+  class="section"
+  data-open={{this.open}}
+  ...attributes
+>
+  <summary
+    {{!on "click" this.toggle}}
+    tabindex="0"
+  >{{@caption}}</summary>
   <div>
     {{yield}}
   </div>
-</details>
+</div>

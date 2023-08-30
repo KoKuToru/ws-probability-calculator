@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import { formatNumber } from 'ws/helpers/format-number';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { COLORS } from './details';
@@ -74,7 +73,7 @@ export default class OverviewTable extends Component {
     if (!value) {
       return undefined;
     }
-    return formatNumber(value.mean);
+    return value.mean;
   }
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());

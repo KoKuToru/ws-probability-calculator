@@ -58,10 +58,15 @@ export default class ResultTable extends Component {
     if (!res) {
       return null;
     }
+    let v;
     if (y == 0) {
-      return res.dmg[0] * 100;
+      v = res.dmg[0] * 100;
+    } else {
+      v = res.dmg.slice(y).reduce((p, c) => p + c, 0);
     }
-    const v = res.dmg.slice(y).reduce((p, c) => p + c, 0);
+    if (v === 0) {
+      return null;
+    }
     return v * 100;
   }
   @action getCellClass(v) {

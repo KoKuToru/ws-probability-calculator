@@ -1,12 +1,35 @@
 {{#if this.state.loaded}}
   <div class="code-section">
-    <Code />
+    <Section>
+      <:header>
+        <span>Code</span>
+      </:header>
+      <:default>
+        <Code />
+      </:default>
+    </Section>
   </div>
   <div class="overview-section">
-    <Overview />
+    <Section>
+      <:header>
+        <span>Overview</span>
+        <span>weighted average damage</span>
+      </:header>
+      <:default>
+        <Overview />
+      </:default>
+    </Section>
   </div>
   <div class="probability-section">
-    <Details />
+    <Section>
+      <:header>
+        <span>Probabilites</span>
+        <span>%</span>
+      </:header>
+      <:default>
+        <Details />
+      </:default>
+    </Section>
   </div>
 {{else}}
   Loading..

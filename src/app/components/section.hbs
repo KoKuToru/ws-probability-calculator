@@ -6,7 +6,7 @@
   <summary
     {{on "click" this.toggle}}
     tabindex="0"
-  >{{@caption}}</summary>
+  >{{yield to="header"}}</summary>
   <div>
     {{yield}}
   </div>

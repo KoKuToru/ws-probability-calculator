@@ -30,6 +30,10 @@ class Private {
     '6,20'
   ]);
   @tracked result = new ResultMap(9+1, 50+1);
+
+  @tracked code_open;
+  @tracked overview_open;
+  @tracked probability_open;
 }
 
 export default class StateService extends Service {
@@ -51,6 +55,25 @@ export default class StateService extends Service {
   }
   set result(v) {
     this.#private.result = v;
+  }
+
+  get code_open() {
+    return this.#private.code_open;
+  }
+  set code_open(v) {
+    this.#private.code_open = v;
+  }
+  get overview_open() {
+    return this.#private.overview_open;
+  }
+  set overview_open(v) {
+    this.#private.overview_open = v;
+  }
+  get probability_open() {
+    return this.#private.probability_open;
+  }
+  set probability_open(v) {
+    this.#private.probability_open = v;
   }
 
   get selected() {
@@ -87,7 +110,10 @@ export default class StateService extends Service {
     const data = {
       'version': 1,
       'code': this.#private.code,
-      'selected': [...this.#private.selected]
+      'selected': [...this.#private.selected],
+      'code_open': this.#private.code_open,
+      'overview_open': this.#private.overview_open,
+      'probability_open': this.#private.probability_open,
     };
     window.history.pushState('', '', `?${await serializeState(data)}`);
   }
@@ -106,6 +132,9 @@ export default class StateService extends Service {
 
         this.#private.code = d.code;
         this.#private.selected = new Set(d.selected ?? []);
+        this.#private.code_open = d.code_open;
+        this.#private.overview_open = d.overview_open;
+        this.#private.probability_open = d.probability_open;
       } catch {
         alert('incompatible state');
         window.history.pushState('', '', `?v=${CURRENT_VERSION}`);

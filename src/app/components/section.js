@@ -1,15 +1,16 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
+import { service } from '@ember/service';
 
 export default class Section extends Component {
-  @tracked _open;
+  @service state;
 
   get open() {
-    return this._open ?? this.args.open ?? true;
+    return this.state[this.args.name] ?? this.args.open ?? true;
   }
 
   @action toggle(e) {
-    this._open = !this.open;
+    this.state[this.args.name] = !this.open;
+    this.state.store();
   }
 }

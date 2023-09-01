@@ -345,6 +345,18 @@ textarea {
 .selectable {
   cursor: pointer;
 }
+.selectable:hover::after {
+  display: block;
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: #b0c1d7;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
 .selectable.selected {
   font-weight: bold;
 }

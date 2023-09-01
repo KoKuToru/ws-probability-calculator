@@ -105,11 +105,14 @@ export default class OverviewTable extends Component {
       }
 
       // search free worker
-      const free = (await Promise.race(WORKERS.map(x => x.promise.then(() => [x.promise]))))[0];
-      if (signal.aborted) {
-        return;
+      let worker = null;
+      while (!worker) {
+        const free = (await Promise.race(WORKERS.map(x => x.promise.then(() => [x.promise]))))[0];
+        if (signal.aborted) {
+          return;
+        }
+        worker = WORKERS.find(x => x.promise === free);
       }
-      const worker = WORKERS.find(x => x.promise === free);
 
       // send request
       const channel = new MessageChannel();

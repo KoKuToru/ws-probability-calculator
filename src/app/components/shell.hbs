@@ -1,23 +1,12 @@
 {{#if this.state.loaded}}
-  <div class="code-overview">
-    <Section @caption="Code" class="code-section" @open={{true}}>
-      <Code />
-    </Section>
-
-    <Section @caption="Overview" class="overview">
-      <Overview />
-    </Section>
+  <div class="code-section">
+    <Code />
   </div>
-  <div>
-    {{#if this.state.hasSelected}}
-      <Section @caption="Probability" class="probability">
-        <Details />
-      </Section>
-    {{/if}}
+  <div class="overview-section">
+    <Overview />
   </div>
-  <div class="header-info">
-    <h1>Weiß Schwarz</h1>
-    <h2>Probability Calculator</h2>
+  <div class="probability-section">
+    <Details />
   </div>
 {{else}}
   Loading..

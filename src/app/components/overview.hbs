@@ -24,6 +24,8 @@
         class={{x.class}}
         data-x={{x.x}}
         data-y={{x.y}}
+        tabindex="0"
+        {{on "click" (fn this.toggleHeader x)}}
       >
         {{x.value}}
       </div>

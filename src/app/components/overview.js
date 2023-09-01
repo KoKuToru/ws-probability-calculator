@@ -33,14 +33,14 @@ export default class OverviewTable extends Component {
       data.push({
         header: true,
         column: true,
-        class: 'header col',
+        class: 'header col selectable',
         x: col,
         value: col,
       });
     }
     for (const row of Array(50).fill(null).map((_, i) => i + 1)) {
       data.push({
-        class: 'header row',
+        class: 'header row selectable',
         y: row,
         header: true,
         value: row,
@@ -77,6 +77,44 @@ export default class OverviewTable extends Component {
   }
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());
+  }
+  @action toggleHeader(value) {
+    if ('x' in value) {
+      let all_set = true;
+      for (let i = value.x; i <= 50; ++i) {
+        if (!this.state.isSelected([value.x, i].join())) {
+          all_set = false;
+          break;
+        }
+      }
+      for (let i = value.x; i <= 50; ++i) {
+        if (all_set) {
+          this.state.toggleSelected([value.x, i].join());
+        } else {
+          if (!this.state.isSelected([value.x, i].join())) {
+            this.state.toggleSelected([value.x, i].join());
+          }
+        }
+      }
+    }
+    if ('y' in value) {
+      let all_set = true;
+      for (let i = 0; i <= Math.min(8, value.y); ++i) {
+        if (!this.state.isSelected([i, value.y].join())) {
+          all_set = false;
+          break;
+        }
+      }
+      for (let i = 0; i <= Math.min(8, value.y); ++i) {
+        if (all_set) {
+          this.state.toggleSelected([i, value.y].join());
+        } else {
+          if (!this.state.isSelected([i, value.y].join())) {
+            this.state.toggleSelected([i, value.y].join());
+          }
+        }
+      }
+    }
   }
 
   #last_code = [];

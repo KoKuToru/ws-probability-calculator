@@ -432,3 +432,8 @@ h1, h2 {
   margin: 0;
   padding: 0;
 }
+
+.nothing-selected {
+  padding-left: calc(15px + 5px);
+  color: gray;
+}

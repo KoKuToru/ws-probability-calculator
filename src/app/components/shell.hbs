@@ -20,19 +20,23 @@
       </:default>
     </Section>
   </div>
-  {{#if this.state.hasSelected}}
-    <div class="probability-section">
-      <Section>
-        <:header>
-          <span>Probabilites</span>
-          <span>%</span>
-        </:header>
-        <:default>
+  <div class="probability-section">
+    <Section>
+      <:header>
+        <span>Probabilites</span>
+        <span>%</span>
+      </:header>
+      <:default>
+        {{#if this.state.hasSelected}}
           <Details />
-        </:default>
-      </Section>
-    </div>
-  {{/if}}
+        {{else}}
+          <div class="nothing-selected">
+            nothing selected in overview
+          </div>
+        {{/if}}
+      </:default>
+    </Section>
+  </div>
 {{else}}
   Loading..
 {{/if}}

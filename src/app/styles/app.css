@@ -154,6 +154,10 @@ select {
   padding: 5px;
 }
 
+div:has(> .code) {
+  overflow: visible;
+}
+
 .code {
   flex-direction: column;
   gap: 5px;
@@ -169,15 +173,20 @@ select {
   white-space: pre-wrap;
   font-family: "Courier New", Courier, monospace;
   font-size: 1em;
-  padding: 5px;
+  margin: -2px;
+  padding: 2px;
   padding-left: 1.5em;
-  margin: 0;
   line-height: var(--line-height);
   overflow: hidden;
   --tab-size: 2;
   tab-size: var(--tab-size);
   word-wrap:break-word;
-  border: transparent;
+  border: 1px solid transparent;
+
+}
+.code > textarea:focus {
+  border: 1px solid gray;
+  outline: none;
 }
 
 .code > textarea {

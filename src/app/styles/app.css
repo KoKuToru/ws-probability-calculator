@@ -97,11 +97,7 @@ body {
 }
 
 .section > div {
-  display: flex;
   position: relative;
-}
-.section > div > :first-child {
-  flex-grow: 1;
 }
 
 .settings {

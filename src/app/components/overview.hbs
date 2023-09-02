@@ -30,9 +30,9 @@
         {{x.value}}
       </div>
     {{else}}
-      {{#let (this.getCellValue x.value) as |value|}}
-        {{#let (this.getCellClass x.value) as |class|}}
-          {{#if class}}
+      {{#if (this.getAnyValue x.value)}}
+        {{#let (this.getCellValue x.value) as |value|}}
+          {{#let (this.getCellClass x.value) as |class|}}
             <div
               class={{class}}
               data-cx={{x.x}}
@@ -40,20 +40,35 @@
               tabindex="0"
               {{on "click" (fn this.toggleCell x.value)}}
               title={{value}}
-            >{{format-number value}}</div>
-          {{else}}
-            <div data-cx={{x.x}} data-ds={{x.y}}>
-              <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-                <line
-                    x1="0" y1="1" x2="1" y2="0"
-                    stroke="lightgray"
-                    vector-effect="non-scaling-stroke"
-                />
-              </svg>
+            >
+              {{#if value}}
+                {{format-number value}}
+              {{else}}
+                <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+                  <line
+                      x1="0" y1="1" x2="1" y2="0"
+                      stroke="lightgray"
+                      vector-effect="non-scaling-stroke"
+                  />
+                </svg>
+              {{/if}}
             </div>
-          {{/if}}
+          {{/let}}
         {{/let}}
-      {{/let}}
+      {{else}}
+        <div
+            data-cx={{x.x}}
+            data-ds={{x.y}}
+        >
+          <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+            <line
+                x1="0" y1="1" x2="1" y2="0"
+                stroke="lightgray"
+                vector-effect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
+      {{/if}}
     {{/if}}
   {{/each}}
 </div>

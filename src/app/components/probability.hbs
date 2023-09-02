@@ -16,8 +16,9 @@
   </div>
   {{#each this.cols key="@index" as |col|}}
     <div
-      class="header col"
+      class="header col selectable {{if (this.isSelectedDmg col) "selected"}}"
       data-dmg={{col}}
+      {{on "click" (fn this.setDmg col)}}
     >
       {{#if col}}
         ≥ {{col}}
@@ -38,7 +39,7 @@
     </div>
     {{#each this.cols key="@index" as |col|}}
       {{#let (this.getCellValue row col) as |value|}}
-        {{#let (this.getCellClass value) as |class|}}
+        {{#let (this.getCellClass value col) as |class|}}
           {{#if class}}
             <div
               class={{class}}

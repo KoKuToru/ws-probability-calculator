@@ -56,13 +56,36 @@ export default class OverviewTable extends Component {
     return data;
   }
 
+  @action getAnyValue(value) {
+    value = this.state.result.get(...value);
+    return Boolean(value);
+  }
+
   @action getCellClass(value) {
     value = this.state.result.get(...value);
     if (!value) {
       return undefined;
     }
-    const idx = Math.min(Math.floor(value.mean * COLORS.length / this.max_mean), COLORS.length - 1);
-    const cls = ['selectable', `color-${idx}`];
+    let idx = null;
+    const selected_dmg = this.state.selected_dmg ?? null;
+    let v = value.mean;
+    if (selected_dmg === null) {
+      idx = Math.min(Math.floor(v * COLORS.length / this.max_mean), COLORS.length - 1);
+    } else {
+      if (selected_dmg == 0) {
+        v = value.dmg[0];
+        // flip color for 0
+        idx = Math.min(Math.floor((1 - v) * COLORS.length), COLORS.length - 1);
+      } else {
+        v = value.dmg.slice(selected_dmg).reduce((p, c) => p + c, 0);
+        idx = Math.min(Math.floor(v * COLORS.length), COLORS.length - 1);
+      }
+    }
+
+    const cls = ['selectable'];
+    if (v) {
+     cls.push(`color-${idx}`);
+    }
     if (this.state.isSelected([value.x, value.y].join())) {
       cls.push('selected');
     }
@@ -73,7 +96,17 @@ export default class OverviewTable extends Component {
     if (!value) {
       return undefined;
     }
-    return value.mean;
+    const selected_dmg = this.state.selected_dmg ?? null;
+    if (selected_dmg === null) {
+      return value.mean;
+    }
+    let v;
+    if (selected_dmg == 0) {
+      v = value.dmg[0];
+    } else {
+      v = value.dmg.slice(selected_dmg).reduce((p, c) => p + c, 0);
+    }
+    return v * 100;
   }
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());

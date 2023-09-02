@@ -53,6 +53,18 @@ export default class ProbabilityComponent extends Component {
     return Array(this.rows.reduce((p, c) => Math.max(p, this.state.result.get(...c)?.dmg?.length ?? 0), 0)).fill().map((_,i) => i);
   }
 
+  @action setDmg(dmg, e) {
+    if (this.state.selected_dmg === dmg) {
+      this.state.selected_dmg = null;
+    } else {
+      this.state.selected_dmg = dmg;
+    }
+    this.state.store();
+  }
+  @action isSelectedDmg(col) {
+    return this.state.selected_dmg === col;
+  }
+
   @action getCellValue(x, y) {
     const res = this.state.result.get(...x);
     if (!res) {
@@ -69,12 +81,18 @@ export default class ProbabilityComponent extends Component {
     }
     return v * 100;
   }
-  @action getCellClass(v) {
+  @action getCellClass(v, y) {
     v ??= null;
     if (v === null) {
       return null;
     }
-    const idx = Math.min(Math.floor(v * COLORS.length / 100.), COLORS.length - 1);
+    let idx;
+    if (y == 0) {
+      // flip color for 0
+      idx = Math.min(Math.floor((100 - v) * COLORS.length / 100.), COLORS.length - 1);
+    } else {
+      idx = Math.min(Math.floor(v * COLORS.length / 100.), COLORS.length - 1);
+    }
     return `color-${idx}`;
   }
 }

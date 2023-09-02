@@ -31,9 +31,11 @@ class Private {
   ]);
   @tracked result = new ResultMap(9+1, 50+1);
 
-  @tracked code_open;
-  @tracked overview_open;
-  @tracked probability_open;
+  @tracked code_open = true;
+  @tracked overview_open = true;
+  @tracked probability_open = true;
+
+  @tracked selected_dmg = null;
 }
 
 export default class StateService extends Service {
@@ -76,6 +78,13 @@ export default class StateService extends Service {
     this.#private.probability_open = v;
   }
 
+  get selected_dmg() {
+    return this.#private.selected_dmg;
+  }
+  set selected_dmg(v) {
+    this.#private.selected_dmg = v;
+  }
+
   get selected() {
     return [...this.#private.selected];
   }
@@ -114,6 +123,7 @@ export default class StateService extends Service {
       'code_open': this.#private.code_open,
       'overview_open': this.#private.overview_open,
       'probability_open': this.#private.probability_open,
+      'selected_dmg': this.#private.selected_dmg
     };
     window.history.pushState('', '', `?${await serializeState(data)}`);
   }
@@ -135,6 +145,7 @@ export default class StateService extends Service {
         this.#private.code_open = d.code_open;
         this.#private.overview_open = d.overview_open;
         this.#private.probability_open = d.probability_open;
+        this.#private.selected_dmg = d.selected_dmg;
       } catch {
         alert('incompatible state');
         window.history.pushState('', '', `?v=${CURRENT_VERSION}`);

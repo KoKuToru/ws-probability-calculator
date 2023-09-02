@@ -19,6 +19,11 @@ the following commands are supported:
 \t* attack dmg
 \t* burn dmg`;
 
+const CODE_MAPPING = [
+  [/attack/g, String.fromCodePoint(0x10FFFF - 0), new RegExp(String.fromCodePoint(0x10FFFF - 0), 'g'), 'attack'],
+  [/burn/g,   String.fromCodePoint(0x10FFFF - 1), new RegExp(String.fromCodePoint(0x10FFFF - 1), 'g'), 'burn'],
+];
+
 class Private {
   @tracked loaded = false;
   @tracked code;
@@ -35,12 +40,59 @@ class Private {
   @tracked code_open = true;
   @tracked overview_open = true;
   @tracked probability_open = true;
+  @tracked settings_open = true;
 
   @tracked selected_dmg = null;
 }
 
 export default class StateService extends Service {
   #private = new Private();
+
+  reset() {
+    const d = new Private();
+    for (const k of [
+      'selected_dmg',
+      'probability_open',
+      'overview_open',
+      'code_open',
+      'selected',
+      'code',
+      'result'
+    ]) {
+      this.#private[k] = d[k];
+    }
+    this.store();
+  }
+  reset_code() {
+    const d = new Private();
+    for (const k of [
+      'code',
+      'result'
+    ]) {
+      this.#private[k] = d[k];
+    }
+    this.store();
+  }
+  reset_overview() {
+    const d = new Private();
+    for (const k of [
+      'selected',
+      'selected_dmg'
+    ]) {
+      this.#private[k] = d[k];
+    }
+    this.store();
+  }
+  reset_probability() {
+    const d = new Private();
+    for (const k of [
+      'selected',
+      'selected_dmg'
+    ]) {
+      this.#private[k] = d[k];
+    }
+    this.store();
+  }
 
   get loaded() {
     return this.#private.loaded;
@@ -77,6 +129,12 @@ export default class StateService extends Service {
   }
   set probability_open(v) {
     this.#private.probability_open = v;
+  }
+  get settings_open() {
+    return this.#private.settings_open;
+  }
+  set settings_open(v) {
+    this.#private.settings_open = v;
   }
 
   get selected_dmg() {
@@ -123,16 +181,22 @@ export default class StateService extends Service {
     }
     const data = [
       CURRENT_VERSION,
-      this.code,
+      CODE_MAPPING.reduce((p, c) => p.replace(c[0], c[1]), this.code),
       [
         this.#private.code_open,
         this.#private.overview_open,
         this.#private.probability_open,
+        this.#private.settings_open,
       ].map(x => x ? 1 : 0).join(''),
       this.#private.selected_dmg ?? -1,
       selected.toString(2).split('').reverse().join('')
     ]
-    window.history.pushState('', '', `?${await serializeState(data)}`);
+    const search = `?${await serializeState(data)}`;
+    const a = new URLSearchParams(`?=${search.slice(1)}`).get('');
+    const b = new URLSearchParams(`?=${location.search.slice(1)}`).get('');
+    if (a !== b) {
+      window.history.pushState('', '', search);
+    }
   }
   @action async restore() {
     try {
@@ -155,11 +219,12 @@ export default class StateService extends Service {
           return;
         }
 
-        this.#private.code = code;
+        this.#private.code = CODE_MAPPING.reduce((p, c) => p.replace(c[2], c[3]), code);
 
         this.#private.code_open = open[0] === '1';
         this.#private.overview_open = open[1] === '1';
         this.#private.probability_open = open[2] === '1';
+        this.#private.settings_open = open[3] === '1';
 
         this.#private.selected_dmg = dmg == -1 ? null : dmg;
 
@@ -187,7 +252,7 @@ async function serializeState(data) {
     //await blobToBase64(new Blob(['\u0002', await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream('gzip'))).blob()])),
   ]
   const b64 = b64_all.reduce((p, c) => p.length < c.length ? p : c);
-  console.log("took", b64_all.indexOf(b64), b64.length, b64_all.map(x => x.length));
+  //console.log("took", b64_all.indexOf(b64), b64.length, b64_all.map(x => x.length));
 
   return b64;
 }
@@ -234,7 +299,6 @@ function baseDecode(encoded, codes) {
     value += BigInt(codes.indexOf(encoded.at(-1)));
     encoded = encoded.slice(0, -1);
   }
-  console.log('decode', value);
 
   // convert into bytes
   let bytes = [];
@@ -254,7 +318,6 @@ function baseEncode(bytes, codes) {
 
   // convert bytes into large bigint
   let value = bytes.reduce((p, c) => p << 8n | BigInt(c), 0n);
-  console.log('encode', value);
   let encoded = '';
   while (value !== 0n) {
     encoded += codes[value % codeSize];

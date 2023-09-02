@@ -95,4 +95,11 @@ export default class ProbabilityComponent extends Component {
     }
     return `color-${idx}`;
   }
+
+  @action reset(e) {
+    e.stopPropagation();
+    if (confirm('reset?')) {
+      this.state.reset_probability();
+    }
+  }
 }

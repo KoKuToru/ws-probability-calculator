@@ -1,4 +1,13 @@
 {{#if this.state.loaded}}
+  <div class="header-section">
+    <summary>
+      <span>Weiß Schwarz</span>
+      <span>Probability Calculator</span>
+      <span class="flex-grow"></span>
+      <span><button {{on "click" this.help}}>help</button></span>
+      <span><button {{on "click" this.reset}}>reset</button></span>
+    </summary>
+  </div>
   <div class="code-section">
     <Code/>
   </div>

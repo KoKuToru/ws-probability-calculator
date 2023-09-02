@@ -2,6 +2,11 @@
   <:header>
     <span>Overview</span>
     <span>{{this.overview_extra}}</span>
+    <span class="flex-grow"></span>
+    {{!--
+    <span><button>export</button></span>
+    <span><button {{on "click" this.reset}}>reset</button></span>
+    --}}
   </:header>
   <:default>
     <div
@@ -11,6 +16,8 @@
 
       {{did-insert this.calculate this.state.code}}
       {{did-update this.calculate this.state.code}}
+
+      {{did-update this.forceCalculate this.state.result}}
     >
       {{#each this.data as |x|}}
         {{#if x.corner}}

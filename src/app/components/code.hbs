@@ -1,17 +1,36 @@
 <Section @name="code_open">
   <:header>
     <span>Code</span>
+    <span title={{this.state.code}}>{{this.compressed}}</span>
+    <span class="flex-grow"></span>
+    {{!--
+    <span><button>settings</button></span>
+    <span><button {{on "click" this.reset}}>reset</button></span>
+    --}}
   </:header>
   <:default>
-    <div class="code">
-    <textarea
-        {{on "input" this.updateCode}}
-        {{on "keydown" this.onKeyDown}}
-        {{on "keydown" this.updateCode}}
-        {{on "change" this.store}}
-        placeholder="no code"
-      >{{this.state.code}}</textarea>
-      <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
+    <div class="main">
+      <div class="code">
+      <textarea
+          {{on "input" this.updateCode}}
+          {{on "keydown" this.onKeyDown}}
+          {{on "keydown" this.updateCode}}
+          {{on "change" this.store}}
+          placeholder="no code"
+        >{{this.state.code}}</textarea>
+        <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
+      </div>
+    </div>
+    <div class="settings">
+      <Section @name="settings_open">
+        <:header>
+          <span>Settings</span>
+          <span class="flex-grow"></span>
+        </:header>
+        <:default>
+          nothing yet
+        </:default>
+      </Section>
     </div>
   </:default>
 </Section>

@@ -31,4 +31,19 @@ export default class Code extends Component {
       );
     }
   }
+
+  get compressed() {
+    const p = this.codeParsed;
+    return p.filter(x => x.code).map(x => [
+      x.code[0][0],
+      x.code[1],
+    ].join('')).join('');
+  }
+
+  @action reset(e) {
+    e.stopPropagation();
+    if (confirm('reset?')) {
+      this.state.reset_code();
+    }
+  }
 }

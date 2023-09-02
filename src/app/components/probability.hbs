@@ -2,6 +2,11 @@
   <:header>
     <span>Probabilites</span>
     <span>%</span>
+    <span class="flex-grow"></span>
+    {{!--
+    <span><button>export</button></span>
+    <span><button {{on "click" this.reset}}>reset</button></span>
+    --}}
   </:header>
   <:default>
     {{#if this.state.hasSelected}}

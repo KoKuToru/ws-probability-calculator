@@ -20,12 +20,23 @@ body {
   max-width: 100vw;
   box-sizing: border-box;
 
-  grid-template-rows: min-content fit-content(100%) fit-content(100%);
+  grid-template-rows:
+    min-content
+    min-content
+    fit-content(100%)
+    fit-content(100%);
   grid-auto-flow: column;
 }
 
 .code-section {
+  border-top: 1px solid black;
+}
 
+.code-section > .section > div {
+  overflow: visible;
+}
+.code-section:has(.settings > .section[data-open]) > .section > div {
+  padding-right: calc(15rem + 1px);
 }
 
 .overview-section {
@@ -85,6 +96,30 @@ body {
   max-height: 100%;
 }
 
+.section > div {
+  display: flex;
+  position: relative;
+}
+.section > div > :first-child {
+  flex-grow: 1;
+}
+
+.settings {
+  max-width: 15rem;
+  width: 100%;
+  margin-top: calc(-1em - 5px - 5px);
+  z-index: 0;
+  position: absolute;
+  background: white;
+  right: 0;
+  top: 0;
+}
+.settings:has(.section[data-open]) {
+  bottom: 0;
+  border-left: 1px solid black;
+  z-index: 2;
+}
+
 summary {
   padding: 5px;
   height: 1em;
@@ -102,7 +137,7 @@ summary > span:first-child {
   font-weight: bold;
 }
 
-summary::before {
+.section > summary::before {
   display: inline-block;
   content: '⏵';
   margin-right: 5px;
@@ -448,4 +483,14 @@ h1, h2 {
 .nothing-selected {
   padding-left: calc(15px + 5px);
   color: gray;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+button {
+  font-size: inherit;
+  font-family: inherit;
+  padding: 1px;
 }

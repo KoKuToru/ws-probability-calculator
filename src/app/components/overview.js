@@ -210,6 +210,11 @@ export default class OverviewTable extends Component {
     }
   }
 
+  @action forceCalculate(el) {
+    this.#last_code = '';
+    this.calculate(el, [this.state.code]);
+  }
+
   #onmessage(resolve, signal, x, y, {data}) {
     resolve();
     if (signal.aborted) {
@@ -233,5 +238,12 @@ export default class OverviewTable extends Component {
       return 'dmg 0 probability %';
     }
     return `dmg ≥ ${dmg} probability %`;
+  }
+
+  @action reset(e) {
+    e.stopPropagation();
+    if (confirm('reset?')) {
+      this.state.reset_overview();
+    }
   }
 }

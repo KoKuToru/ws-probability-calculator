@@ -21,20 +21,62 @@ export default class DataHighlighterComponent extends Component {
   }
 
   @action mousemove(e) {
-    const element = e.target.closest('[data-x][data-y]');
+    const element = e.target.closest('[data-cx][data-ds], [data-cx], [data-ds], [data-dmg]');
     if (!element) {
       this.#style.textContent = '';
       return;
     }
-    const x = parseInt(element.dataset.x);
-    const y = parseInt(element.dataset.y);
+    const cx = parseInt(element.dataset.cx);
+    const ds = parseInt(element.dataset.ds);
+    const dmg = parseInt(element.dataset.dmg);
 
-    document.querySelector(`[data-x="${x}"][data-y="${y}"]`).scrollIntoViewIfNeeded?.(true);
+    document.querySelector(`[data-cx="${cx}"][data-ds="${ds}"]`)?.scrollIntoViewIfNeeded?.(true);
 
-    this.#style.textContent = `
-[data-x="${x}"][data-y="${y}"]::after,
-[data-x="${x}"]:not([data-y])::after,
-[data-y="${y}"]:not([data-x])::after {
+    let css = '__DUMMY__';
+
+    if (element.classList.contains('header')) {
+      if (!element.closest('.probability-section')) {
+        if (!isNaN(cx)) {
+          css += `,[data-cx="${cx}"]::after`;
+        }
+        if (!isNaN(ds)) {
+          css += `,[data-ds="${ds}"]::after`;
+        }
+      } else {
+        if (!isNaN(cx) && !isNaN(ds)) {
+          css += `,[data-cx="${cx}"][data-ds="${ds}"]::after`;
+          css += `,[data-cx="${cx}"]:not([data-ds])::after`;
+          css += `,[data-ds="${ds}"]:not([data-cx])::after`;
+        }
+      }
+      if (!isNaN(dmg)) {
+        css += `,[data-dmg="${dmg}"]::after`;
+      }
+    } else {
+      if (!isNaN(cx) && !isNaN(ds)) {
+        if (!element.closest('.probability-section')) {
+          css += `,[data-cx="${cx}"][data-ds="${ds}"]::after`;
+        } else {
+          css += `,[data-cx="${cx}"][data-ds="${ds}"]:not([data-dmg])::after`;
+          css += `,[data-dmg="${dmg}"]:not([data-cx]):not([data-ds])::after`;
+        }
+        css += `,[data-cx="${cx}"]:not([data-ds])::after`;
+        css += `,[data-ds="${ds}"]:not([data-cx])::after`;
+      } else if (!isNaN(cx)) {
+        css += `,[data-cx="${cx}"]::after`;
+      } else if (!isNaN(ds)) {
+        css += `,[data-ds="${ds}"]::after`;
+      } else {
+        css += `,[data-dmg="${dmg}"]::after`;
+      }
+    }
+
+    if (!css) {
+      // something went wrong
+      return;
+    }
+
+    css += `{
   display: block;
   content: '';
   position: absolute;
@@ -45,7 +87,7 @@ export default class DataHighlighterComponent extends Component {
   background: #b0c1d7;
   mix-blend-mode: multiply;
   pointer-events: none;
-}
-`;
+}`;
+    this.#style.textContent = css;
   }
 }

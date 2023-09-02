@@ -15,7 +15,10 @@
     </svg>
   </div>
   {{#each this.cols key="@index" as |col|}}
-    <div class="header col">
+    <div
+      class="header col"
+      data-dmg={{col}}
+    >
       {{#if col}}
         ≥ {{col}}
       {{else}}
@@ -28,8 +31,8 @@
   {{#each this.rows as |row|}}
     <div
       class="header row"
-      data-x={{get row "0"}}
-      data-y={{get row "1"}}
+      data-cx={{get row "0"}}
+      data-ds={{get row "1"}}
     >
       {{get row "0"}} / {{get row "1"}}
     </div>
@@ -40,8 +43,9 @@
             <div
               class={{class}}
               title={{value}}
-              data-x={{get row "0"}}
-              data-y={{get row "1"}}
+              data-cx={{get row "0"}}
+              data-ds={{get row "1"}}
+              data-dmg={{col}}
             >
               {{format-number value 5}}
             </div>

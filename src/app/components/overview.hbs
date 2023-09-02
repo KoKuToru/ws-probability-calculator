@@ -22,8 +22,8 @@
     {{else if x.header}}
       <div
         class={{x.class}}
-        data-x={{x.x}}
-        data-y={{x.y}}
+        data-cx={{x.x}}
+        data-ds={{x.y}}
         tabindex="0"
         {{on "click" (fn this.toggleHeader x)}}
       >
@@ -35,14 +35,14 @@
           {{#if class}}
             <div
               class={{class}}
-              data-x={{x.x}}
-              data-y={{x.y}}
+              data-cx={{x.x}}
+              data-ds={{x.y}}
               tabindex="0"
               {{on "click" (fn this.toggleCell x.value)}}
               title={{value}}
             >{{format-number value}}</div>
           {{else}}
-            <div data-x={{x.x}} data-y={{x.y}}>
+            <div data-cx={{x.x}} data-ds={{x.y}}>
               <svg viewBox="0 0 1 1" preserveAspectRatio="none">
                 <line
                     x1="0" y1="1" x2="1" y2="0"

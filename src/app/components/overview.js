@@ -246,4 +246,13 @@ export default class OverviewTable extends Component {
       this.state.reset_overview();
     }
   }
+
+  @action scrollIntoView(el) {
+    if (!this.state.selected.length) {
+      return;
+    }
+    const min_x = this.state.selected.reduce((p, c) => Math.min(p, parseInt(c.split(',')[0])), 8);
+    const min_y = this.state.selected.reduce((p, c) => Math.min(p, parseInt(c.split(',')[1])), 50);
+    el.querySelector(`[data-cx="${min_x}"][data-ds="${min_y}"]`)?.scrollIntoView?.();
+  }
 }

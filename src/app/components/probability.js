@@ -24,7 +24,7 @@ export const COLORS = [
   document.head.append(style);
 }
 
-export default class ResultTable extends Component {
+export default class ProbabilityComponent extends Component {
   @service state;
 
   setWidth(e, [data]) {

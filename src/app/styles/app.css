@@ -243,7 +243,7 @@ textarea {
   pointer-events: none;
 }
 
-.details {
+.table {
   display: inline-grid;
   grid-template-columns: repeat(var(--columns), min-content);
   white-space: nowrap;
@@ -252,7 +252,7 @@ textarea {
   font-size: 10px;
 }
 
-.details > div {
+.table > div {
   position: relative;
   display: flex;
   align-items: center;
@@ -262,27 +262,27 @@ textarea {
   font-family: monospace;
   padding: 3px 6px;
 }
-.details > div > svg {
+.table > div > svg {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
 }
-.overview .details > div {
+.overview .table > div {
   align-items: center;
   justify-content: center;
 }
 
-.details > div.corner {
+.table > div.corner {
   min-height: 1.5rem;
   min-width: 4rem;
 }
-.overview .details > div.corner {
+.overview .table > div.corner {
   min-width: 1.5rem;
   min-height: 1rem;
 }
-.details > div.corner svg {
+.table > div.corner svg {
   position: absolute;
   left: 0;
   top: 0;
@@ -290,28 +290,28 @@ textarea {
   height: 100%;
   pointer-events: none;
 }
-.details > div.corner > span:first-child {
+.table > div.corner > span:first-child {
   position: absolute;
   left: 0.25rem;
   bottom: 0;
 }
-.details > div.corner > span:not(:first-child) {
+.table > div.corner > span:not(:first-child) {
   position: absolute;
   right: 0.25rem;
   top: 0;
 }
 
-.details > div.header {
+.table > div.header {
   text-align: center;
   justify-content: center;
 }
 
-.details > div:not(.header) {
+.table > div:not(.header) {
   border-left: 1px solid gray;
   border-top: 1px solid black;
 }
 
-.details > .header.col {
+.table > .header.col {
   position: sticky;
   top: 0;
   z-index: 3;
@@ -320,7 +320,7 @@ textarea {
   border-left: 1px solid black;
 }
 
-.details > .header.row {
+.table > .header.row {
   position: sticky;
   left: 0;
   z-index: 2;
@@ -329,7 +329,7 @@ textarea {
   border-top: 1px solid black;
 }
 
-.details > .header.col.row {
+.table > .header.col.row {
   position: sticky;
   left: 0;
   top: 0;
@@ -382,13 +382,13 @@ textarea {
 }
 
 
-.details.pivot {
+.table.pivot {
   grid-auto-flow: column;
   grid-template-columns: unset;
   grid-template-rows: repeat(var(--columns), min-content);
 }
 
-.details.pivot > .header.row {
+.table.pivot > .header.row {
   position: sticky;
   top: 0;
   z-index: 3;
@@ -399,7 +399,7 @@ textarea {
   border-top: none;
 }
 
-.details.pivot > .header.col {
+.table.pivot > .header.col {
   position: sticky;
   left: 0;
   z-index: 2;
@@ -410,18 +410,18 @@ textarea {
   border-bottom: 1px solid lightgray;
 }
 
-.details.pivot > div.corner {
+.table.pivot > div.corner {
   border-top: none !important;
 }
 
-.details.pivot > div.corner > span:not(:first-child) {
+.table.pivot > div.corner > span:not(:first-child) {
   position: absolute;
   left: 0.25rem;
   bottom: 0;
   right: unset;
   top: unset;
 }
-.details.pivot > div.corner > span:first-child {
+.table.pivot > div.corner > span:first-child {
   position: absolute;
   right: 0.25rem;
   top: 0;

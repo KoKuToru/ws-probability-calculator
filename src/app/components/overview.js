@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { COLORS } from './details';
+import { COLORS } from './probability';
 import { tracked } from '@glimmer/tracking';
 import parseCode from 'ws/utils/code-parser';
 

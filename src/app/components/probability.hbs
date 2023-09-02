@@ -1,5 +1,5 @@
 <div
-  class="details"
+  class="table"
   {{did-insert this.setWidth this.cols}}
   {{did-update this.setWidth this.cols}}
 >
@@ -37,7 +37,12 @@
       {{#let (this.getCellValue row col) as |value|}}
         {{#let (this.getCellClass value) as |class|}}
           {{#if class}}
-            <div class={{class}} title={{value}}>
+            <div
+              class={{class}}
+              title={{value}}
+              data-x={{get row "0"}}
+              data-y={{get row "1"}}
+            >
               {{format-number value 5}}
             </div>
           {{else}}

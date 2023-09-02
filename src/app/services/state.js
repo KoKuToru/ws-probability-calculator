@@ -3,6 +3,7 @@ import { registerDestructor } from '@ember/destroyable';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import ResultMap from 'ws/utils/result-map';
+import CODEC from './codec';
 
 const CURRENT_VERSION = 1;
 
@@ -104,7 +105,6 @@ export default class StateService extends Service {
       this.#private.selected.add(k);
     }
     this.#private.selected = this.#private.selected;
-    this.store();
   }
 
   constructor(...args) {
@@ -116,39 +116,58 @@ export default class StateService extends Service {
   }
 
   @action async store() {
-    const data = {
-      'version': 1,
-      'code': this.#private.code,
-      'selected': [...this.#private.selected],
-      'code_open': this.#private.code_open,
-      'overview_open': this.#private.overview_open,
-      'probability_open': this.#private.probability_open,
-      'selected_dmg': this.#private.selected_dmg
-    };
+    let selected = 0n;
+    for (const s of this.#private.selected.values()) {
+      const [a, b] = s.split(',').map(x => parseInt(x));
+      selected |= 1n << BigInt(a + b * 9);
+    }
+    const data = [
+      CURRENT_VERSION,
+      this.code,
+      [
+        this.#private.code_open,
+        this.#private.overview_open,
+        this.#private.probability_open,
+      ].map(x => x ? 1 : 0).join(''),
+      this.#private.selected_dmg ?? -1,
+      selected.toString(2).split('').reverse().join('')
+    ]
     window.history.pushState('', '', `?${await serializeState(data)}`);
   }
   @action async restore() {
     try {
-      if (!location.search) {
+      const search = new URLSearchParams(`?=${location.search?.slice?.(1) ?? ''}`).get('');
+      if (!search?.length) {
         return;
       }
       try {
-        const d = await deserializeState(location.search?.slice(1));
-        if (d.version != 1) {
-          alert('incompatible version');
-          window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
+        const [
+          version,
+          code,
+          open,
+          dmg,
+          selected
+        ] = await deserializeState(search);
+
+        if (version != CURRENT_VERSION) {
+          alert('incompatible state');
+          window.history.pushState('', '', `?`);
           return;
         }
 
-        this.#private.code = d.code;
-        this.#private.selected = new Set(d.selected ?? []);
-        this.#private.code_open = d.code_open;
-        this.#private.overview_open = d.overview_open;
-        this.#private.probability_open = d.probability_open;
-        this.#private.selected_dmg = d.selected_dmg;
+        this.#private.code = code;
+
+        this.#private.code_open = open[0] === '1';
+        this.#private.overview_open = open[1] === '1';
+        this.#private.probability_open = open[2] === '1';
+
+        this.#private.selected_dmg = dmg == -1 ? null : dmg;
+
+        this.#private.selected = new Set(selected.split('').map((a, b) => a === '1' && [b % 9, Math.floor(b / 9)].join(',')).filter(x => x));
+
       } catch {
-        alert('incompatible state');
-        window.history.pushState('', '', `?v=${CURRENT_VERSION}`);
+        alert('error loading state');
+        window.history.pushState('', '', `?`);
         return;
       }
     } finally {
@@ -162,24 +181,19 @@ export default class StateService extends Service {
 async function serializeState(data) {
   data = JSON.stringify(data);
 
-  const b64 = [
-    await blobToBase64(new Blob(['\u0000', data])),
-    await blobToBase64(new Blob(['\u0001', await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream('deflate-raw'))).blob()])),
-  ].reduce((p, c) => p.length < c.length ? p : c);
+  const b64_all = [
+    //await blobToBase64(new Blob(['\u0000', data])),
+    await blobToBaseEncoding(new Blob(['\u0001', await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream('deflate-raw'))).blob()])),
+    //await blobToBase64(new Blob(['\u0002', await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream('gzip'))).blob()])),
+  ]
+  const b64 = b64_all.reduce((p, c) => p.length < c.length ? p : c);
+  console.log("took", b64_all.indexOf(b64), b64.length, b64_all.map(x => x.length));
 
-  return b64 // convert to base64url
-    .replace(/[+]/g, '-')
-    .replace(/[/]/g, '_')
-    .replace(/[=]/g, '.');
+  return b64;
 }
 
 async function deserializeState(b64) {
-  b64 = b64 // convert from base64url
-    .replace(/[-]/g, '+')
-    .replace(/[_]/g, '/')
-    .replace(/[.]/g, '=');
-
-  const buffer = await base64ToBlob(b64).then(x => x.arrayBuffer());
+  const buffer = await baseEncodingToBlob(b64).then(x => x.arrayBuffer());
 
   const marker = (new Int8Array(buffer, 0, 1))[0];
   const blob = new Blob([new Int8Array(buffer, 1)]);
@@ -188,29 +202,64 @@ async function deserializeState(b64) {
 
   switch (marker) {
     case 0:
-      json = await blob.text();
+      json = await blob.json();
       break;
     case 1:
-      json = await new Response(blob.stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()
+      json = await new Response(blob.stream().pipeThrough(new DecompressionStream('deflate-raw'))).json()
+      break;
+    case 2:
+      json = await new Response(blob.stream().pipeThrough(new DecompressionStream('gzip'))).json()
       break;
     default:
       throw new Error('marker?');
   }
 
-  return JSON.parse(json);
+  return json;
 }
 
-async function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',', 2).pop())
-    reader.onerror = (err) => reject(err)
-    reader.readAsDataURL(blob)
-  });
+async function blobToBaseEncoding(blob) {
+  return baseEncode(new Uint8Array(await blob.arrayBuffer()), CODEC);
 }
 
-async function base64ToBlob(b64) {
-  const resp = await fetch(`data:application/octet-binary;base64,${b64}`);
-  const blob = await resp.blob();
-  return blob;
+async function baseEncodingToBlob(b64) {
+  return new Blob([baseDecode(b64, CODEC)]);
+}
+
+function baseDecode(encoded, codes) {
+  const codeSize = BigInt(codes.length);
+
+  let value = 0n;
+  while (encoded.length) {
+    value *= codeSize;
+    value += BigInt(codes.indexOf(encoded.at(-1)));
+    encoded = encoded.slice(0, -1);
+  }
+  console.log('decode', value);
+
+  // convert into bytes
+  let bytes = [];
+  while (value !== 0n) {
+    bytes.push(Number(value & 0xFFn));
+    value >>= 8n;
+  }
+
+  return new Uint8Array(bytes.reverse());
+}
+
+function baseEncode(bytes, codes) {
+  if (!(bytes instanceof Uint8Array)) {
+    throw new Error('Must be Uint8Array')
+  }
+  const codeSize = BigInt(codes.length);
+
+  // convert bytes into large bigint
+  let value = bytes.reduce((p, c) => p << 8n | BigInt(c), 0n);
+  console.log('encode', value);
+  let encoded = '';
+  while (value !== 0n) {
+    encoded += codes[value % codeSize];
+    value /= codeSize;
+  }
+
+  return encoded;
 }

@@ -110,6 +110,7 @@ export default class OverviewTable extends Component {
   }
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());
+    this.state.store();
   }
   @action toggleHeader(value) {
     if ('x' in value) {
@@ -148,6 +149,7 @@ export default class OverviewTable extends Component {
         }
       }
     }
+    this.state.store();
   }
 
   #last_code = [];

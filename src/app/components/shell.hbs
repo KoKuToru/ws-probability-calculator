@@ -1,41 +1,12 @@
 {{#if this.state.loaded}}
   <div class="code-section">
-    <Section @name="code_open">
-      <:header>
-        <span>Code</span>
-      </:header>
-      <:default>
-        <Code />
-      </:default>
-    </Section>
+    <Code/>
   </div>
   <div class="overview-section">
-    <Section @name="overview_open">
-      <:header>
-        <span>Overview</span>
-        <span>{{this.overview_extra}}</span>
-      </:header>
-      <:default>
-        <Overview />
-      </:default>
-    </Section>
+    <Overview />
   </div>
   <div class="probability-section">
-    <Section @name="probability_open">
-      <:header>
-        <span>Probabilites</span>
-        <span>%</span>
-      </:header>
-      <:default>
-        {{#if this.state.hasSelected}}
-          <Probability />
-        {{else}}
-          <div class="nothing-selected">
-            nothing selected in overview
-          </div>
-        {{/if}}
-      </:default>
-    </Section>
+    <Probability />
   </div>
 {{else}}
   Loading..

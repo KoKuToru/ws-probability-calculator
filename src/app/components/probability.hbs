@@ -1,68 +1,82 @@
-<div
-  class="table"
-  {{did-insert this.setWidth this.cols}}
-  {{did-update this.setWidth this.cols}}
->
-  <div class="header col row corner">
-    <span>cx / ds</span>
-    <span>dmg</span>
-    <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-        <line
-            x1="0" y1="0" x2="1" y2="1"
-            stroke="black"
-            vector-effect="non-scaling-stroke"
-        />
-    </svg>
-  </div>
-  {{#each this.cols key="@index" as |col|}}
-    <div
-      class="header col selectable {{if (this.isSelectedDmg col) "selected"}}"
-      data-dmg={{col}}
-      {{on "click" (fn this.setDmg col)}}
-    >
-      {{#if col}}
-        ≥ {{col}}
-      {{else}}
-        {{col}}
-      {{/if}}
-    </div>
-  {{/each}}
+<Section @name="probability_open">
+  <:header>
+    <span>Probabilites</span>
+    <span>%</span>
+  </:header>
+  <:default>
+    {{#if this.state.hasSelected}}
+      <div
+        class="table"
+        {{did-insert this.setWidth this.cols}}
+        {{did-update this.setWidth this.cols}}
+      >
+        <div class="header col row corner">
+          <span>cx / ds</span>
+          <span>dmg</span>
+          <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+              <line
+                  x1="0" y1="0" x2="1" y2="1"
+                  stroke="black"
+                  vector-effect="non-scaling-stroke"
+              />
+          </svg>
+        </div>
+        {{#each this.cols key="@index" as |col|}}
+          <div
+            class="header col selectable {{if (this.isSelectedDmg col) "selected"}}"
+            data-dmg={{col}}
+            {{on "click" (fn this.setDmg col)}}
+          >
+            {{#if col}}
+              ≥ {{col}}
+            {{else}}
+              {{col}}
+            {{/if}}
+          </div>
+        {{/each}}
 
 
-  {{#each this.rows as |row|}}
-    <div
-      class="header row"
-      data-cx={{get row "0"}}
-      data-ds={{get row "1"}}
-    >
-      {{get row "0"}} / {{get row "1"}}
-    </div>
-    {{#each this.cols key="@index" as |col|}}
-      {{#let (this.getCellValue row col) as |value|}}
-        {{#let (this.getCellClass value col) as |class|}}
-          {{#if class}}
-            <div
-              class={{class}}
-              title={{value}}
-              data-cx={{get row "0"}}
-              data-ds={{get row "1"}}
-              data-dmg={{col}}
-            >
-              {{format-number value 5}}
-            </div>
-          {{else}}
-            <div>
-              <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-                <line
-                    x1="0" y1="1" x2="1" y2="0"
-                    stroke="lightgray"
-                    vector-effect="non-scaling-stroke"
-                />
-              </svg>
-            </div>
-          {{/if}}
-        {{/let}}
-      {{/let}}
-    {{/each}}
-  {{/each}}
-</div>
+        {{#each this.rows as |row|}}
+          <div
+            class="header row"
+            data-cx={{get row "0"}}
+            data-ds={{get row "1"}}
+          >
+            {{get row "0"}} / {{get row "1"}}
+          </div>
+          {{#each this.cols key="@index" as |col|}}
+            {{#let (this.getCellValue row col) as |value|}}
+              {{#let (this.getCellClass value col) as |class|}}
+                {{#if class}}
+                  <div
+                    class={{class}}
+                    title={{value}}
+                    data-cx={{get row "0"}}
+                    data-ds={{get row "1"}}
+                    data-dmg={{col}}
+                  >
+                    {{format-number value 5}}
+                  </div>
+                {{else}}
+                  <div>
+                    <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+                      <line
+                          x1="0" y1="1" x2="1" y2="0"
+                          stroke="lightgray"
+                          vector-effect="non-scaling-stroke"
+                      />
+                    </svg>
+                  </div>
+                {{/if}}
+              {{/let}}
+            {{/let}}
+          {{/each}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="nothing-selected">
+        nothing selected in overview
+      </div>
+    {{/if}}
+  </:default>
+</Section>

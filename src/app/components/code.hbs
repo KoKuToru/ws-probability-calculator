@@ -1,12 +1,17 @@
-<div class="code">
-  <textarea
-    {{on "input" this.updateCode}}
-    {{on "keydown" this.onKeyDown}}
-    {{on "keydown" this.updateCode}}
-    {{on "change" this.store}}
-    placeholder="no code"
-  >{{this.state.code}}</textarea>
-  <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
-</div>
-
-
+<Section @name="code_open">
+  <:header>
+    <span>Code</span>
+  </:header>
+  <:default>
+    <div class="code">
+    <textarea
+        {{on "input" this.updateCode}}
+        {{on "keydown" this.onKeyDown}}
+        {{on "keydown" this.updateCode}}
+        {{on "change" this.store}}
+        placeholder="no code"
+      >{{this.state.code}}</textarea>
+      <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
+    </div>
+  </:default>
+</Section>

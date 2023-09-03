@@ -42,6 +42,7 @@ module.exports = function (environment) {
 
   if (environment === 'production') {
     // here you can enable a production-specific feature
+    ENV.APP.rootURL = '/ws-probability-calculator/';
   }
 
   return ENV;

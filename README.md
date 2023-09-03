@@ -23,7 +23,7 @@ everthing that is not detected as a command gets ignorered, can be used as comme
 
 ## Overview
 
-displays the weighted avverage damage for the given cx-count and deck-size.
+displays the weighted average damage for the given cx-count and deck-size.
 you can click on the cells and headers to select them for the [Probabilites](#probabilites).
 
 ## Probabilites

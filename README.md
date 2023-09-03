@@ -5,6 +5,7 @@
 
 ## Current Limitations
 
+* **doesn't run in firefox**: [:has() CSS relational pseudo-class](https://caniuse.com/css-has)
 * only `attack` and `burn` is supported right now
 * own deck starts with `trg = 15` and `not_trg = 35`
 * own waitingroom starts with `trg = 0` and `not_trg = 0`

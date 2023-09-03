@@ -2,6 +2,7 @@ import Action from './action.js';
 import Probability from './probability.js';
 import State from './state.js';
 
+
 self.addEventListener('message', function(e) {
   const data = e.data;
   let action = new Action();
@@ -20,24 +21,19 @@ self.addEventListener('message', function(e) {
   // execute
   const istate = new State({
     op_cx: data.op_cx,
-    op_size: data.op_size,
-    /*
-    my_trg: data.my_trg,
-    my_size: data.my_size,
-    */
-
-    /*settings: Object.freeze({
-      // settings:
-      op_refresh_cx: data.op_refresh_cx,
-      op_refresh_size: data.op_refresh_size,
-      my_refresh_trg: data.my_refresh_trg,
-      my_refresh_size: data.my_refresh_size
-    })*/
+    op_not_cx: data.op_size - data.op_cx,
+    w_op_cx: 8 - data.op_cx,
+    w_op_not_cx: 50 - data.op_size - data.op_cx
   });
 
+
+  const states = [...action.execute(istate)];
+
   let dmg = [];
-  for (const state of action.execute(istate)) {
+  for (const state of states) {
+    // calculate probabilty for state
     const p = state.probability;
+    // store dmg probability
     const arr = (dmg[state.dmg] ??= []);
     const idx = arr.findIndex(x => x.denominator === p.denominator);
     if (idx === -1) {
@@ -49,27 +45,40 @@ self.addEventListener('message', function(e) {
   }
 
   dmg = Array.from(dmg);
+  const ZERO = new Probability(0, 1);
   for (let i = 0; i < dmg.length; ++i) {
     if (dmg[i] === undefined) {
-      dmg[i] = 0;
+      dmg[i] = ZERO;
       continue;
     }
-    dmg[i] = dmg[i].reduce((p, c) => p.add(c)).toNumber();
+    dmg[i] = dmg[i].reduce((p, c) => p.add(c));
   }
 
-  let mean = 0;
+  let mean = new Probability(0, 1);
   for (let i = 0; i < dmg.length; i++) {
-    mean += i * dmg[i];
+    mean = mean.add(dmg[i].mul(new Probability(i, 1)));
   }
-  if (mean > 0) {
-    mean /= dmg.reduce((c, p) => c + p);
+  if (mean.numerator > 0n) {
+    const dmg_sum = dmg.reduce((c, p) => c.add(p));
+    mean = mean.mul(new Probability(dmg_sum.denominator, dmg_sum.numerator));
+  }
+
+  const dmg_acc = [];
+  for (let i = 0; i < dmg.length; ++i) {
+    if (i == 0) {
+      dmg_acc[i] = dmg[i];
+      continue;
+    }
+    dmg_acc[i] = dmg.slice(i).reduce((c, p) => c.add(p));
   }
 
   e.ports[0].postMessage({
     data,
-    dmg,
-    mean,
-    zero: [...dmg, 0][0] * 100,
-    one_or_more: [0, ...dmg.slice(1)].reduce((p, c) => p + c) * 100
+    exact_dmg: dmg.map(x => x.toString()),
+    exact_dmg_acc: dmg_acc.map(x => x.toString()),
+    dmg: dmg.map(x => x.toNumber()),
+    dmg_acc: dmg_acc.map(x => x.toNumber()),
+    exact_mean: mean.toString(),
+    mean: mean.toNumber()
   });
 });

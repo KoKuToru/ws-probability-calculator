@@ -1,47 +1,14 @@
-export class ProbabilityDouble {
-  #f;
-
-  constructor(a, b) {
-    this.#f = a / b;
-  }
-
-  get numerator() {
-    return this.#f
-  }
-
-  get denominator() {
-    return 1.;
-  }
-
-  mul(other) {
-    return new ProbabilityDouble(this.#f * other.numerator, 1.);
-  }
-
-  add(other) {
-    return new ProbabilityDouble(this.#f + other.numerator, 1.);
-  }
-
-  toJSON() {
-    return [this.numerator.toString(), this.denominator.toString()];
-  }
-
-  toNumber() {
-    return this.#f;
-  }
-
-  toString() {
-    return this.toNumber().toString();
-  }
-};
-
-export class ProbabilityExact {
+export class Probability {
   #a;
   #b;
 
   constructor(a, b, gcd=true) {
     this.#a = BigInt(a);
     this.#b = BigInt(b);
-    if (gcd) {
+    if (this.#a == this.#b) {
+      this.#a = 1n;
+      this.#b = 1n;
+    } else if (gcd && b !== 1) {
       const d = this.#gcd(this.#a, this.#b);
       this.#a /= d;
       this.#b /= d;
@@ -71,29 +38,32 @@ export class ProbabilityExact {
   }
 
   mul(other) {
+    if (other.numerator === 1n && other.denominator === 1n) {
+      return this;
+    }
     // https://www.matematikazasite.com/en/how-to-simplify-fractions-before-multiplying/
-    const a = new ProbabilityExact(this.numerator, other.denominator);
-    const b = new ProbabilityExact(other.numerator, this.denominator);
-    return new ProbabilityExact(a.numerator * b.numerator, a.denominator * b.denominator);
+    const a = new Probability(this.numerator, other.denominator);
+    const b = new Probability(other.numerator, this.denominator);
+    return new Probability(a.numerator * b.numerator, a.denominator * b.denominator);
   }
 
   add(other) {
     if (this.denominator === other.denominator) {
-      return new ProbabilityExact(
+      return new Probability(
         this.numerator + other.numerator,
         this.denominator,
         false
       );
     }
     // could be improved with LCM..
-    return new ProbabilityExact(
+    return new Probability(
       this.numerator * other.denominator + other.numerator * this.denominator,
       this.denominator * other.denominator
     )
   }
 
   toJSON() {
-    return [this.numerator.toString(), this.denominator.toString()];
+    return [this.numerator.toString(), this.denominator.toString()].join('/');
   }
 
   toNumber() {
@@ -129,4 +99,4 @@ export class ProbabilityExact {
   }
 };
 
-export default ProbabilityExact;
+export default Probability;

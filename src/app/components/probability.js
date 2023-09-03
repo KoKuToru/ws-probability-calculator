@@ -71,7 +71,7 @@ export default class ProbabilityComponent extends Component {
       return null;
     }
     let v = res.dmg_acc[y];
-    if (v === 0) {
+    if (!v) {
       return null;
     }
     return v * 100;

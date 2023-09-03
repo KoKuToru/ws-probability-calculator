@@ -8,16 +8,13 @@ import CODEC from './codec';
 const CURRENT_VERSION = 1;
 
 const DEFAULT_CODE =
-`attack 3
-\tthis will do 3 dmg + trigger, opponent checks up to 3(+trigger) cards and might cancel with a cx
+`3 times attack 3 + burn 1
+attack 3
 burn 1
-\tthis will do 1 dmg, opponent checks up to 1 cards and might cancel with a cx
-
-only code with a check-mark will be executed from top to bottom
-
-the following commands are supported:
-\t* attack dmg
-\t* burn dmg`;
+attack 3
+burn 1
+attack 3
+burn 1`;
 
 const CODE_MAPPING = [
   [/attack/g, String.fromCodePoint(0x10FFFF - 0), new RegExp(String.fromCodePoint(0x10FFFF - 0), 'g'), 'attack'],

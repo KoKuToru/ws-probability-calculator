@@ -70,12 +70,7 @@ export default class ProbabilityComponent extends Component {
     if (!res) {
       return null;
     }
-    let v;
-    if (y == 0) {
-      v = res.dmg[0];
-    } else {
-      v = res.dmg.slice(y).reduce((p, c) => p + c, 0);
-    }
+    let v = res.dmg_acc[y];
     if (v === 0) {
       return null;
     }
@@ -94,6 +89,15 @@ export default class ProbabilityComponent extends Component {
       idx = Math.min(Math.floor(v * COLORS.length / 100.), COLORS.length - 1);
     }
     return `color-${idx}`;
+  }
+  @action getCellTitle(x, y) {
+    const vv = this.getCellValue(x, y);
+    const value = this.state.result.get(...x);
+    if (!value) {
+      return undefined;
+    }
+    const v = value.exact_dmg_acc[y];
+    return `${v} = ${vv}`;
   }
 
   @action reset(e) {

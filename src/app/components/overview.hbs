@@ -54,7 +54,7 @@
                   data-ds={{x.y}}
                   tabindex="0"
                   {{on "click" (fn this.toggleCell x.value)}}
-                  title={{value}}
+                  title={{this.getCellTitle x.value}}
                 >
                   {{#if value}}
                     {{format-number value}}

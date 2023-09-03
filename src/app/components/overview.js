@@ -5,7 +5,7 @@ import { COLORS } from './probability';
 import { tracked } from '@glimmer/tracking';
 import parseCode from 'ws/utils/code-parser';
 
-const PARALLE_SIZE = (navigator.hardwareConcurrency ?? 2) - 1;
+const PARALLE_SIZE = Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
 const WORKERS = Array(PARALLE_SIZE).fill(null).map(x => new Worker('/worker/worker.js', {type: 'module'}));
 WORKERS.forEach(x => x.promise = new Promise(r => r()));
 
@@ -100,14 +100,22 @@ export default class OverviewTable extends Component {
     if (selected_dmg === null) {
       return value.mean;
     }
-    let v;
-    if (selected_dmg == 0) {
-      v = value.dmg[0];
-    } else {
-      v = value.dmg.slice(selected_dmg).reduce((p, c) => p + c, 0);
-    }
-    return v * 100;
+    return value.dmg_acc[selected_dmg] * 100;
   }
+
+  @action getCellTitle(value) {
+    const vv = this.getCellValue(value);
+    value = this.state.result.get(...value);
+    if (!value) {
+      return undefined;
+    }
+    const selected_dmg = this.state.selected_dmg ?? null;
+    const v = selected_dmg === null
+      ? value.exact_mean
+      : value.exact_dmg_acc[selected_dmg];
+    return `${v} = ${vv}`;
+  }
+
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());
     this.state.store();

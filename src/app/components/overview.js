@@ -6,7 +6,7 @@ import { tracked } from '@glimmer/tracking';
 import parseCode from 'ws/utils/code-parser';
 
 const PARALLE_SIZE = Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
-const WORKERS = Array(PARALLE_SIZE).fill(null).map(x => new Worker('/worker/worker.js', {type: 'module'}));
+const WORKERS = Array(PARALLE_SIZE).fill(null).map(x => new Worker('./worker/worker.js', {type: 'module'}));
 WORKERS.forEach(x => x.promise = new Promise(r => r()));
 
 export default class OverviewTable extends Component {

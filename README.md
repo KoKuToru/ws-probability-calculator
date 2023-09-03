@@ -20,7 +20,7 @@ right now the following commands are supported:
 * `burn DMG`
     * does a attack without trigger check
 
-everthing that is not detected as a command gets ignorered, can be used as comment..
+everything that is not detected as a command gets ignored, can be used as comment..
 
 ## Overview
 
@@ -30,4 +30,4 @@ you can click on the cells and headers to select them for the [Probabilites](#pr
 ## Probabilites
 
 displays the probability for equal or more than x-dmg.
-you can click on the column header to select the representation of [Overview](#overview).
+you can click on the column header to change what [Overview](#overview) displays.

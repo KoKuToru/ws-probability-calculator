@@ -1,4 +1,4 @@
-# Weiß Schwarz Probabilty Calculator
+# Weiß Schwarz Probability Calculator
 
 * runs 100% in browser
 * shareable via url, the whole state gets stored in the url

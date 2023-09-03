@@ -23,7 +23,7 @@ self.addEventListener('message', function(e) {
     op_cx: data.op_cx,
     op_not_cx: data.op_size - data.op_cx,
     w_op_cx: 8 - data.op_cx,
-    w_op_not_cx: 50 - data.op_size - data.op_cx
+    w_op_not_cx: 50 - data.op_size
   });
 
 

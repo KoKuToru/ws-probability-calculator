@@ -158,8 +158,6 @@ export default class State {
             w_my_trg: state.w_my_trg + step.my_trg,
             w_my_not_trg: state.w_my_not_trg + step.my_not_trg,
 
-            dmg: this.dmg,
-
             steps: [ create_step(step.my, EMPTY) ]
           });
         } else {

@@ -25,6 +25,7 @@ export default function parse(code) {
 
     text = text.slice(offset);
 
+    if (offset == 0) // for now no tabbing allowed
     for (const [s, ...p] of syntax) {
       s.lastIndex = 0; //< reset the regex
       const m = s.exec(text);

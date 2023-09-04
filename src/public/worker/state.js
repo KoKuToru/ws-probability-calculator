@@ -38,6 +38,18 @@ export default class State {
   dmg = 0;
   steps = null;
 
+  get debug_count() {
+    return this.prev?.reduce?.((p, c) => p + c.count, 0) ?? 1;
+  }
+
+  *debug_moves() {
+    for (const s of this.steps ?? [{op:'',my:''}])
+    for (const p of this.prev ?? [{}])
+    for (const n of p?.debug_moves?.() ?? ['']) {
+      yield [n, s.my, s.op].filter(x => x).join();
+    }
+  }
+
   get probability() {
     if (!this.prev) {
       return new Probability(1, 1);

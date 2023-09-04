@@ -249,7 +249,7 @@ export default class State {
         state = new State({
           prev: state,
 
-          dmg: this.dmg + step.dmg,
+          dmg: state.dmg + step.dmg,
 
           steps: [ create_step(EMPTY, EMPTY, step.dmg) ]
         });

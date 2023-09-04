@@ -1,17 +1,24 @@
-import attack from './actions/attack.js';
-import burn from './actions/burn.js';
 import create_step, { EMPTY, StepFast } from './step.js';
 
 const EMPTY_STEPS = Object.freeze([ create_step(EMPTY, EMPTY) ]);
 const EMPTY_ARRAY = Object.freeze([]);
+
+const DUMMY_CHILDREN =
+  Object.freeze({
+    *execute(state) {
+      yield state;
+    }
+  });
 
 export default class Action {
   static dummy_func = function* (state) { yield state; };
 
   #prev;
   #steps;
+  #children;
 
-  constructor(prev, steps) {
+  constructor(prev, steps, children) {
+    this.#children = children ?? DUMMY_CHILDREN;
     this.#prev = prev;
     steps ??= EMPTY_STEPS;
     if (steps !== EMPTY_STEPS) {
@@ -44,20 +51,20 @@ export default class Action {
     }
   }
 
-  attack(dmg) {
-    return new Action(this, [...attack(dmg)]);
-  }
-
-  burn(dmg) {
-    return new Action(this, [...burn(dmg)]);
+  *execute_children(state) {
+    for (const estate of this.#children.execute(state)) {
+      yield estate;
+    }
   }
 
   *execute(state) {
     const dedup = new Map();
 
-    for (let nstate of this.#prev?.execute?.(state) ?? [state]) {
-      if (!this.#steps.length) {
-        yield nstate;
+    for (let nstate of (this.#prev?? DUMMY_CHILDREN).execute?.(state)) {
+      if (this.#steps === EMPTY_ARRAY) {
+        for (const estate of this.execute_children(nstate)) {
+          yield estate;
+        }
         continue;
       }
 
@@ -74,9 +81,9 @@ export default class Action {
       // calculate new estate
       estates = [];
       for (const step of this.#steps) {
-        for (const estate of nstate.next(step)) {
+        for (const istate of nstate.next(step)) {
           // search next step
-          let queue = [estate];
+          let queue = [istate];
           while (queue.length) {
             let next = queue.pop();
             for (const prev of next.prev ?? EMPTY_ARRAY) {
@@ -87,8 +94,10 @@ export default class Action {
               }
             }
           }
-
-          yield estate;
+          // do children
+          for (const estate of this.execute_children(istate)) {
+            yield estate;
+          }
         }
       }
 

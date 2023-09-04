@@ -2,22 +2,33 @@ import Action from './action.js';
 import Probability from './probability.js';
 import State from './state.js';
 
+import Attack from './actions/attack.js';
+import Burn from './actions/burn.js';
+import Repeat from './actions/repeat.js';
+
+const ALLOWED_ACTIONS = new Map([
+  ['attack', Attack],
+  ['burn', Burn],
+  ['repeat', Repeat]
+]);
+
+function build_action(code) {
+  let action = new Action();
+  for (const cmd of code) {
+    const cls = ALLOWED_ACTIONS.get(cmd[0]);
+    if (cls) {
+      action = new cls(action, ...cmd.slice(1, -1), build_action(cmd.at(-1)));
+    } else {
+      console.error(`unknown action ${cmd[0]}`);
+    }
+  }
+  return action;
+}
 
 self.addEventListener('message', function(e) {
   const data = e.data;
-  let action = new Action();
+  const action = build_action(data.code);
 
-  const allowed_actions = new Set(Object.getOwnPropertyNames(Action.prototype));
-  allowed_actions.delete('constructor');
-  allowed_actions.delete('execute');
-
-  for (const code of data.code) {
-    if (allowed_actions.has(code[0])) {
-      action = action[code[0]](...code.slice(1));
-    } else {
-      console.error(`unknown action ${code[0]}`);
-    }
-  }
   // execute
   const istate = new State({
     op_cx: data.op_cx,
@@ -25,7 +36,6 @@ self.addEventListener('message', function(e) {
     w_op_cx: 8 - data.op_cx,
     w_op_not_cx: 50 - data.op_size
   });
-
 
   const states = [...action.execute(istate)];
 

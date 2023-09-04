@@ -1,6 +1,13 @@
 import step, { EMPTY, CX, NOT_CX } from '../step.js';
+import Action from '../action.js';
 
-export default function *burn(dmg) {
+export default class Burn extends Action {
+  constructor(prev, dmg, children) {
+    super(prev, burn(dmg), children);
+  }
+}
+
+function *burn(dmg) {
   for (let n = 0; n < dmg; ++n) {
     // cancel case:
     yield step(EMPTY, NOT_CX.repeat(n) + CX);

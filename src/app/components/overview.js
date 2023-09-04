@@ -160,12 +160,18 @@ export default class OverviewTable extends Component {
     this.state.store();
   }
 
+  #prepare_code(code) {
+    return code
+      .filter(x => x.code)
+      .map(x => [...x.code, this.#prepare_code(x.children)]);
+  }
+
   #last_code = [];
   #abort_controller = new AbortController();
   @action async calculate(el, [code]) {
     el;
 
-    code = parseCode(code).filter(x => x.code).map(x => x.code);
+    code = this.#prepare_code(parseCode(code));
     if (
       code.length === this.#last_code.length &&
       code.every((x, i) => x.length === this.#last_code[i]?.length && x.every((y, j) => y === this.#last_code[i][j]))

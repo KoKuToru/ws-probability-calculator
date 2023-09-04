@@ -250,7 +250,7 @@ div:has(> .code) {
   width: 0.75em;
   height: 0.75em;
   top: 0.125em;
-  left: -1em;
+  left: calc(-1em + 1ch * var(--space-count));
   display: flex;
   align-items: center;
   justify-content: center;

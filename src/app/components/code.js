@@ -32,12 +32,23 @@ export default class Code extends Component {
     }
   }
 
+  #compressed_short(code) {
+    if (!code.children.length) {
+      return code.short;
+    }
+    const x = code.children
+      .filter(x => x.short)
+      .map(x => this.#compressed_short(x))
+      .join('');
+    return `${code.short}{${x}}`;
+  }
+
   get compressed() {
     const p = this.codeParsed;
-    return p.filter(x => x.code).map(x => [
-      x.code[0][0],
-      x.code[1],
-    ].join('')).join('');
+    return p
+      .filter(x => x.short)
+      .map(x => this.#compressed_short(x))
+      .join('');
   }
 
   @action reset(e) {

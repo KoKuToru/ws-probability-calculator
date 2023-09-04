@@ -8,13 +8,10 @@ import CODEC from './codec';
 const CURRENT_VERSION = 1;
 
 const DEFAULT_CODE =
-`3 times attack 3 + burn 1
-attack 3
-burn 1
-attack 3
-burn 1
-attack 3
-burn 1`;
+`3 times: attack 3 + burn 1
+repeat 3
+  attack 3
+  burn 1`;
 
 const CODE_MAPPING = [
   [/attack/g, String.fromCodePoint(0x10FFFF - 0), new RegExp(String.fromCodePoint(0x10FFFF - 0), 'g'), 'attack'],

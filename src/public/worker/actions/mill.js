@@ -9,9 +9,8 @@ export default class Mill extends Action {
 
 function *mill(count) {
   // all permutations
-  for (let n = 0; n < count; ++n)
-  for (let m = n; m < count; ++m) {
-    const cards = NOT_CX.repeat(n) + CX.repeat(m);
+  for (let n = 0; n < count; ++n) {
+    const cards = NOT_CX.repeat(n) + CX.repeat(count - n);
     for (let p of permute(cards)) {
       yield step(EMPTY, p);
     }
@@ -19,16 +18,20 @@ function *mill(count) {
 }
 
 function *permute(str) {
-  if (str.length <= 1) {
-    return str;
-  }
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    const remainder = str.slice(0, i) + str.slice(i + 1);
-    const permutedRemainder = permute(remainder);
-    for (const permutation of permutedRemainder) {
-      yield `${char}${permutation}`;
+  // poors man permutation without repetition
+  str = str.split('');
+  const used = new Set();
+  for (let i = 0; i < str.length; ++i)
+  for (let j = 0; j < str.length; ++j) {
+    let nstr = [...str];
+    const tmp = nstr[i];
+    nstr[i] = nstr[j];
+    nstr[j] = tmp;
+    nstr = nstr.join('');
+    if (used.has(nstr)) {
+      continue;
     }
+    used.add(nstr);
+    yield nstr;
   }
 };

@@ -21,7 +21,7 @@ const ALLOWED_ACTIONS = new Map([
 function build_action(code) {
   code = compiler(code);
   let action = new Action();
-  for (const [cmd, params] of code) {
+  for (const [cmd, params, condition] of code) {
     const cls = ALLOWED_ACTIONS.get(cmd);
     if (cls) {
       if (cmd === 'push') {
@@ -29,6 +29,7 @@ function build_action(code) {
         action.setDedup(false);
       }
       action = new cls(action, ...params);
+      action.setConditions(condition);
     } else {
       console.error(`unknown action ${cmd}`);
     }

@@ -30,7 +30,7 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'each': {
-        const index = stack.findLastIndex(([a, b]) => a === Number && b === params[0]);
+        const index = stack.findLastIndex(([a, b]) => a === AsNumber && b === params[0]);
         // get the limit
         const limit_code = code_parents.findLast(x => ['attack', 'burn', 'mill'].includes(x[0]));
         const limit = limit_code[1][0] + Number(limit_code[0] === 'attack'); // attack could trigger
@@ -39,7 +39,7 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'if': {
-        const index = stack.findLastIndex(([a, b]) => a === Boolean && b === params[0]);
+        const index = stack.findLastIndex(([a, b]) => a === AsBoolean && b === params[0]);
         res.push(...compile(children, code_parents, stack, [...conditions, [index, '!=', 0]]));
       } break;
       default: {
@@ -67,19 +67,31 @@ export default function compile(code, code_parents, stack, conditions) {
   );
 }
 
+function AsNumber(x) {
+  return Number(x);
+}
+
+function AsBoolean(x) {
+  return Number(Boolean(x));
+}
+
 function collect_stack(code, stack) {
   stack ??= [];
   for (const [cmd, params, children] of code) {
     switch (cmd) {
       case 'each':
-        if (!stack.find(([a, b]) => a === Number && b === params[0])) {
-          stack.push([Number, params[0]]);
+        if (!stack.find(([a, b]) => a === AsNumber && b === params[0])) {
+          stack.push([AsNumber, params[0]]);
         }
+        // do the children
+        collect_stack(children, stack);
         break;
       case 'if': {
-        if (!stack.find(([a, b]) => a === Boolean && b === params[0])) {
-          stack.push([Boolean, params[0]]);
+        if (!stack.find(([a, b]) => a === AsBoolean && b === params[0])) {
+          stack.push([AsBoolean, params[0]]);
         }
+        // do the children
+        collect_stack(children, stack);
       } break;
       case 'repeat':
         // do the children

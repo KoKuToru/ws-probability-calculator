@@ -1,7 +1,12 @@
 const syntax = [
   [/^attack\s+([0-9]+)\s*$/g, parseInt, 'attack', 'a'],
   [/^burn\s+([0-9]+)\s*$/g, parseInt, 'burn', 'b'],
-  [/^repeat\s+([0-9]+)\s*$/g, parseInt, 'repeat', 'r']
+  [/^repeat\s+([0-9]+)\s*$/g, parseInt, 'repeat', 'r'],
+  [/^each\s+(cx)\s*$/g, () => 'cx', 'each', 'e'],
+  [/^each\s+(not\s+cx)\s*$/g, () => 'ncx', 'each', 'e'],
+  [/^if\s+(cx)\s*$/g, () => 'cx', 'if', 'i'],
+  [/^if\s+(not\s+cx)\s*$/g, () => 'ncx', 'if', 'i'],
+  [/^mill\s+([0-9]+)\s*$/g, parseInt, 'mill', 'm'],
 ];
 
 export default function parse(code) {

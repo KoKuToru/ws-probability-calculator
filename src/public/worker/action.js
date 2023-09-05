@@ -16,6 +16,7 @@ export default class Action {
   #prev;
   #steps;
   #dedup = true;
+  #conditions = [];
 
   constructor(prev, steps) {
     this.#prev = prev;
@@ -53,12 +54,25 @@ export default class Action {
   setDedup(v) {
     this.#dedup = v;
   }
+  setConditions(c) {
+    this.#conditions = c.map(([idx, op, right]) => [idx, CONDITIONS[op], right]);
+  }
+
+  #conditionCheck(state) {
+    for (const [idx, op, right] of this.#conditions) {
+      const left = state.stack[idx][1];
+      if (!op(left, right)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   *execute(state) {
     const dedup = new Map();
 
     for (let nstate of (this.#prev?? DUMMY_CHILDREN).execute?.(state)) {
-      if (this.#steps === EMPTY_ARRAY) {
+      if (this.#steps === EMPTY_ARRAY || !this.#conditionCheck(nstate)) {
         yield nstate;
         continue;
       }
@@ -110,3 +124,12 @@ export default class Action {
     }
   }
 }
+
+const CONDITIONS = Object.freeze({
+  '<':  function(a, b) { return a < b; },
+  '<=': function(a, b) { return a <= b; },
+  '>':  function(a, b) { return a > b; },
+  '>=': function(a, b) { return a >= b; },
+  '==': function(a, b) { return a == b; },
+  '!=': function(a, b) { return a != b; },
+});

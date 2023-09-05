@@ -8,6 +8,7 @@ export default class State {
   #id = ++State.id;
 
   prev = null;
+  stack = [];
 
   // current deck state:
   op_cx = 8;
@@ -37,6 +38,7 @@ export default class State {
 
   dmg = 0;
   steps = null;
+  osteps = null;
 
   get debug_count() {
     return this.prev?.reduce?.((p, c) => p + c.count, 0) ?? 1;
@@ -117,7 +119,9 @@ export default class State {
       this.w_op_cx,
       this.w_op_not_cx,
       this.w_my_trg,
-      this.w_my_not_trg
+      this.w_my_not_trg,
+      // extra stack information
+      ...this.stack
     ].join();
   }
 
@@ -145,7 +149,8 @@ export default class State {
 
         dmg: this.dmg + steps.dmg,
 
-        steps: steps.slow
+        steps: steps.slow,
+        osteps: steps
       });
       yield state;
       return;
@@ -171,7 +176,8 @@ export default class State {
             w_my_trg: state.w_my_trg + step.my_trg,
             w_my_not_trg: state.w_my_not_trg + step.my_not_trg,
 
-            steps: [ create_step(step.my, EMPTY) ]
+            steps: [ create_step(step.my, EMPTY) ],
+            osteps: steps
           });
         } else {
           // do 1 after another
@@ -199,7 +205,8 @@ export default class State {
               w_my_trg: state.w_my_trg + sub_step.my_trg,
               w_my_not_trg: state.w_my_not_trg + sub_step.my_not_trg,
 
-              steps: [ create_step(sub_step.my, EMPTY) ]
+              steps: [ create_step(sub_step.my, EMPTY) ],
+              osteps: steps
             });
           } while (my.length);
         }
@@ -221,7 +228,8 @@ export default class State {
             w_op_cx: state.w_op_cx + step.op_cx,
             w_op_not_cx: state.w_op_not_cx + step.op_not_cx,
 
-            steps: [ create_step(EMPTY, step.op) ]
+            steps: [ create_step(EMPTY, step.op) ],
+            osteps: steps
           });
         } else {
           // do 1 after another
@@ -249,7 +257,8 @@ export default class State {
               w_op_cx: state.w_op_cx + sub_step.op_cx,
               w_op_not_cx: state.w_op_not_cx + sub_step.op_not_cx,
 
-              steps: [ create_step(EMPTY, sub_step.op) ]
+              steps: [ create_step(EMPTY, sub_step.op) ],
+              osteps: steps
             });
           } while (op.length);
         }
@@ -262,7 +271,8 @@ export default class State {
 
           dmg: state.dmg + step.dmg,
 
-          steps: [ create_step(EMPTY, EMPTY, step.dmg) ]
+          steps: [ create_step(EMPTY, EMPTY, step.dmg) ],
+          osteps: steps
         });
       }
 
@@ -301,6 +311,8 @@ export default class State {
       this.w_my_not_trg = 0;
     }
     Object.freeze(this);
+    Object.freeze(this.stack);
+    Object.freeze(this.steps);
   }
 
   get id() {

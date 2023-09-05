@@ -15,12 +15,12 @@ const ALLOWED_ACTIONS = new Map([
 function build_action(code) {
   code = compiler(code);
   let action = new Action();
-  for (const cmd of code) {
-    const cls = ALLOWED_ACTIONS.get(cmd[0]);
+  for (const [cmd, params] of code) {
+    const cls = ALLOWED_ACTIONS.get(cmd);
     if (cls) {
-      action = new cls(action, ...cmd.slice(1));
+      action = new cls(action, ...params);
     } else {
-      console.error(`unknown action ${cmd[0]}`);
+      console.error(`unknown action ${cmd}`);
     }
   }
   return action;

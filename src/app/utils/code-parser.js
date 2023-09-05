@@ -45,7 +45,7 @@ export default function parse(code) {
           short: '',
           text,
           indent,
-          code: [name, ...m.slice(1).map((x, i) => parsers[i] ? parsers[i](x) : x)],
+          code: [name, m.slice(1).map((x, i) => parsers[i] ? parsers[i](x) : x)],
           children: []
         };
         if (c.code.length > 2) {

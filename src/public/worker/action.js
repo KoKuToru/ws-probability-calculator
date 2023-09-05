@@ -15,6 +15,7 @@ export default class Action {
 
   #prev;
   #steps;
+  #dedup = true;
 
   constructor(prev, steps) {
     this.#prev = prev;
@@ -49,6 +50,10 @@ export default class Action {
     }
   }
 
+  setDedup(v) {
+    this.#dedup = v;
+  }
+
   *execute(state) {
     const dedup = new Map();
 
@@ -59,40 +64,49 @@ export default class Action {
       }
 
       // try dedup
-      const k = nstate.key;
-      let estates = dedup.get(k);
-      if (estates) {
-        for (const estate of estates) {
-          estate.prev.push(nstate);
+      let estates;
+      if (this.#dedup) {
+        const k = nstate.key;
+        estates = dedup.get(k);
+        if (estates) {
+          for (const estate of estates) {
+            estate.prev.push(nstate);
+          }
+          continue;
         }
-        continue;
+        estates = [];
       }
 
       // calculate new estate
-      estates = [];
       for (const step of this.#steps) {
         for (const estate of nstate.next(step)) {
           // search next step
-          let queue = [estate];
-          while (queue.length) {
-            let next = queue.pop();
-            for (const prev of next.prev ?? EMPTY_ARRAY) {
-              if (prev.id < nstate.id) {
-                // skip
-                continue;
-              }
-              if (prev === nstate) {
-                estates.push(next);
-              } else {
-                queue.push(prev);
+          if (this.#dedup) {
+            let queue = [estate];
+            while (queue.length) {
+              let next = queue.pop();
+              for (const prev of next.prev ?? EMPTY_ARRAY) {
+                if (prev.id < nstate.id) {
+                  // skip
+                  continue;
+                }
+                if (prev === nstate) {
+                  estates.push(next);
+                } else {
+                  queue.push(prev);
+                }
               }
             }
           }
+
           yield estate;
         }
       }
 
-      dedup.set(k, estates);
+      if (this.#dedup) {
+        const k = nstate.key;
+        dedup.set(k, estates);
+      }
     }
   }
 }

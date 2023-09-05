@@ -4,12 +4,18 @@ import State from './state.js';
 
 import Attack from './actions/attack.js';
 import Burn from './actions/burn.js';
+import Mill from './actions/mill.js';
+import Push from './actions/push.js';
+import Pop from './actions/pop.js';
 
 import compiler from './compiler.js';
 
 const ALLOWED_ACTIONS = new Map([
   ['attack', Attack],
-  ['burn', Burn]
+  ['burn', Burn],
+  ['mill', Mill],
+  ['push', Push],
+  ['pop', Pop],
 ]);
 
 function build_action(code) {
@@ -18,6 +24,10 @@ function build_action(code) {
   for (const [cmd, params] of code) {
     const cls = ALLOWED_ACTIONS.get(cmd);
     if (cls) {
+      if (cmd === 'push') {
+        // need to disable dedup
+        action.setDedup(false);
+      }
       action = new cls(action, ...params);
     } else {
       console.error(`unknown action ${cmd}`);

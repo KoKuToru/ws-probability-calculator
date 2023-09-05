@@ -2,8 +2,8 @@ import step, { EMPTY, CX, NOT_CX } from '../step.js';
 import Action from '../action.js';
 
 export default class Burn extends Action {
-  constructor(prev, dmg, children) {
-    super(prev, burn(dmg), children);
+  constructor(prev, dmg) {
+    super(prev, burn(dmg));
   }
 }
 

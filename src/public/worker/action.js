@@ -15,10 +15,8 @@ export default class Action {
 
   #prev;
   #steps;
-  #children;
 
-  constructor(prev, steps, children) {
-    this.#children = children ?? DUMMY_CHILDREN;
+  constructor(prev, steps) {
     this.#prev = prev;
     steps ??= EMPTY_STEPS;
     if (steps !== EMPTY_STEPS) {
@@ -51,20 +49,12 @@ export default class Action {
     }
   }
 
-  *execute_children(state) {
-    for (const estate of this.#children.execute(state)) {
-      yield estate;
-    }
-  }
-
   *execute(state) {
     const dedup = new Map();
 
     for (let nstate of (this.#prev?? DUMMY_CHILDREN).execute?.(state)) {
       if (this.#steps === EMPTY_ARRAY) {
-        for (const estate of this.execute_children(nstate)) {
-          yield estate;
-        }
+        yield nstate;
         continue;
       }
 
@@ -81,9 +71,9 @@ export default class Action {
       // calculate new estate
       estates = [];
       for (const step of this.#steps) {
-        for (const istate of nstate.next(step)) {
+        for (const estate of nstate.next(step)) {
           // search next step
-          let queue = [istate];
+          let queue = [estate];
           while (queue.length) {
             let next = queue.pop();
             for (const prev of next.prev ?? EMPTY_ARRAY) {
@@ -94,10 +84,7 @@ export default class Action {
               }
             }
           }
-          // do children
-          for (const estate of this.execute_children(istate)) {
-            yield estate;
-          }
+          yield estate;
         }
       }
 

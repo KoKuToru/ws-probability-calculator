@@ -2,8 +2,8 @@ import step, { TRG, NOT_TRG, CX, NOT_CX } from '../step.js';
 import Action from '../action.js';
 
 export default class Attack extends Action {
-  constructor(prev, dmg, children) {
-    super(prev, attack(dmg), children);
+  constructor(prev, dmg) {
+    super(prev, attack(dmg));
   }
 }
 

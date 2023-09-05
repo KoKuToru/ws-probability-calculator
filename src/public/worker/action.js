@@ -88,8 +88,7 @@ export default class Action {
         }
       }
 
-      // sometimes give wrong results
-      //XXX: dedup.set(k, estates);
+      dedup.set(k, estates);
     }
   }
 }

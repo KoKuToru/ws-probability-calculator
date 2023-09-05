@@ -113,6 +113,7 @@ export default class State {
       this.my_trg,
       this.my_not_trg,
       // this i need ...
+      this.dmg,
       this.w_op_cx,
       this.w_op_not_cx,
       this.w_my_trg,

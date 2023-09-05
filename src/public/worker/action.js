@@ -77,6 +77,10 @@ export default class Action {
           while (queue.length) {
             let next = queue.pop();
             for (const prev of next.prev ?? EMPTY_ARRAY) {
+              if (prev.id < nstate.id) {
+                // skip
+                continue;
+              }
               if (prev === nstate) {
                 estates.push(next);
               } else {

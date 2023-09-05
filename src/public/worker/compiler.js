@@ -32,7 +32,8 @@ export default function compile(code, code_parents, stack, conditions) {
       case 'each': {
         const index = stack.findLastIndex(([a, b]) => a === Number && b === params[0]);
         // get the limit
-        const limit = code_parents.findLast(x => ['attack', 'burn', 'mill'].includes(x[0]))[1][0];
+        const limit_code = code_parents.findLast(x => ['attack', 'burn', 'mill'].includes(x[0]));
+        const limit = limit_code[1][0] + Number(limit_code[0] === 'attack'); // attack could trigger
         for (let i = 0; i < limit; ++i) {
           res.push(...compile(children, code_parents, stack, [...conditions, [index, '>', i]]));
         }

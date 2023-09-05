@@ -41,7 +41,7 @@ export default class State {
   osteps = null;
 
   get debug_count() {
-    return this.prev?.reduce?.((p, c) => p + c.count, 0) ?? 1;
+    return this.prev?.reduce?.((p, c) => p + c.debug_count, 0) ?? 1;
   }
 
   *debug_moves() {

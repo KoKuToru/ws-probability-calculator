@@ -4,20 +4,21 @@ import State from './state.js';
 
 import Attack from './actions/attack.js';
 import Burn from './actions/burn.js';
-import Repeat from './actions/repeat.js';
+
+import compiler from './compiler.js';
 
 const ALLOWED_ACTIONS = new Map([
   ['attack', Attack],
-  ['burn', Burn],
-  ['repeat', Repeat]
+  ['burn', Burn]
 ]);
 
 function build_action(code) {
+  code = compiler(code);
   let action = new Action();
   for (const cmd of code) {
     const cls = ALLOWED_ACTIONS.get(cmd[0]);
     if (cls) {
-      action = new cls(action, ...cmd.slice(1, -1), build_action(cmd.at(-1)));
+      action = new cls(action, ...cmd.slice(1));
     } else {
       console.error(`unknown action ${cmd[0]}`);
     }

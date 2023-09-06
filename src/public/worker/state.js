@@ -204,6 +204,10 @@ export default class State {
       step_b = null;
     }
 
+    if (this.op_size == 0 && this.w_op_size == 0) {
+      console.error('EMPTY DECK ! EMPTY WAITING ROOM');
+    }
+
     if (
       this.op_cx >= step_a.op_cx &&
       this.op_not_cx >= step_a.op_not_cx &&

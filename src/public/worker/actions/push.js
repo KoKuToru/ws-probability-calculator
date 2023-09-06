@@ -13,14 +13,16 @@ export default class Push extends Action {
   *execute(state) {
     for (let nstate of (this.#prev?? DUMMY_CHILDREN).execute?.(state)) {
       const stack_values = {
-        cx: nstate.osteps.op_cx,
-        ncx: nstate.osteps.op_not_cx,
+        ecx: nstate.osteps.op_cx,
+        encx: nstate.osteps.op_not_cx,
+        iecx: Number(Boolean(nstate.osteps.op_cx)),
+        incx: Number(!Boolean(nstate.osteps.op_cx)),
       };
       const estate = new State({
         prev: nstate,
 
-        stack: [...nstate.stack, ...this.#what.map(([f, n]) =>
-          [n, f(stack_values[n])]
+        stack: [...nstate.stack, ...this.#what.map(n =>
+          [n, stack_values[n]]
         )],
 
         steps: [],

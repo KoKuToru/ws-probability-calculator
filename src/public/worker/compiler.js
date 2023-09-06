@@ -30,7 +30,11 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'each': {
-        const index = stack.findLastIndex(([a, b]) => a === AsNumber && b === params[0]);
+        const name = `e${params[0]}`;
+        const index = stack.lastIndexOf(name);
+        if (index < 0) {
+          throw new Error('stack var not found');
+        }
         // get the limit
         const limit_code = code_parents.findLast(x => ['attack', 'burn', 'mill'].includes(x[0]));
         const limit = limit_code[1][0] + Number(limit_code[0] === 'attack'); // attack could trigger
@@ -39,7 +43,11 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'if': {
-        const index = stack.findLastIndex(([a, b]) => a === AsBoolean && b === params[0]);
+        const name = `i${params[0]}`;
+        const index = stack.lastIndexOf(name);
+        if (index < 0) {
+          throw new Error('stack var not found');
+        }
         res.push(...compile(children, code_parents, stack, [...conditions, [index, '!=', 0]]));
       } break;
       default: {
@@ -79,16 +87,18 @@ function collect_stack(code, stack) {
   stack ??= [];
   for (const [cmd, params, children] of code) {
     switch (cmd) {
-      case 'each':
-        if (!stack.find(([a, b]) => a === AsNumber && b === params[0])) {
-          stack.push([AsNumber, params[0]]);
+      case 'each': {
+        const name = `e${params[0]}`;
+        if (!stack.includes(name)) {
+          stack.push(name);
         }
         // do the children
         collect_stack(children, stack);
-        break;
+      } break;
       case 'if': {
-        if (!stack.find(([a, b]) => a === AsBoolean && b === params[0])) {
-          stack.push([AsBoolean, params[0]]);
+        const name = `i${params[0]}`;
+        if (!stack.includes(name)) {
+          stack.push(name);
         }
         // do the children
         collect_stack(children, stack);

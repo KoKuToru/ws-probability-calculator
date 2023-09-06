@@ -144,9 +144,6 @@ export default class State {
         w_op_cx: this.w_op_cx + steps.op_cx,
         w_op_not_cx: this.w_op_not_cx + steps.op_not_cx,
 
-        w_my_trg: this.w_my_trg + steps.my_trg,
-        w_my_not_trg: this.w_my_not_trg + steps.my_not_trg,
-
         dmg: this.dmg + steps.dmg,
 
         steps: steps.slow,
@@ -173,9 +170,6 @@ export default class State {
             my_trg: state.my_trg - step.my_trg,
             my_not_trg: state.my_not_trg - step.my_not_trg,
 
-            w_my_trg: state.w_my_trg + step.my_trg,
-            w_my_not_trg: state.w_my_not_trg + step.my_not_trg,
-
             steps: [ create_step(step.my, EMPTY) ],
             osteps: steps
           });
@@ -201,9 +195,6 @@ export default class State {
 
               my_trg: state.my_trg - sub_step.my_trg,
               my_not_trg: state.my_not_trg - sub_step.my_not_trg,
-
-              w_my_trg: state.w_my_trg + sub_step.my_trg,
-              w_my_not_trg: state.w_my_not_trg + sub_step.my_not_trg,
 
               steps: [ create_step(sub_step.my, EMPTY) ],
               osteps: steps

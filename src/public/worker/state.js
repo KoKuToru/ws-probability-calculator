@@ -125,8 +125,70 @@ export default class State {
     ].join();
   }
 
+  *next_slow(steps, step) {
+    // XXX: waiting room is handled wrong !
+
+    let step_a = step;
+    let step_b;
+    if (
+      step.op_size > this.op_size ||
+      step.my_size > this.my_size
+    ) {
+      // split step
+      step_a = Step.create({
+        my: step.my.slice(0, this.my_size),
+        op: step.op.slice(0, this.op_size),
+      });
+      step_b = Step.create({
+        my: step.my.slice(this.my_size),
+        op: step.op.slice(this.op_size),
+        dmg: step.dmg
+      });
+    }
+
+    // remove step_a if nothing..
+    if (step_a.op_size == 0 && step_a.my_size == 0) {
+      step_a = step_b;
+      step_b = null;
+    }
+
+    if (
+      this.op_cx >= step_a.op_cx &&
+      this.op_not_cx >= step_a.op_not_cx &&
+      this.my_trg >= step_a.my_trg &&
+      this.my_not_trg >= step_a.my_not_trg
+    ) {
+      const state = new State({
+        prev: this,
+
+        op_cx: this.op_cx - step_a.op_cx,
+        op_not_cx: this.op_not_cx - step_a.op_not_cx,
+
+        my_trg: this.my_trg - step_a.my_trg,
+        my_not_trg: this.my_not_trg - step_a.my_not_trg,
+
+        w_op_cx: step_a.op_into_w ? this.w_op_cx + step_a.op_cx : this.w_op_cx,
+        w_op_not_cx: step_a.op_into_w ? this.w_op_not_cx + step_a.op_not_cx : this.w_op_not_cx,
+
+        w_my_trg: step_a.my_into_w ? this.w_my_trg + step_a.my_trg : this.w_my_trg,
+        w_my_not_trg: step_a.my_into_w ? this.w_my_not_trg + step_a.my_not_trg : this.w_my_not_trg,
+
+        dmg: this.dmg + step_a.dmg,
+
+        steps: [ step_a ],
+        osteps: steps
+      });
+      if (step_b) {
+        for (const rstate of state.next_slow(steps, step_b)) {
+          yield rstate;
+        }
+      } else {
+        yield state;
+      }
+    }
+  }
+
   *next(steps) {
-    const cancel = steps.op_cx != 0;
     if (
       this.op_cx >= steps.op_cx &&
       this.op_not_cx >= steps.op_not_cx &&
@@ -156,122 +218,11 @@ export default class State {
       yield state;
       return;
     }
-    // do the slow mode
-    next_step:
+    // do the slow mode:
     for (const step of steps.slow) {
-      let state = this;
-
-      // do my
-      if (step.my_size) {
-        if (
-          state.my_trg >= step.my_trg &&
-          state.my_not_trg >= step.my_not_trg
-        ) {
-          // do everything
-          state = new State({
-            prev: state,
-
-            my_trg: state.my_trg - step.my_trg,
-            my_not_trg: state.my_not_trg - step.my_not_trg,
-
-            steps: [ Step.create(step.my, EMPTY) ],
-            osteps: steps
-          });
-        } else {
-          // do 1 after another
-          const my = step.my.split('');
-          do {
-            let idx = my.findIndex((x, _, a) => x !== a[0]);
-            if (idx < 0) {
-              idx = my.length;
-            }
-            idx = Math.min(state.my_size, idx);
-            const sub_step = Step.create(my.splice(0, idx).join(''), EMPTY);
-            if (
-              state.my_trg < sub_step.my_trg ||
-              state.my_not_trg < sub_step.my_not_trg
-            ) {
-              // impossible state
-              continue next_step;
-            }
-            state = new State({
-              prev: state,
-
-              my_trg: state.my_trg - sub_step.my_trg,
-              my_not_trg: state.my_not_trg - sub_step.my_not_trg,
-
-              steps: [ Step.create(sub_step.my, EMPTY) ],
-              osteps: steps
-            });
-          } while (my.length);
-        }
+      for (const state of this.next_slow(steps, step)) {
+        yield state;
       }
-
-      // do op
-      if (step.op_size) {
-        if (
-          state.op_cx >= step.op_cx &&
-          state.op_not_cx >= step.op_not_cx
-        ) {
-          // do everything
-          state = new State({
-            prev: state,
-
-            op_cx: state.op_cx - step.op_cx,
-            op_not_cx: state.op_not_cx - step.op_not_cx,
-
-            w_op_cx: cancel ? state.w_op_cx + step.op_cx : state.w_op_cx,
-            w_op_not_cx: cancel ? state.w_op_not_cx + step.op_not_cx : state.w_op_not_cx,
-
-            steps: [ Step.create(EMPTY, step.op) ],
-            osteps: steps
-          });
-        } else {
-          // do 1 after another
-          const op = step.op.split('');
-          do {
-            let idx = op.findIndex((x, _, a) => x !== a[0]);
-            if (idx < 0) {
-              idx = op.length;
-            }
-            idx = Math.min(state.op_size, idx);
-            const sub_step = Step.create(EMPTY, op.splice(0, idx).join(''));
-            if (
-              state.op_cx < sub_step.op_cx ||
-              state.op_not_cx < sub_step.op_not_cx
-            ) {
-              // impossible state
-              continue next_step;
-            }
-            state = new State({
-              prev: state,
-
-              op_cx: state.op_cx - sub_step.op_cx,
-              op_not_cx: state.op_not_cx - sub_step.op_not_cx,
-
-              w_op_cx: cancel ? state.w_op_cx + sub_step.op_cx : state.w_op_cx,
-              w_op_not_cx: cancel ? state.w_op_not_cx + sub_step.op_not_cx : state.w_op_not_cx,
-
-              steps: [ Step.create(EMPTY, sub_step.op) ],
-              osteps: steps
-            });
-          } while (op.length);
-        }
-      }
-
-      // do dmg
-      if (step.dmg) {
-        state = new State({
-          prev: state,
-
-          dmg: state.dmg + step.dmg,
-
-          steps: [ Step.create(EMPTY, EMPTY, step.dmg) ],
-          osteps: steps
-        });
-      }
-
-      yield state;
     }
   }
 

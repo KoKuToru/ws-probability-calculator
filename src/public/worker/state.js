@@ -126,6 +126,7 @@ export default class State {
   }
 
   *next(steps) {
+    const cancel = steps.op_cx != 0;
     if (
       this.op_cx >= steps.op_cx &&
       this.op_not_cx >= steps.op_not_cx &&
@@ -141,8 +142,8 @@ export default class State {
         my_trg: this.my_trg - steps.my_trg,
         my_not_trg: this.my_not_trg - steps.my_not_trg,
 
-        w_op_cx: this.w_op_cx + steps.op_cx,
-        w_op_not_cx: this.w_op_not_cx + steps.op_not_cx,
+        w_op_cx: cancel ? this.w_op_cx + steps.op_cx : this.w_op_cx,
+        w_op_not_cx: cancel ? this.w_op_not_cx + steps.op_not_cx : this.w_op_not_cx,
 
         dmg: this.dmg + steps.dmg,
 
@@ -216,8 +217,8 @@ export default class State {
             op_cx: state.op_cx - step.op_cx,
             op_not_cx: state.op_not_cx - step.op_not_cx,
 
-            w_op_cx: state.w_op_cx + step.op_cx,
-            w_op_not_cx: state.w_op_not_cx + step.op_not_cx,
+            w_op_cx: cancel ? state.w_op_cx + step.op_cx : state.w_op_cx,
+            w_op_not_cx: cancel ? state.w_op_not_cx + step.op_not_cx : state.w_op_not_cx,
 
             steps: [ create_step(EMPTY, step.op) ],
             osteps: steps
@@ -245,8 +246,8 @@ export default class State {
               op_cx: state.op_cx - sub_step.op_cx,
               op_not_cx: state.op_not_cx - sub_step.op_not_cx,
 
-              w_op_cx: state.w_op_cx + sub_step.op_cx,
-              w_op_not_cx: state.w_op_not_cx + sub_step.op_not_cx,
+              w_op_cx: cancel ? state.w_op_cx + sub_step.op_cx : state.w_op_cx,
+              w_op_not_cx: cancel ? state.w_op_not_cx + sub_step.op_not_cx : state.w_op_not_cx,
 
               steps: [ create_step(EMPTY, sub_step.op) ],
               osteps: steps

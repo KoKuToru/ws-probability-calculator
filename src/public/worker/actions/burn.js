@@ -10,8 +10,14 @@ export default class Burn extends Action {
 function *burn(dmg) {
   for (let n = 0; n < dmg; ++n) {
     // cancel case:
-    yield Step.create(EMPTY, NOT_CX.repeat(n) + CX);
+    yield Step.create({
+      op: NOT_CX.repeat(n) + CX,
+      op_into_w: true
+    });
   }
   // not cancel case:
-  yield Step.create(EMPTY, NOT_CX.repeat(dmg), dmg);
+  yield Step.create({
+    op: NOT_CX.repeat(dmg),
+    dmg
+  });
 }

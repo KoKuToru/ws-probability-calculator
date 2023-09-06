@@ -142,8 +142,11 @@ export default class State {
         my_trg: this.my_trg - steps.my_trg,
         my_not_trg: this.my_not_trg - steps.my_not_trg,
 
-        w_op_cx: cancel ? this.w_op_cx + steps.op_cx : this.w_op_cx,
-        w_op_not_cx: cancel ? this.w_op_not_cx + steps.op_not_cx : this.w_op_not_cx,
+        w_op_cx: steps.op_into_w ? this.w_op_cx + steps.op_cx : this.w_op_cx,
+        w_op_not_cx: steps.op_into_w ? this.w_op_not_cx + steps.op_not_cx : this.w_op_not_cx,
+
+        w_my_trg: steps.my_into_w ? this.w_my_trg + steps.my_trg : this.w_my_trg,
+        w_my_not_trg: steps.my_into_w ? this.w_my_not_trg + steps.my_not_trg : this.w_my_not_trg,
 
         dmg: this.dmg + steps.dmg,
 

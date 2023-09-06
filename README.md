@@ -6,9 +6,7 @@
 ## Current Limitations
 
 * ignores level-up
-* reshuffle doesn't put card into clock #1
-* not cancel doesn't put cards not into waiting room
-* only `attack` and `burn` and `repeat` is supported right now
+* code validation incomplete
 * own deck starts with `my_trg = 15` and `my_not_trg = 35`
 * own waitingroom starts with `w_my_trg = 0` and `w_my_not_trg = 0`
 * opponent waitingroom starts with `w_op_cx = 8 - op_cx` and `w_op_not_cx = 50 - op_cx - op_not_cx`
@@ -21,8 +19,14 @@ right now the following commands are supported:
     * does an attack with trigger check
 * `burn DMG`
     * does an attack without trigger check
+* `mill COUNT`
+    * mill cards from opponent (but it into waiting room)
 * `repeat REPEATS`
     * repeats everything that is indented after
+* `each cx` / `each not cx`
+    * for each cx from `attack`, `burn` or `mill`
+* `if cx` / `if not cx`
+    * if `attack`, `burn` (`mill`) has a cx (cancel)
 
 everything that is not detected as a command gets ignored, can be used as comment..
 

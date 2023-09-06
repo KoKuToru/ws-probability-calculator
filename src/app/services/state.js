@@ -16,6 +16,9 @@ repeat 3
 const CODE_MAPPING = [
   [/attack/g, String.fromCodePoint(0x10FFFF - 0), new RegExp(String.fromCodePoint(0x10FFFF - 0), 'g'), 'attack'],
   [/burn/g,   String.fromCodePoint(0x10FFFF - 1), new RegExp(String.fromCodePoint(0x10FFFF - 1), 'g'), 'burn'],
+  [/repeat/g,   String.fromCodePoint(0x10FFFF - 2), new RegExp(String.fromCodePoint(0x10FFFF - 2), 'g'), 'repeat'],
+  [/each/g,   String.fromCodePoint(0x10FFFF - 3), new RegExp(String.fromCodePoint(0x10FFFF - 3), 'g'), 'each'],
+  [/mill/g,   String.fromCodePoint(0x10FFFF - 4), new RegExp(String.fromCodePoint(0x10FFFF - 4), 'g'), 'mill'],
 ];
 
 class Private {

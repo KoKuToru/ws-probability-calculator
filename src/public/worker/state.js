@@ -1,5 +1,5 @@
 import Probability from './probability.js';
-import Step, { EMPTY, CX, TRG } from './step.js';
+import Step, { CX, TRG, NOT_CX, NOT_TRG } from './step.js';
 
 const PROBABILITY_CACHE = new WeakMap();
 
@@ -29,11 +29,19 @@ export default class State {
   get w_op_size() {
     return this.w_op_cx + this.w_op_not_cx;
   }
+  #op_reshuffled = false;
+  get op_reshuffled() {
+    return this.#op_reshuffled;
+  }
 
   w_my_trg = 0;
   w_my_not_trg = 0;
   get w_my_size() {
     return this.w_my_trg + this.w_my_not_trg;
+  }
+  #my_reshuffled = false;
+  get my_reshuffled() {
+    return this.#my_reshuffled;
   }
 
   dmg = 0;
@@ -125,8 +133,48 @@ export default class State {
     ].join();
   }
 
+  *next_slow_op_reshuffled(steps, step) {
+    // reshuffle dmg
+    for (const step_c of [ Step.create({ op: CX, dmg: 1 }), Step.create({ op: NOT_CX, dmg: 1 }) ]) {
+      for (const state of this.next_slow(steps, step_c)) {
+        for (const rstate of state.next_slow(steps, step)) {
+          yield rstate;
+        }
+      }
+    }
+  }
+
+  *next_slow_my_reshuffled(steps, step) {
+    // reshuffle
+    for (const step_c of [ Step.create({ my: TRG }), Step.create({ my: NOT_TRG }) ]) {
+      for (const state of this.next_slow(steps, step_c)) {
+        for (const rstate of state.next_slow(steps, step)) {
+          yield rstate;
+        }
+      }
+    }
+  }
+
+  *next_slow_reshuffled(steps, step) {
+    for (const step_c of [ Step.create({ op: CX, dmg: 1 }), Step.create({ op: NOT_CX, dmg: 1 }) ]) {
+      for (const step_d of [ Step.create({ my: TRG }), Step.create({ my: NOT_TRG }) ]) {
+        for (const state of this.next_slow(steps, step_c)) {
+          for (const rstate of state.next_slow(steps, step_d)) {
+            for (const lstate of rstate.next_slow(steps, step)) {
+              yield lstate;
+            }
+          }
+        }
+      }
+    }
+  }
+
   *next_slow(steps, step) {
     // XXX: waiting room is handled wrong !
+    if (!step) {
+      yield this;
+      return;
+    }
 
     let step_a = step;
     let step_b;
@@ -138,10 +186,14 @@ export default class State {
       step_a = Step.create({
         my: step.my.slice(0, this.my_size),
         op: step.op.slice(0, this.op_size),
+        op_into_w: step.op_into_w,
+        my_into_w: step.my_into_w
       });
       step_b = Step.create({
         my: step.my.slice(this.my_size),
         op: step.op.slice(this.op_size),
+        op_into_w: step.op_into_w,
+        my_into_w: step.my_into_w,
         dmg: step.dmg
       });
     }
@@ -178,12 +230,21 @@ export default class State {
         steps: [ step_a ],
         osteps: steps
       });
-      if (step_b) {
-        for (const rstate of state.next_slow(steps, step_b)) {
+      if (state.op_reshuffled && this.my_reshuffled) {
+        for (const rstate of state.next_slow_reshuffled(steps, step_b)) {
           yield rstate;
         }
-      } else {
-        yield state;
+      } else if (state.op_reshuffled) {
+        for (const rstate of state.next_slow_op_reshuffled(steps, step_b)) {
+          yield rstate;
+        }
+      } else if (state.my_reshuffled) {
+        for (const rstate of state.next_slow_my_reshuffled(steps, step_b)) {
+          yield rstate;
+        }
+      }
+      for (const rstate of state.next_slow(steps, step_b)) {
+        yield rstate;
       }
     }
   }
@@ -244,17 +305,18 @@ export default class State {
 
     // check for reshuffle:
     if (this.op_size === 0) {
-      this.dmg += 1;
       this.op_cx = this.w_op_cx;
       this.op_not_cx = this.w_op_not_cx;
       this.w_op_cx = 0;
       this.w_op_not_cx = 0;
+      this.#op_reshuffled = true;
     }
     if (this.my_size === 0) {
       this.my_trg = this.w_my_trg;
       this.my_not_trg = this.w_my_not_trg;
       this.w_my_trg = 0;
       this.w_my_not_trg = 0;
+      this.#my_reshuffled = true;
     }
     Object.freeze(this);
     Object.freeze(this.stack);

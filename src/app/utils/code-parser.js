@@ -66,8 +66,12 @@ export default function parse(code) {
         return c;
       }
     }
-
-    return { text, indent };
+    const c = { text, indent };
+    if (parent) {
+      parent.children.push(c);
+      return null;
+    }
+    return c;
   }).filter(x => x);
 
   return ast;

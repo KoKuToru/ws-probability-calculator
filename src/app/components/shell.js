@@ -7,7 +7,7 @@ export default class ShellComponent extends Component {
 
   @action help(e) {
     e.stopPropagation();
-    window.open('https://github.com/KoKuToru/ws-probability-calculator/blob/gp-pages/README.md', '_blank');
+    window.open('https://github.com/KoKuToru/ws-probability-calculator/blob/gh-pages/README.md', '_blank');
   }
 
   @action reset(e) {

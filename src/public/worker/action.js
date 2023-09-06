@@ -22,30 +22,7 @@ export default class Action {
     this.#prev = prev;
     steps ??= EMPTY_STEPS;
     if (steps !== EMPTY_STEPS) {
-      const fast = new Map();
-      for (const step of steps) {
-        const key = [
-          step.my_trg,
-          step.my_not_trg,
-          step.op_cx,
-          step.op_not_cx,
-          step.dmg
-        ].join();
-        let tmp = fast.get(key);
-        if (!tmp) {
-          tmp = {
-            slow: [],
-            my_trg: step.my_trg,
-            my_not_trg: step.my_not_trg,
-            op_cx: step.op_cx,
-            op_not_cx: step.op_not_cx,
-            dmg: step.dmg
-          };
-          fast.set(key, tmp);
-        }
-        tmp.slow.push(step);
-      }
-      this.#steps = Object.freeze([...fast.values()].map(x => new StepFast(x)));
+      this.#steps = StepFast.create(steps);
     } else {
       this.#steps = EMPTY_ARRAY;
     }

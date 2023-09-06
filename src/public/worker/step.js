@@ -25,6 +25,33 @@ export class StepFast {
     Object.freeze(this);
     Object.freeze(this.slow);
   }
+
+  static create(steps) {
+    const fast = new Map();
+    for (const step of steps) {
+      const key = [
+        step.my_trg,
+        step.my_not_trg,
+        step.op_cx,
+        step.op_not_cx,
+        step.dmg
+      ].join();
+      let tmp = fast.get(key);
+      if (!tmp) {
+        tmp = {
+          slow: [],
+          my_trg: step.my_trg,
+          my_not_trg: step.my_not_trg,
+          op_cx: step.op_cx,
+          op_not_cx: step.op_not_cx,
+          dmg: step.dmg
+        };
+        fast.set(key, tmp);
+      }
+      tmp.slow.push(step);
+    }
+    return Object.freeze([...fast.values()].map(x => new StepFast(x)));
+  }
 }
 
 class Step {

@@ -1,4 +1,4 @@
-import step, { TRG, NOT_TRG, CX, NOT_CX } from '../step.js';
+import Step, { TRG, NOT_TRG, CX, NOT_CX } from '../step.js';
 import Action from '../action.js';
 
 export default class Attack extends Action {
@@ -11,9 +11,9 @@ function *attack(dmg) {
   for (const trigger of [true, false]) {
     for (let n = 0; n < dmg + trigger; ++n) {
       // cancel case:
-      yield step(trigger ? TRG : NOT_TRG, NOT_CX.repeat(n) + CX);
+      yield Step.create(trigger ? TRG : NOT_TRG, NOT_CX.repeat(n) + CX);
     }
     // not cancel case:
-    yield step(trigger ? TRG : NOT_TRG, NOT_CX.repeat(dmg + trigger), dmg + trigger);
+    yield Step.create(trigger ? TRG : NOT_TRG, NOT_CX.repeat(dmg + trigger), dmg + trigger);
   }
 }

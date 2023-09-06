@@ -1,4 +1,4 @@
-import step, { EMPTY, CX, NOT_CX } from '../step.js';
+import Step, { EMPTY, CX, NOT_CX } from '../step.js';
 import Action from '../action.js';
 
 export default class Burn extends Action {
@@ -10,8 +10,8 @@ export default class Burn extends Action {
 function *burn(dmg) {
   for (let n = 0; n < dmg; ++n) {
     // cancel case:
-    yield step(EMPTY, NOT_CX.repeat(n) + CX);
+    yield Step.create(EMPTY, NOT_CX.repeat(n) + CX);
   }
   // not cancel case:
-  yield step(EMPTY, NOT_CX.repeat(dmg), dmg);
+  yield Step.create(EMPTY, NOT_CX.repeat(dmg), dmg);
 }

@@ -1,6 +1,7 @@
-import create_step, { EMPTY, StepFast } from './step.js';
+import Step, { EMPTY } from './step.js';
+import StepFast from './step-fast.js';
 
-const EMPTY_STEPS = Object.freeze([ create_step(EMPTY, EMPTY) ]);
+const EMPTY_STEPS = Object.freeze([ Step.create(EMPTY, EMPTY) ]);
 const EMPTY_ARRAY = Object.freeze([]);
 
 const DUMMY_CHILDREN =

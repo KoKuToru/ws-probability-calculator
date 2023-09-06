@@ -1,5 +1,5 @@
 import Probability from './probability.js';
-import create_step, { EMPTY, CX, TRG } from './step.js';
+import Step, { EMPTY, CX, TRG } from './step.js';
 
 const PROBABILITY_CACHE = new WeakMap();
 
@@ -171,7 +171,7 @@ export default class State {
             my_trg: state.my_trg - step.my_trg,
             my_not_trg: state.my_not_trg - step.my_not_trg,
 
-            steps: [ create_step(step.my, EMPTY) ],
+            steps: [ Step.create(step.my, EMPTY) ],
             osteps: steps
           });
         } else {
@@ -183,7 +183,7 @@ export default class State {
               idx = my.length;
             }
             idx = Math.min(state.my_size, idx);
-            const sub_step = create_step(my.splice(0, idx).join(''), EMPTY);
+            const sub_step = Step.create(my.splice(0, idx).join(''), EMPTY);
             if (
               state.my_trg < sub_step.my_trg ||
               state.my_not_trg < sub_step.my_not_trg
@@ -197,7 +197,7 @@ export default class State {
               my_trg: state.my_trg - sub_step.my_trg,
               my_not_trg: state.my_not_trg - sub_step.my_not_trg,
 
-              steps: [ create_step(sub_step.my, EMPTY) ],
+              steps: [ Step.create(sub_step.my, EMPTY) ],
               osteps: steps
             });
           } while (my.length);
@@ -220,7 +220,7 @@ export default class State {
             w_op_cx: cancel ? state.w_op_cx + step.op_cx : state.w_op_cx,
             w_op_not_cx: cancel ? state.w_op_not_cx + step.op_not_cx : state.w_op_not_cx,
 
-            steps: [ create_step(EMPTY, step.op) ],
+            steps: [ Step.create(EMPTY, step.op) ],
             osteps: steps
           });
         } else {
@@ -232,7 +232,7 @@ export default class State {
               idx = op.length;
             }
             idx = Math.min(state.op_size, idx);
-            const sub_step = create_step(EMPTY, op.splice(0, idx).join(''));
+            const sub_step = Step.create(EMPTY, op.splice(0, idx).join(''));
             if (
               state.op_cx < sub_step.op_cx ||
               state.op_not_cx < sub_step.op_not_cx
@@ -249,7 +249,7 @@ export default class State {
               w_op_cx: cancel ? state.w_op_cx + sub_step.op_cx : state.w_op_cx,
               w_op_not_cx: cancel ? state.w_op_not_cx + sub_step.op_not_cx : state.w_op_not_cx,
 
-              steps: [ create_step(EMPTY, sub_step.op) ],
+              steps: [ Step.create(EMPTY, sub_step.op) ],
               osteps: steps
             });
           } while (op.length);
@@ -263,7 +263,7 @@ export default class State {
 
           dmg: state.dmg + step.dmg,
 
-          steps: [ create_step(EMPTY, EMPTY, step.dmg) ],
+          steps: [ Step.create(EMPTY, EMPTY, step.dmg) ],
           osteps: steps
         });
       }

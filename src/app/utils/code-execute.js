@@ -42,6 +42,11 @@ export default async function *execute(queue, signal) {
       }
       signal.throwIfAborted();
     }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      return;
+    }
+    throw e;
   } finally {
     // kill all workers
     workers.forEach(x => x.terminate());

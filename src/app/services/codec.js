@@ -7,7 +7,8 @@ function *findCodePoints() {
     }
   }
 }
-console.log([...findCodePoints()].join(''));
+//console.log([...findCodePoints()].join(''));
+
 export default '*-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
 
 // funny but lots of % in url

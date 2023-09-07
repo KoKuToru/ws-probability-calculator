@@ -24,7 +24,7 @@ export default class ShellComponent extends Component {
   @action share(e) {
     e.stopPropagation();
     navigator.share({
-      url: location.url,
+      url: document.URL,
       title: window.title
     });
   }

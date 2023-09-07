@@ -20,6 +20,29 @@ export default class OverviewTable extends Component {
     );
   }
 
+  #compressed_short(code) {
+    if (!code.children.length) {
+      return code.short;
+    }
+    const x = code.children
+      .filter(x => x.short)
+      .map(x => this.#compressed_short(x))
+      .join('');
+    return `${code.short}{${x}}`;
+  }
+
+  get codeParsed() {
+    return parseCode(this.state.code);
+  }
+
+  get compressed() {
+    const p = this.codeParsed;
+    return p
+      .filter(x => x.short)
+      .map(x => this.#compressed_short(x))
+      .join('');
+  }
+
   get data() {
     const data = [];
     data.push({
@@ -166,24 +189,23 @@ export default class OverviewTable extends Component {
       .map(x => [...x.code, this.#prepare_code(x.children)]);
   }
 
-  #last_code = [];
+  #last_short_code = '';
   #abort_controller = new AbortController();
   @action async calculate(el, [code]) {
     el;
 
-    code = this.#prepare_code(parseCode(code));
-    if (
-      code.length === this.#last_code.length &&
-      code.every((x, i) => x.length === this.#last_code[i]?.length && x.every((y, j) => y === this.#last_code[i][j]))
-    ) {
+    const short_code = this.compressed;
+    if ( short_code === this.#last_short_code ) {
       return;
     }
-    this.#abort_controller.abort();
+    this.#last_short_code = short_code;
 
+    this.#abort_controller.abort();
     this.state.result.clear();
 
-    this.#last_code = code;
     this.#abort_controller = new AbortController();
+
+    code = this.#prepare_code(parseCode(code));
 
     const signal = this.#abort_controller.signal;
     const calc = async (cx, ds) => {
@@ -225,7 +247,7 @@ export default class OverviewTable extends Component {
   }
 
   @action forceCalculate(el) {
-    this.#last_code = '';
+    this.#last_short_code = '';
     this.calculate(el, [this.state.code]);
   }
 

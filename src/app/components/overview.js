@@ -4,10 +4,7 @@ import { action } from '@ember/object';
 import { COLORS } from './probability';
 import { tracked } from '@glimmer/tracking';
 import parseCode from 'ws/utils/code-parser';
-
-const PARALLE_SIZE = Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
-const WORKERS = Array(PARALLE_SIZE).fill(null).map(x => new Worker('./worker/worker.js', {type: 'module'}));
-WORKERS.forEach(x => x.promise = new Promise(r => r()));
+import codeExecute from 'ws/utils/code-execute';
 
 export default class OverviewTable extends Component {
   @service state;
@@ -208,61 +205,40 @@ export default class OverviewTable extends Component {
     code = this.#prepare_code(parseCode(code));
 
     const signal = this.#abort_controller.signal;
-    const calc = async (cx, ds) => {
-      if (signal.aborted) {
-        return;
-      }
 
-      // search free worker
-      let worker = null;
-      while (!worker) {
-        const free = (await Promise.race(WORKERS.map(x => x.promise.then(() => [x.promise]))))[0];
-        if (signal.aborted) {
-          return;
-        }
-        worker = WORKERS.find(x => x.promise === free);
-      }
-
-      // send request
-      const channel = new MessageChannel();
-      worker.promise = new Promise(r => channel.port1.onmessage = this.#onmessage.bind(this, r, signal, cx, ds));
-      worker.postMessage({
-        op_cx: cx,
-        op_size: ds,
-        code
-      }, [ channel.port2 ]);
-    };
-
-    // calculate all
+    const queue = [];
     const priority = new Set([...this.state.selected, '0,50']);
     for (const value of priority) {
-      await calc(...value.split(',').map(x => parseInt(x)));
+      const [cx, ds] = value.split(',').map(x => parseInt(x));
+      queue.push({ op_cx: cx, op_size: ds, code });
     }
     for (let ds = 1; ds <= 50; ++ds)
     for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
       if (!priority.has([cx, ds].join())) {
-        await calc(cx, ds);
+        queue.push({ op_cx: cx, op_size: ds, code });
       }
+    }
+
+    for await (const res of codeExecute(queue, signal)) {
+      signal.throwIfAborted();
+
+      const x = res.data.op_cx;
+      const y = res.data.op_size;
+
+      // store result
+      if (res.mean > this.max_mean) {
+        this.max_mean = res.mean;
+      }
+      res.x = x;
+      res.y = y;
+      Object.freeze(res);
+      this.state.result.set(x, y, res);
     }
   }
 
   @action forceCalculate(el) {
     this.#last_short_code = '';
     this.calculate(el, [this.state.code]);
-  }
-
-  #onmessage(resolve, signal, x, y, {data}) {
-    resolve();
-    if (signal.aborted) {
-      return;
-    }
-    // store result
-    if (data.mean > this.max_mean) {
-      this.max_mean = data.mean;
-    }
-    data.x = x;
-    data.y = y;
-    this.state.result.set(x, y, data);
   }
 
   get overview_extra() {

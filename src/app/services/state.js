@@ -293,7 +293,11 @@ function baseDecode(encoded, codes) {
   let value = 0n;
   while (encoded.length) {
     value *= codeSize;
-    value += BigInt(codes.indexOf(encoded.at(-1)));
+    const t = codes.indexOf(encoded.at(-1));
+    if (t < 0) {
+      throw new Error('letter not found in codes');
+    }
+    value += BigInt(t);
     encoded = encoded.slice(0, -1);
   }
 

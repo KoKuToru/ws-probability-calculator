@@ -4,6 +4,9 @@
       <span>Weiß Schwarz</span>
       <span>Probability Calculator</span>
       <span class="flex-grow"></span>
+      {{#if this.canShare}}
+        <span><button {{on "click" this.share}}>share</button></span>
+      {{/if}}
       <span><button {{on "click" this.help}}>help</button></span>
       <span><button {{on "click" this.reset}}>reset</button></span>
     </summary>

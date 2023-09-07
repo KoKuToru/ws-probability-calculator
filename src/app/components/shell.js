@@ -16,4 +16,16 @@ export default class ShellComponent extends Component {
       this.state.reset();
     }
   }
+
+  get canShare() {
+    return navigator.shared && navigator.canShare;
+  }
+
+  @action share(e) {
+    e.stopPropagation();
+    navigator.share({
+      url: location.url,
+      title: window.title
+    });
+  }
 }

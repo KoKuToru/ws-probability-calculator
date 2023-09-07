@@ -207,13 +207,13 @@ div:has(> .code) {
   font-size: 1em;
   margin: -2px;
   padding: 2px;
-  padding-left: 1.5em;
+  margin-left: 1.5em;
   line-height: var(--line-height);
-  overflow: hidden;
   --tab-size: 2;
   tab-size: var(--tab-size);
   word-wrap:break-word;
   border: 1px solid transparent;
+  border: 1px dotted gray;
 
 }
 .code > textarea:focus {
@@ -250,21 +250,33 @@ div:has(> .code) {
   width: 0.75em;
   height: 0.75em;
   top: 0.125em;
-  left: calc(-1em + 1ch * var(--space-count));
+  left: -1.2em;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  z-index: 10;
 }
 .code .bad {
+  color: #b25454df;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: red;
+}
+.code .comment {
   color: gray;
+  font-style: italic;
+}
+.code .ok {
+  color: black;
+}
+.code .indicator.bad {
+  background-color: #b25454df;
+  color: white;
 }
 .code .indicator.ok {
   background-color: #54b27cDF;
   color: white;
-}
-.code .indicator.ok::after {
-  content: '✓';
+  transform: scale(0.75);
 }
 
 textarea {

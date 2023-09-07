@@ -1,12 +1,12 @@
 const syntax = [
-  [/^attack\s+([0-9]+)\s*$/g, parseInt, 'attack', 'a'],
-  [/^burn\s+([0-9]+)\s*$/g, parseInt, 'burn', 'b'],
-  [/^repeat\s+([0-9]+)\s*$/g, parseInt, 'repeat', 'r'],
-  [/^each\s+(cx)\s*$/g, () => 'cx', 'each', 'e'],
-  [/^each\s+(not\s+cx)\s*$/g, () => 'ncx', 'each', 'e'],
-  [/^if\s+(cx)\s*$/g, () => 'cx', 'if', 'i'],
-  [/^if\s+(not\s+cx)\s*$/g, () => 'ncx', 'if', 'i'],
-  [/^mill\s+([0-9]+)\s*$/g, parseInt, 'mill', 'm'],
+  { regex: /^attack\s+([0-9]+)\s*$/g, params: [parseInt],    name: 'attack', short: 'a', need_parent: false },
+  { regex: /^burn\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'burn',   short: 'b', need_parent: false },
+  { regex: /^repeat\s+([0-9]+)\s*$/g, params: [parseInt],    name: 'repeat', short: 'r', need_parent: false },
+  { regex: /^each\s+(cx)\s*$/g,       params: [() => 'cx'],  name: 'each',   short: 'e', need_parent: true },
+  { regex: /^each\s+(not\s+cx)\s*$/g, params: [() => 'ncx'], name: 'each',   short: 'e', need_parent: true },
+  { regex: /^if\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
+  { regex: /^mill\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'mill',   short: 'm', need_parent: false },
 ];
 
 export default function parse(code) {
@@ -40,33 +40,36 @@ export default function parse(code) {
       parent = parent_stack.at(-1);
     }
 
-    for (const [s, ...p] of syntax) {
-      const [name, short] = p.slice(-2);
-      const parsers = p.slice(0, -2);
-      s.lastIndex = 0; //< reset the regex
-      const m = s.exec(text);
+    let error = null;
+    for (const s of syntax) {
+      s.regex.lastIndex = 0; //< reset the regex
+      const m = s.regex.exec(text);
       if (m) {
         const c = {
-          short: '',
+          short: s.short,
           text,
           indent,
-          code: [name, m.slice(1).map((x, i) => parsers[i] ? parsers[i](x) : x)],
+          code: [ s.name, m.slice(1).map((x, i) => s.params[i] ? s.params[i](x) : x) ],
           children: []
         };
         if (c.code.length > 2) {
-          c.short = `${short}(${c.code.slice(1).map(x => toString(x)).join(',')})`;
+          c.short = `${c.short}(${c.code.slice(1).map(x => toString(x)).join(',')})`;
         } else {
-          c.short = `${short}${c.code.slice(1).map(x => toString(x)).join(',')}`;
+          c.short = `${c.short}${c.code.slice(1).map(x => toString(x)).join(',')}`;
         }
-        parent_stack.push(c);
-        if (parent) {
-          parent.children.push(c);
-          return null;
+        if (!s.need_parent || parent_stack.find(x => ['attack', 'burn', 'mill'].includes(x?.code?.[0]))) {
+          parent_stack.push(c);
+          if (parent) {
+            parent.children.push(c);
+            return null;
+          }
+          return c;
+        } else {
+          error = 'needs a parent';
         }
-        return c;
       }
     }
-    const c = { text, indent };
+    const c = { text, indent, error };
     if (parent) {
       parent.children.push(c);
       return null;

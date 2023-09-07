@@ -18,7 +18,7 @@ export default class ShellComponent extends Component {
   }
 
   get canShare() {
-    return navigator.shared && navigator.canShare;
+    return navigator.share && navigator.canShare;
   }
 
   @action share(e) {

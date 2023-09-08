@@ -1,12 +1,16 @@
 export default class StepFast {
   slow;
+
   my_trg;
   my_not_trg;
+  my_into_w;
   get my_size() {
     return this.my_trg + this.my_not_trg;
   }
+
   op_cx;
   op_not_cx;
+  op_into_w;
   get op_size() {
     return this.op_cx + this.op_not_cx;
   }
@@ -23,8 +27,10 @@ export default class StepFast {
       const key = [
         step.my_trg,
         step.my_not_trg,
+        step.my_into_w,
         step.op_cx,
         step.op_not_cx,
+        step.op_into_w,
         step.dmg
       ].join();
       let tmp = fast.get(key);
@@ -33,8 +39,10 @@ export default class StepFast {
           slow: [],
           my_trg: step.my_trg,
           my_not_trg: step.my_not_trg,
+          my_into_w: step.my_into_w,
           op_cx: step.op_cx,
           op_not_cx: step.op_not_cx,
+          op_into_w: step.op_into_w,
           dmg: step.dmg
         };
         fast.set(key, tmp);

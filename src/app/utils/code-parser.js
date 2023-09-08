@@ -1,4 +1,4 @@
-const syntax = [
+export const syntax = [
   { regex: /^attack\s+([0-9]+)\s*$/g, params: [parseInt],    name: 'attack', short: 'a', need_parent: false },
   { regex: /^burn\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'burn',   short: 'b', need_parent: false },
   { regex: /^repeat\s+([0-9]+)\s*$/g, params: [parseInt],    name: 'repeat', short: 'r', need_parent: false },
@@ -8,6 +8,18 @@ const syntax = [
   { regex: /^if\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
   { regex: /^mill\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'mill',   short: 'm', need_parent: false },
 ];
+
+export function unparse(code) {
+  return code.map(x => {
+    if (!x.children.length) {
+      return `${' '.repeat(x.indent)}${x.text}`;
+    }
+    return [
+      `${' '.repeat(x.indent)}${x.text}`,
+      unparse(x.children)
+    ].join('\n')
+  }).join('\n');
+}
 
 export default function parse(code) {
   code ??= '';
@@ -53,9 +65,9 @@ export default function parse(code) {
           children: []
         };
         if (c.code.length > 2) {
-          c.short = `${c.short}(${c.code.slice(1).map(x => toString(x)).join(',')})`;
+          c.short = `${c.short}(${c.code.slice(1).join(',')})`;
         } else {
-          c.short = `${c.short}${c.code.slice(1).map(x => toString(x)).join(',')}`;
+          c.short = `${c.short}${c.code.slice(1).join(',')}`;
         }
         if (!s.need_parent || parent_stack.find(x => ['attack', 'burn', 'mill'].includes(x?.code?.[0]))) {
           parent_stack.push(c);
@@ -69,7 +81,7 @@ export default function parse(code) {
         }
       }
     }
-    const c = { text, indent, error };
+    const c = { text, indent, error, children: [] };
     if (parent) {
       parent.children.push(c);
       return null;
@@ -78,11 +90,4 @@ export default function parse(code) {
   }).filter(x => x);
 
   return ast;
-}
-
-function toString(x) {
-  if (typeof x === 'string') {
-    return `'${x}'`;
-  }
-  return `${x}`;
 }

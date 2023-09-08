@@ -4,6 +4,8 @@ import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import ResultMap from 'ws/utils/result-map';
 import CODEC from './codec';
+import parse, { unparse } from '../utils/code-parser';
+import { compress, decompress } from '../utils/code-compressor';
 
 const CURRENT_VERSION = 1;
 
@@ -12,14 +14,6 @@ const DEFAULT_CODE =
 repeat 3
   attack 3
   burn 1`;
-
-const CODE_MAPPING = [
-  [/attack/g, String.fromCodePoint(0x10FFFF - 0), new RegExp(String.fromCodePoint(0x10FFFF - 0), 'g'), 'attack'],
-  [/burn/g,   String.fromCodePoint(0x10FFFF - 1), new RegExp(String.fromCodePoint(0x10FFFF - 1), 'g'), 'burn'],
-  [/repeat/g,   String.fromCodePoint(0x10FFFF - 2), new RegExp(String.fromCodePoint(0x10FFFF - 2), 'g'), 'repeat'],
-  [/each/g,   String.fromCodePoint(0x10FFFF - 3), new RegExp(String.fromCodePoint(0x10FFFF - 3), 'g'), 'each'],
-  [/mill/g,   String.fromCodePoint(0x10FFFF - 4), new RegExp(String.fromCodePoint(0x10FFFF - 4), 'g'), 'mill'],
-];
 
 class Private {
   @tracked loaded = false;
@@ -176,9 +170,11 @@ export default class StateService extends Service {
       const [a, b] = s.split(',').map(x => parseInt(x));
       selected |= 1n << BigInt(a + b * 9);
     }
+    const text = [];
     const data = [
       CURRENT_VERSION,
-      CODE_MAPPING.reduce((p, c) => p.replace(c[0], c[1]), this.code),
+      compress(parse(this.code), text),
+      text,
       [
         this.#private.code_open,
         this.#private.overview_open,
@@ -205,6 +201,7 @@ export default class StateService extends Service {
         const [
           version,
           code,
+          text,
           open,
           dmg,
           selected
@@ -216,7 +213,7 @@ export default class StateService extends Service {
           return;
         }
 
-        this.#private.code = CODE_MAPPING.reduce((p, c) => p.replace(c[2], c[3]), code);
+        this.#private.code = unparse(decompress(code, text));
 
         this.#private.code_open = open[0] === '1';
         this.#private.overview_open = open[1] === '1';

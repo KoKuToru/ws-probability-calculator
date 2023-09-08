@@ -1,12 +1,17 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import parseCode from 'ws/utils/code-parser';
+import parseCode, { unparse as unparseCode } from 'ws/utils/code-parser';
+import { compress as compressCode, decompress as decompressCode } from 'ws/utils/code-compressor';
 
 export default class Code extends Component {
   @service state;
 
   @action store() {
+    const tmp = [];
+    const ccode = compressCode(this.codeParsed, tmp);
+    const dcode = decompressCode(ccode, tmp);
+    this.state.code = unparseCode(dcode);
     this.state.store();
   }
 
@@ -44,11 +49,8 @@ export default class Code extends Component {
   }
 
   get compressed() {
-    const p = this.codeParsed;
-    return p
-      .filter(x => x.short)
-      .map(x => this.#compressed_short(x))
-      .join('');
+    const code = compressCode(this.codeParsed);
+    return code;
   }
 
   @action reset(e) {

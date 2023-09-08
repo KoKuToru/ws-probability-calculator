@@ -57,7 +57,18 @@ export default class State {
     for (const s of this.steps ?? [{op:'',my:''}])
     for (const p of this.prev ?? [{}])
     for (const n of p?.debug_moves?.() ?? ['']) {
-      yield [n, s.my, s.op].filter(x => x).join();
+      const my = s.my
+        .replace(/1/g, 'TRG ')
+        .replace(/2/g, 'NOT_TRG ');
+      const op = s.op
+        .replace(/3/g, 'CX')
+        .replace(/4/g, 'NOT_CX ');
+
+      if (!my?.length && !op?.length) {
+        yield n;
+        continue;
+      }
+      yield [n, '( ', my.length ? `my: ${my} ` : null, op.length ? `op: ${op} ` : null, ')'].filter(x => x).join('');
     }
   }
 

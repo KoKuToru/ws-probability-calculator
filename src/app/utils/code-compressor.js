@@ -42,6 +42,9 @@ function decompressParams(code) {
   }
   return [
     code.split(',').map(x => {
+      if (x == 'ncx') {
+        return 'not cx';
+      }
       const y = parseInt(x);
       if (isNaN(y)) {
         return x;

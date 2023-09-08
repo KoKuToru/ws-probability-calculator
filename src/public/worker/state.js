@@ -1,4 +1,5 @@
 import Probability from './probability.js';
+import StepFast from './step-fast.js';
 import Step, { CX, TRG, NOT_CX, NOT_TRG } from './step.js';
 
 const PROBABILITY_CACHE = new WeakMap();
@@ -133,134 +134,15 @@ export default class State {
     ].join();
   }
 
-  *next_slow_op_reshuffled(steps, step) {
-    // reshuffle dmg
-    for (const step_c of [ Step.create({ op: CX, dmg: 1 }), Step.create({ op: NOT_CX, dmg: 1 }) ]) {
-      for (const state of this.next_slow(steps, step_c)) {
-        for (const rstate of state.next_slow(steps, step)) {
-          yield rstate;
-        }
-      }
-    }
-  }
-
-  *next_slow_my_reshuffled(steps, step) {
-    // reshuffle
-    for (const step_c of [ Step.create({ my: TRG }), Step.create({ my: NOT_TRG }) ]) {
-      for (const state of this.next_slow(steps, step_c)) {
-        for (const rstate of state.next_slow(steps, step)) {
-          yield rstate;
-        }
-      }
-    }
-  }
-
-  *next_slow_reshuffled(steps, step) {
-    for (const step_c of [ Step.create({ op: CX, dmg: 1 }), Step.create({ op: NOT_CX, dmg: 1 }) ]) {
-      for (const step_d of [ Step.create({ my: TRG }), Step.create({ my: NOT_TRG }) ]) {
-        for (const state of this.next_slow(steps, step_c)) {
-          for (const rstate of state.next_slow(steps, step_d)) {
-            for (const lstate of rstate.next_slow(steps, step)) {
-              yield lstate;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  *next_slow(steps, step) {
-    // XXX: waiting room is handled wrong !
-    if (!step) {
-      yield this;
-      return;
-    }
-
-    let step_a = step;
-    let step_b;
-    if (
-      step.op_size > this.op_size ||
-      step.my_size > this.my_size
-    ) {
-      // split step
-      step_a = Step.create({
-        my: step.my.slice(0, this.my_size),
-        op: step.op.slice(0, this.op_size),
-        op_into_w: step.op_into_w,
-        my_into_w: step.my_into_w
-      });
-      step_b = Step.create({
-        my: step.my.slice(this.my_size),
-        op: step.op.slice(this.op_size),
-        op_into_w: step.op_into_w,
-        my_into_w: step.my_into_w,
-        dmg: step.dmg
-      });
-    }
-
-    // remove step_a if nothing..
-    if (step_a.op_size == 0 && step_a.my_size == 0) {
-      step_a = step_b;
-      step_b = null;
-    }
-
-    if (this.op_size == 0 && this.w_op_size == 0) {
-      console.error('EMPTY DECK ! EMPTY WAITING ROOM');
-    }
-
-    if (
-      this.op_cx >= step_a.op_cx &&
-      this.op_not_cx >= step_a.op_not_cx &&
-      this.my_trg >= step_a.my_trg &&
-      this.my_not_trg >= step_a.my_not_trg
-    ) {
-      const state = new State({
-        prev: this,
-
-        op_cx: this.op_cx - step_a.op_cx,
-        op_not_cx: this.op_not_cx - step_a.op_not_cx,
-
-        my_trg: this.my_trg - step_a.my_trg,
-        my_not_trg: this.my_not_trg - step_a.my_not_trg,
-
-        w_op_cx: step_a.op_into_w ? this.w_op_cx + step_a.op_cx : this.w_op_cx,
-        w_op_not_cx: step_a.op_into_w ? this.w_op_not_cx + step_a.op_not_cx : this.w_op_not_cx,
-
-        w_my_trg: step_a.my_into_w ? this.w_my_trg + step_a.my_trg : this.w_my_trg,
-        w_my_not_trg: step_a.my_into_w ? this.w_my_not_trg + step_a.my_not_trg : this.w_my_not_trg,
-
-        dmg: this.dmg + step_a.dmg,
-
-        steps: [ step_a ],
-        osteps: steps
-      });
-      if (state.op_reshuffled && this.my_reshuffled) {
-        for (const rstate of state.next_slow_reshuffled(steps, step_b)) {
-          yield rstate;
-        }
-      } else if (state.op_reshuffled) {
-        for (const rstate of state.next_slow_op_reshuffled(steps, step_b)) {
-          yield rstate;
-        }
-      } else if (state.my_reshuffled) {
-        for (const rstate of state.next_slow_my_reshuffled(steps, step_b)) {
-          yield rstate;
-        }
-      }
-      for (const rstate of state.next_slow(steps, step_b)) {
-        yield rstate;
-      }
-    }
-  }
-
-  *next(steps) {
+  *next(steps, osteps) {
+    osteps ??= steps;
     if (
       this.op_cx >= steps.op_cx &&
       this.op_not_cx >= steps.op_not_cx &&
       this.my_trg >= steps.my_trg &&
       this.my_not_trg >= steps.my_not_trg
     ) {
-      const state = new State({
+      let state = new State({
         prev: this,
 
         op_cx: this.op_cx - steps.op_cx,
@@ -278,15 +160,68 @@ export default class State {
         dmg: this.dmg + steps.dmg,
 
         steps: steps.slow,
-        osteps: steps
+        osteps
       });
-      yield state;
+      // shuffle dmg
+      const rsteps = [];
+      if (state.my_reshuffled && state.op_reshuffled) {
+        rsteps.push(
+          Step.create({ my: TRG,     op: CX,     dmg: 1 }),
+          Step.create({ my: NOT_TRG, op: CX,     dmg: 1 }),
+          Step.create({ my: TRG,     op: NOT_CX, dmg: 1 }),
+          Step.create({ my: NOT_TRG, op: NOT_CX, dmg: 1 }),
+        );
+      } else if (state.my_reshuffled) {
+        rsteps.push(
+          Step.create({ my: TRG     }),
+          Step.create({ my: NOT_TRG }),
+        );
+      } else if (state.op_reshuffled) {
+        rsteps.push(
+          Step.create({ op: CX,     dmg: 1 }),
+          Step.create({ op: NOT_CX, dmg: 1 }),
+        );
+      } else if (steps.next.length) {
+        for (const fast of steps.next) {
+          for (const fstate of state.next(fast, osteps)) {
+            yield fstate;
+          }
+        }
+        return;
+      } else {
+        yield state;
+        return;
+      }
+      const fsteps = StepFast.create(rsteps, null);
+      for (const fstep of fsteps) {
+        for (const rstate of state.next(fstep, osteps)) {
+          if (steps.next.length) {
+            for (const fast of steps.next) {
+              for (const fstate of rstate.next(fast, osteps)) {
+                yield fstate;
+              }
+            }
+          } else {
+            yield rstate;
+          }
+        }
+      }
+      return;
+    }
+    if (steps.next.length) {
+      // IMPOSSIBLE STATE
       return;
     }
     // do the slow mode:
-    for (const step of steps.slow) {
-      for (const state of this.next_slow(steps, step)) {
-        yield state;
+    const my_steps = StepFast.create(steps.slow.map(x => Step.create({ my: x.my,  my_into_w: x.my_into_w })), this.my_size);
+    const op_steps = StepFast.create(steps.slow.map(x => Step.create({ op: x.op,  op_into_w: x.op_into_w, dmg: x.dmg })), this.op_size);
+    for (const my_step of my_steps) {
+      for (const my_state of this.next(my_step, osteps)) {
+        for (const op_step of op_steps) {
+          for (const op_state of my_state.next(op_step, osteps)) {
+            yield op_state;
+          }
+        }
       }
     }
   }

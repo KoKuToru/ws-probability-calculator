@@ -33,7 +33,9 @@ export default class StepFast {
       if (limit) {
         kstep = Step.create({
           my: step.my.slice(0, limit),
+          my_into_w: step.my_into_w, //<- not very correct
           op: step.op.slice(0, limit),
+          op_into_w: step.op_into_w, //<- not very correct
         });
         // the following might generate a EMPTY step
         // but .. i have no better idea yet

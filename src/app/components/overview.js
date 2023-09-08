@@ -219,6 +219,7 @@ export default class OverviewTable extends Component {
       }
     }
 
+    let first = true;
     for await (const res of codeExecute(queue, signal)) {
       signal.throwIfAborted();
 
@@ -233,6 +234,21 @@ export default class OverviewTable extends Component {
       res.y = y;
       Object.freeze(res);
       this.state.result.set(x, y, res);
+
+      if (first) {
+        first = false;
+        const tmp = res.code.map(([action, params, condition]) => {
+          if (condition.length) {
+            condition = `if (${condition.map(([left, opt, right]) => `stack[${left}] ${opt} ${right}`).join(' && ')}) `;
+          } else {
+            condition = '';
+          }
+          return [condition, `${action}(${params.join(', ')});`];
+        });
+        const condition_size = tmp.reduce((p, c) => Math.max(p, c[0].length), 0);
+        tmp.forEach(a => a[0] = a[0].padEnd(condition_size, ' '));
+        this.state.debug_code = tmp.map(x => x.join('')).join('\n');
+      }
     }
   }
 

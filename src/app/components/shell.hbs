@@ -14,6 +14,18 @@
   <div class="code-section">
     <Code/>
   </div>
+  <div class="code-section">
+    <Section @name="debug_open">
+      <:header>
+        <span>Compiled Code</span>
+      </:header>
+      <:default>
+        <div class="code code-compiled">
+          <code>{{this.state.debug_code}}</code>
+        </div>
+      </:default>
+    </Section>
+  </div>
   <div class="overview-section">
     <Overview />
   </div>

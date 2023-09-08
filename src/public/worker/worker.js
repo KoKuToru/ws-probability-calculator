@@ -19,7 +19,6 @@ const ALLOWED_ACTIONS = new Map([
 ]);
 
 function build_action(code) {
-  code = compiler(code);
   let action = new Action();
   for (const [cmd, params, condition] of code) {
     const cls = ALLOWED_ACTIONS.get(cmd);
@@ -39,7 +38,8 @@ function build_action(code) {
 
 self.addEventListener('message', function(e) {
   const data = e.data;
-  const action = build_action(data.code);
+  const code = compiler(data.code);
+  const action = build_action(code);
 
   // execute
   const istate = new State({
@@ -96,6 +96,7 @@ self.addEventListener('message', function(e) {
 
   e.ports[0].postMessage({
     data,
+    code,
     exact_dmg: dmg.map(x => x.toString()),
     exact_dmg_acc: dmg_acc.map(x => x.toString()),
     dmg: dmg.map(x => x.toNumber()),

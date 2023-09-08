@@ -39,6 +39,9 @@ class Private {
 export default class StateService extends Service {
   #private = new Private();
 
+  @tracked debug_code;
+  @tracked debug_open = false;
+
   reset() {
     const d = new Private();
     for (const k of [

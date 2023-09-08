@@ -30,6 +30,7 @@ body {
   grid-template-rows:
     min-content
     min-content
+    min-content
     fit-content(100%)
     fit-content(100%);
   grid-auto-flow: column;
@@ -205,7 +206,8 @@ div:has(> .code) {
 }
 
 .code > div,
-.code > textarea {
+.code > textarea,
+code {
   grid-column-start: 1;
   grid-row-start: 1;
   white-space: pre-wrap;
@@ -220,7 +222,9 @@ div:has(> .code) {
   word-wrap:break-word;
   border: 1px solid transparent;
   border: 1px dotted gray;
-
+}
+code {
+  display: block;
 }
 .code > textarea:focus {
   border: 1px solid gray;
@@ -508,4 +512,8 @@ button {
   font-size: inherit;
   font-family: inherit;
   padding: 1px;
+}
+
+code {
+  white-space: pre-wrap;
 }

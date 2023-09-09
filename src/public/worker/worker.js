@@ -20,14 +20,15 @@ const ALLOWED_ACTIONS = new Map([
   ['pop', Pop],
 ]);
 
-function build_action(code) {
+function build_action(code, allow_dedup) {
+  allow_dedup ??= true;
   let action = new Action();
   for (const [cmd, params, condition, dedup] of code) {
     const cls = ALLOWED_ACTIONS.get(cmd);
     if (cls) {
       action = new cls(action, ...params);
       action.setConditions(condition);
-      action.setDedup(dedup);
+      action.setDedup(allow_dedup && dedup);
     } else {
       console.error(`unknown action ${cmd}`);
     }
@@ -49,6 +50,23 @@ self.addEventListener('message', function(e) {
   });
 
   const states = [...action.execute(istate)];
+
+  // validation step:
+  /*{
+    const moves = states.reduce((p, c) => p + c.debug_count, 0);
+    const props = states.reduce((p, c) => p + c.probability.toNumber(), 0);
+    let moves2 = 0;
+    let props2 = 0;
+    for (const state of build_action(code, false).execute(istate)) {
+      moves2 += state.debug_count;
+      props2 += state.probability.toNumber();
+    }
+    props2;
+    if (moves2 !== moves) {
+      throw new Error('something wrong');
+    }
+  }*/
+
   let dmg = [];
   for (const state of states) {
     // calculate probabilty for state

@@ -38,10 +38,10 @@ export default class ProbabilityComponent extends Component {
     const selected = this.state.selected.map(x => x.split(',').map(x => parseInt(x))).sort((a, b) => {
       for (let i = 0; i < Math.max(a.length, b.length); ++i) {
         if (a[i] < b[i]) {
-          return -1;
+          return 1;
         }
         if (a[i] > b[i]) {
-          return 1;
+          return -1;
         }
       }
       return 0;

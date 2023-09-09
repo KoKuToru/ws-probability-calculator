@@ -195,7 +195,7 @@ export default class OverviewTable extends Component {
     const signal = this.#abort_controller.signal;
 
     const queue = [];
-    const priority = new Set([...this.state.selected, '0,50']);
+    const priority = new Set([...this.state.selected]);
     for (const value of priority) {
       const [cx, ds] = value.split(',').map(x => parseInt(x));
       queue.push({ op_cx: cx, op_size: ds, code });

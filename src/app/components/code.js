@@ -38,17 +38,6 @@ export default class Code extends Component {
     }
   }
 
-  #compressed_short(code) {
-    if (!code.children.length) {
-      return code.short;
-    }
-    const x = code.children
-      .filter(x => x.short)
-      .map(x => this.#compressed_short(x))
-      .join('');
-    return `${code.short}{${x}}`;
-  }
-
   get compressed() {
     const code = compressCode(this.codeParsed);
     return code;

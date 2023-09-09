@@ -5,6 +5,7 @@ import { COLORS } from './probability';
 import { tracked } from '@glimmer/tracking';
 import parseCode from 'ws/utils/code-parser';
 import codeExecute from 'ws/utils/code-execute';
+import { compress as compressCode } from 'ws/utils/code-compressor';
 
 export default class OverviewTable extends Component {
   @service state;
@@ -17,27 +18,13 @@ export default class OverviewTable extends Component {
     );
   }
 
-  #compressed_short(code) {
-    if (!code.children.length) {
-      return code.short;
-    }
-    const x = code.children
-      .filter(x => x.short)
-      .map(x => this.#compressed_short(x))
-      .join('');
-    return `${code.short}{${x}}`;
-  }
-
   get codeParsed() {
     return parseCode(this.state.code);
   }
 
   get compressed() {
-    const p = this.codeParsed;
-    return p
-      .filter(x => x.short)
-      .map(x => this.#compressed_short(x))
-      .join('');
+    const code = compressCode(this.codeParsed);
+    return code;
   }
 
   get data() {
@@ -202,7 +189,7 @@ export default class OverviewTable extends Component {
 
     this.#abort_controller = new AbortController();
 
-    code = this.#prepare_code(parseCode(code));
+    code = this.#prepare_code(this.codeParsed);
 
     const signal = this.#abort_controller.signal;
 

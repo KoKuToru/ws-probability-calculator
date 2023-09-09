@@ -108,6 +108,39 @@ export class Probability {
     const b = d.split('').map(x => bs[parseInt(x)]).join('');
     return `${t}\u2044${b}`;
   }
+
+  toDecimalString() {
+    // do division
+    const res = [];
+    let n = this.numerator;
+    const d = this.denominator;
+    const rem = new Map();
+    while (true) {
+      const t = n / d;
+      res.push(t);
+      if (t != 0) {
+        n %= d;
+      }
+      if (n == 0) {
+        break;
+      }
+      if (rem.has(n)) {
+        break;
+      } else {
+        rem.set(n, res.length);
+      }
+      n *= 10n;
+    }
+    const idx = rem.get(n);
+    const sres = res.map(x => x.toString());
+    if (idx) {
+      sres.splice(idx, 0, '\xa0');
+      sres.push('…');
+    }
+    const s = `${sres[0]}.${sres.slice(1).join('')}`;
+    debugger;
+    return s;
+  }
 };
 
 export default Probability;

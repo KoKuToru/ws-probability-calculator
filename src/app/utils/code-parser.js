@@ -7,6 +7,7 @@ export const syntax = [
   { regex: /^if\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
   { regex: /^mill\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'mill',   short: 'm', need_parent: false },
+  { regex: /^damage\s+([0-9]+)\s*$/g, params: [parseInt],    name: 'damage', short: 'd', need_parent: false },
 ];
 
 export function unparse(code) {

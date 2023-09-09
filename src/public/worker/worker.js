@@ -5,6 +5,7 @@ import State from './state.js';
 import Attack from './actions/attack.js';
 import Burn from './actions/burn.js';
 import Mill from './actions/mill.js';
+import Damage from './actions/damage.js';
 import Push from './actions/push.js';
 import Pop from './actions/pop.js';
 
@@ -14,6 +15,7 @@ const ALLOWED_ACTIONS = new Map([
   ['attack', Attack],
   ['burn', Burn],
   ['mill', Mill],
+  ['damage', Damage],
   ['push', Push],
   ['pop', Pop],
 ]);
@@ -50,7 +52,7 @@ self.addEventListener('message', function(e) {
   });
 
   const states = [...action.execute(istate)];
-
+  debugger;
   let dmg = [];
   for (const state of states) {
     // calculate probabilty for state

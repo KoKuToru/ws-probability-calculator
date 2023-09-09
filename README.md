@@ -20,6 +20,8 @@ right now the following commands are supported:
     * does an attack without trigger check
 * `mill COUNT`
     * mill cards from opponent (but it into waiting room)
+* `damage DMG`
+    * fix damage to opponent
 * `repeat REPEATS`
     * repeats everything that is indented after
 * `each cx` / `each not cx`

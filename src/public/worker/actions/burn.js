@@ -8,7 +8,7 @@ export default class Burn extends Action {
 }
 
 function *burn(dmg) {
-  for (let n = 0; n < dmg; ++n) {
+  for (let n = 0; n < dmg - 1; ++n) {
     // cancel case:
     yield Step.create({
       op: NOT_CX.repeat(n) + CX,

@@ -237,16 +237,26 @@ export default class OverviewTable extends Component {
 
       if (first) {
         first = false;
-        const tmp = res.code.map(([action, params, condition]) => {
+        const tmp = res.code.map(([action, params, condition, dedup]) => {
           if (condition.length) {
             condition = `if (${condition.map(([left, opt, right]) => `stack[${left}] ${opt} ${right}`).join(' && ')}) `;
           } else {
             condition = '';
           }
-          return [condition, `${action}(${params.join(', ')});`];
+          if (!dedup) {
+            return [condition, `{ ${action}(${params.join(', ')}); `, '         }'];
+          } else {
+            return [condition, `{ ${action}(${params.join(', ')}); `, 'dedup(); }'];
+          }
         });
-        const condition_size = tmp.reduce((p, c) => Math.max(p, c[0].length), 0);
-        tmp.forEach(a => a[0] = a[0].padEnd(condition_size, ' '));
+        {
+          const condition_size = tmp.reduce((p, c) => Math.max(p, c[0].length), 0);
+          tmp.forEach(a => a[0] = a[0].padEnd(condition_size, ' '));
+        }
+        {
+          const code_size = tmp.reduce((p, c) => Math.max(p, c[1].length), 0);
+          tmp.forEach(a => a[1] = a[1].padEnd(code_size, ' '));
+        }
         this.state.debug_code = tmp.map(x => x.join('')).join('\n');
       }
     }

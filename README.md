@@ -16,12 +16,20 @@ right now the following commands are supported:
 
 * `attack DMG`
     * does an attack with trigger check
+* `attack cx` / `attack not cx`
+    * same as `attack DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
 * `burn DMG`
     * does an attack without trigger check
+* `burn cx` / `burn not cx`
+    * same as `burn DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
 * `mill COUNT`
     * mill cards from opponent (but it into waiting room)
+* `mill cx` / `mill not cx`
+    * same as `mill COUNT` but does it for each cx or not cx from `attack`, `burn` or `mill`
 * `damage DMG`
     * fix damage to opponent
+* `damage cx` / `damage not cx`
+    * same as `damage DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
 * `repeat REPEATS`
     * repeats everything that is indented after
 * `each cx` / `each not cx`

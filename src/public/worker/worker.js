@@ -22,15 +22,12 @@ const ALLOWED_ACTIONS = new Map([
 
 function build_action(code) {
   let action = new Action();
-  for (const [cmd, params, condition] of code) {
+  for (const [cmd, params, condition, dedup] of code) {
     const cls = ALLOWED_ACTIONS.get(cmd);
     if (cls) {
-      if (cmd === 'push') {
-        // need to disable dedup
-        action.setDedup(false);
-      }
       action = new cls(action, ...params);
       action.setConditions(condition);
+      action.setDedup(dedup);
     } else {
       console.error(`unknown action ${cmd}`);
     }
@@ -42,6 +39,7 @@ self.addEventListener('message', function(e) {
   const data = e.data;
   const code = compiler(data.code);
   const action = build_action(code);
+  debugger;
 
   // execute
   const istate = new State({

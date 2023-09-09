@@ -26,6 +26,7 @@ export default class StepFast {
   }
 
   static create(steps, limit) {
+    let c = 0;
     const fast = new Map();
     for (const step of steps) {
       let kstep = step;
@@ -47,6 +48,7 @@ export default class StepFast {
           dmg: step.dmg
         });
       }
+      c += 1;
       const key = [
         kstep.my_trg,
         kstep.my_not_trg,
@@ -54,7 +56,8 @@ export default class StepFast {
         kstep.op_cx,
         kstep.op_not_cx,
         kstep.op_target,
-        kstep.dmg
+        kstep.dmg,
+        c
       ].map(x => x.toString()).join();
       let tmp = fast.get(key);
       if (!tmp) {
@@ -67,7 +70,8 @@ export default class StepFast {
           op_cx: kstep.op_cx,
           op_not_cx: kstep.op_not_cx,
           op_target: kstep.op_target,
-          dmg: kstep.dmg
+          dmg: kstep.dmg,
+          c
         };
         fast.set(key, tmp);
       }

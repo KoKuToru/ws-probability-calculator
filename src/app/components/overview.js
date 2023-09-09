@@ -175,11 +175,11 @@ export default class OverviewTable extends Component {
 
   #last_short_code = '';
   #abort_controller = new AbortController();
-  @action async calculate(el, [code]) {
+  @action async calculate(el) {
     el;
 
     const short_code = this.state.overview_open + this.compressed;
-    if ( short_code === this.#last_short_code ) {
+    if (short_code === this.#last_short_code ) {
       return;
     }
     this.#last_short_code = short_code;
@@ -190,7 +190,7 @@ export default class OverviewTable extends Component {
 
     this.#abort_controller = new AbortController();
 
-    code = this.#prepare_code(this.codeParsed);
+    const code = this.#prepare_code(this.codeParsed);
 
     const signal = this.#abort_controller.signal;
 

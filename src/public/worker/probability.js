@@ -78,12 +78,14 @@ export class Probability {
       denominator = Number(this.denominator / g);
     }
     // just to be sure..
+    /*
     if (BigInt(numerator) !== this.numerator) {
       console.warn('Big(numerator) !== this.numerator');
     }
     if (BigInt(denominator) !== this.denominator) {
       console.warn('Big(numerator) !== this.numerator');
     }
+    */
     // do the division
     return numerator / denominator;
   }

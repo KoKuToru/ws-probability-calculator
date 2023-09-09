@@ -67,15 +67,24 @@ export class Probability {
   }
 
   toNumber() {
+    let n = this.numerator;
+    let d = this.denominator;
     // is there a better way to do this?
-    let numerator = Number(this.numerator);
-    let denominator = Number(this.denominator);
-    if (BigInt(numerator) !== this.numerator ||
-        BigInt(denominator) !== this.denominator) {
+    let numerator = Number(n);
+    let denominator = Number(d);
+    if (BigInt(numerator) !== n ||
+        BigInt(denominator) !== d) {
       // try to simplify
-      const g = this.#gcd(this.numerator, this.denominator);
-      numerator   = Number(this.numerator / g);
-      denominator = Number(this.denominator / g);
+      const g = this.#gcd(n, d);
+      numerator   = Number(n / g);
+      denominator = Number(d / g);
+    }
+    while (BigInt(numerator) !== n ||
+           BigInt(denominator) !== d) {
+      n /= 10n;
+      d /= 10n;
+      numerator   = Number(n);
+      denominator = Number(d);
     }
     // just to be sure..
     /*

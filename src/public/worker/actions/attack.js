@@ -9,7 +9,7 @@ export default class Attack extends Action {
 
 function *attack(dmg) {
   for (const trigger of [true, false]) {
-    for (let n = 0; n < dmg + trigger; ++n) {
+    for (let n = 0; n < dmg + trigger - 1; ++n) {
       // cancel case:
       yield Step.create({
         my: trigger ? TRG : NOT_TRG,

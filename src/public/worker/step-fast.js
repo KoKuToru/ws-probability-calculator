@@ -6,14 +6,14 @@ export default class StepFast {
 
   my_trg;
   my_not_trg;
-  my_into_w;
+  my_target;
   get my_size() {
     return this.my_trg + this.my_not_trg;
   }
 
   op_cx;
   op_not_cx;
-  op_into_w;
+  op_target;
   get op_size() {
     return this.op_cx + this.op_not_cx;
   }
@@ -33,29 +33,29 @@ export default class StepFast {
       if (limit) {
         kstep = Step.create({
           my: step.my.slice(0, limit),
-          my_into_w: step.my_into_w, //<- not very correct
+          my_target: step.my_target,
           op: step.op.slice(0, limit),
-          op_into_w: step.op_into_w, //<- not very correct
+          op_target: step.op_target,
         });
         // the following might generate a EMPTY step
         // but .. i have no better idea yet
         nstep = Step.create({
           my: step.my.slice(limit),
-          my_into_w: step.my_into_w,
+          my_target: step.my_target,
           op: step.op.slice(limit),
-          op_into_w: step.op_into_w,
+          op_target: step.op_target,
           dmg: step.dmg
         });
       }
       const key = [
         kstep.my_trg,
         kstep.my_not_trg,
-        kstep.my_into_w,
+        kstep.my_target,
         kstep.op_cx,
         kstep.op_not_cx,
-        kstep.op_into_w,
+        kstep.op_target,
         kstep.dmg
-      ].join();
+      ].map(x => x.toString()).join();
       let tmp = fast.get(key);
       if (!tmp) {
         tmp = {
@@ -63,10 +63,10 @@ export default class StepFast {
           next: [],
           my_trg: kstep.my_trg,
           my_not_trg: kstep.my_not_trg,
-          my_into_w: kstep.my_into_w,
+          my_target: kstep.my_target,
           op_cx: kstep.op_cx,
           op_not_cx: kstep.op_not_cx,
-          op_into_w: kstep.op_into_w,
+          op_target: kstep.op_target,
           dmg: kstep.dmg
         };
         fast.set(key, tmp);

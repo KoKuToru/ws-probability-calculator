@@ -1,8 +1,9 @@
 import Probability from './probability.js';
 import StepFast from './step-fast.js';
-import Step, { CX, TRG, NOT_CX, NOT_TRG } from './step.js';
+import Step, { CX, TRG, NOT_CX, NOT_TRG, WAITINGROOM, STOCK, CLOCK, MEMORY } from './step.js';
 
 const PROBABILITY_CACHE = new WeakMap();
+const EMPTY_STEPS = Object.freeze([ Step.create({}) ]);
 
 export default class State {
   static id = 0;
@@ -22,6 +23,19 @@ export default class State {
   my_not_trg = 50 - 15;
   get my_size() {
     return this.my_trg + this.my_not_trg;
+  }
+
+  // pending state:
+  p_op_cx = 0;
+  p_op_not_cx = 0;
+  get p_op_size() {
+    return this.p_op_cx + this.p_op_not_cx;
+  }
+
+  p_my_trg = 0;
+  p_my_not_trg = 0;
+  get p_my_size() {
+    return this.p_my_trg + this.p_my_not_trg;
   }
 
   // waiting room state:
@@ -129,24 +143,96 @@ export default class State {
 
   get key() {
     return [
-      // future state ...
+      this.dmg,
+
       this.op_cx,
       this.op_not_cx,
       this.my_trg,
       this.my_not_trg,
-      // this i need ...
-      this.dmg,
+
       this.w_op_cx,
       this.w_op_not_cx,
       this.w_my_trg,
       this.w_my_not_trg,
-      // extra stack information
+
+      // pending should be always 0
+      this.p_op_cx,
+      this.p_op_not_cx,
+      this.p_my_trg,
+      this.p_my_not_trg,
+
       ...this.stack
     ].join();
   }
 
-  *next(steps, osteps) {
+  *next(steps, osteps)  {
     osteps ??= steps;
+    for (let state of this.subnext(steps, osteps)) {
+      // move pending into target
+      if (state.p_my_size) {
+        const tmp = {
+          prev: state,
+          p_my_trg: 0,
+          p_my_not_trg: 0,
+          w_my_trg: state.w_my_trg,
+          w_my_not_trg: state.w_my_not_trg,
+          steps: EMPTY_STEPS,
+          osteps: osteps
+        };
+        switch (steps.my_target) {
+          case WAITINGROOM:
+            tmp.w_my_trg += state.p_my_trg;
+            tmp.w_my_not_trg += state.p_my_not_trg;
+            break;
+          case STOCK:
+            // just remove the cards for now..
+            break;
+          case CLOCK:
+            // just remove the cards for now..
+            break;
+          case MEMORY:
+            // just remove the cards for now..
+            break;
+        }
+        state = new State(tmp);
+      }
+      if (state.p_op_size) {
+        const tmp = {
+          prev: state,
+          p_op_cx: 0,
+          p_op_not_cx: 0,
+          w_op_cx: state.w_op_cx,
+          w_op_not_cx: state.w_op_not_cx,
+          steps: EMPTY_STEPS,
+          osteps: osteps
+        };
+        switch (steps.op_target) {
+          case WAITINGROOM:
+            tmp.w_op_cx += state.p_op_cx;
+            tmp.w_op_not_cx += state.p_op_not_cx;
+            break;
+          case STOCK:
+            // just remove the cards for now..
+            break;
+          case CLOCK:
+            // just remove the cards for now..
+            break;
+          case MEMORY:
+            // just remove the cards for now..
+            break;
+        }
+        state = new State(tmp);
+      }
+      yield state;
+    }
+  }
+
+  *subnext(steps, osteps) {
+    if (!steps.op_cx && !steps.op_not_cx && !steps.my_trg && !steps.my_not_trg) {
+      // nothing todo
+      yield this;
+      return;
+    }
     if (
       this.op_cx >= steps.op_cx &&
       this.op_not_cx >= steps.op_not_cx &&
@@ -162,11 +248,11 @@ export default class State {
         my_trg: this.my_trg - steps.my_trg,
         my_not_trg: this.my_not_trg - steps.my_not_trg,
 
-        w_op_cx: steps.op_into_w ? this.w_op_cx + steps.op_cx : this.w_op_cx,
-        w_op_not_cx: steps.op_into_w ? this.w_op_not_cx + steps.op_not_cx : this.w_op_not_cx,
+        p_my_trg: this.p_my_trg + steps.my_trg,
+        p_my_not_trg: this.p_my_not_trg + steps.my_not_trg,
 
-        w_my_trg: steps.my_into_w ? this.w_my_trg + steps.my_trg : this.w_my_trg,
-        w_my_not_trg: steps.my_into_w ? this.w_my_not_trg + steps.my_not_trg : this.w_my_not_trg,
+        p_op_cx: this.p_op_cx + steps.op_cx,
+        p_op_not_cx: this.p_op_not_cx + steps.op_not_cx,
 
         dmg: this.dmg + steps.dmg,
 
@@ -177,24 +263,24 @@ export default class State {
       const rsteps = [];
       if (state.my_reshuffled && state.op_reshuffled) {
         rsteps.push(
-          Step.create({ my: TRG,     op: CX,     dmg: 1 }),
-          Step.create({ my: NOT_TRG, op: CX,     dmg: 1 }),
-          Step.create({ my: TRG,     op: NOT_CX, dmg: 1 }),
-          Step.create({ my: NOT_TRG, op: NOT_CX, dmg: 1 }),
+          Step.create({ my: TRG,     my_target: CLOCK, op: CX,     op_target: CLOCK, dmg: 1 }),
+          Step.create({ my: NOT_TRG, my_target: CLOCK, op: CX,     op_target: CLOCK, dmg: 1 }),
+          Step.create({ my: TRG,     my_target: CLOCK, op: NOT_CX, op_target: CLOCK, dmg: 1 }),
+          Step.create({ my: NOT_TRG, my_target: CLOCK, op: NOT_CX, op_target: CLOCK, dmg: 1 }),
         );
       } else if (state.my_reshuffled) {
         rsteps.push(
-          Step.create({ my: TRG     }),
-          Step.create({ my: NOT_TRG }),
+          Step.create({ my: TRG    , my_target: CLOCK }),
+          Step.create({ my: NOT_TRG, my_target: CLOCK }),
         );
       } else if (state.op_reshuffled) {
         rsteps.push(
-          Step.create({ op: CX,     dmg: 1 }),
-          Step.create({ op: NOT_CX, dmg: 1 }),
+          Step.create({ op: CX,     op_target: CLOCK, dmg: 1 }),
+          Step.create({ op: NOT_CX, op_target: CLOCK, dmg: 1 }),
         );
       } else if (steps.next.length) {
         for (const fast of steps.next) {
-          for (const fstate of state.next(fast, osteps)) {
+          for (const fstate of state.subnext(fast, osteps)) {
             yield fstate;
           }
         }
@@ -203,17 +289,62 @@ export default class State {
         yield state;
         return;
       }
+      // store pending
+      const p_my_trg     =  state.p_my_trg;
+      const p_my_not_trg =  state.p_my_not_trg;
+      const p_op_cx      =  state.p_op_cx;
+      const p_op_not_cx  =  state.p_op_not_cx;
+      const has_pending  = p_my_trg || p_my_not_trg || p_op_cx || p_op_not_cx;
+      if (has_pending) {
+        // remove pending
+        state = new State({
+          prev: state,
+          p_my_trg: 0,
+          p_my_not_trg: 0,
+          p_op_cx: 0,
+          p_op_not_cx: 0,
+          steps: EMPTY_STEPS,
+          osteps: osteps
+        });
+      }
+      // do the steps
       const fsteps = StepFast.create(rsteps, null);
       for (const fstep of fsteps) {
         for (const rstate of state.next(fstep, osteps)) {
           if (steps.next.length) {
             for (const fast of steps.next) {
-              for (const fstate of rstate.next(fast, osteps)) {
-                yield fstate;
+              for (let fstate of rstate.subnext(fast, osteps)) {
+                if (has_pending) {
+                  // readd pending
+                  yield new State({
+                    prev: fstate,
+                    p_my_trg,
+                    p_my_not_trg,
+                    p_op_cx,
+                    p_op_not_cx,
+                    steps: EMPTY_STEPS,
+                    osteps: osteps
+                  });
+                } else {
+                  yield fstate;
+                }
               }
             }
           } else {
-            yield rstate;
+            if (has_pending) {
+              // readd pending
+              yield new State({
+                prev: rstate,
+                p_my_trg,
+                p_my_not_trg,
+                p_op_cx,
+                p_op_not_cx,
+                steps: EMPTY_STEPS,
+                osteps: osteps
+              });
+            } else {
+              yield rstate;
+            }
           }
         }
       }
@@ -227,9 +358,9 @@ export default class State {
     const my_steps = StepFast.create(steps.slow.map(x => Step.create({ my: x.my,  my_into_w: x.my_into_w })), this.my_size);
     const op_steps = StepFast.create(steps.slow.map(x => Step.create({ op: x.op,  op_into_w: x.op_into_w, dmg: x.dmg })), this.op_size);
     for (const my_step of my_steps) {
-      for (const my_state of this.next(my_step, osteps)) {
+      for (const my_state of this.subnext(my_step, osteps)) {
         for (const op_step of op_steps) {
-          for (const op_state of my_state.next(op_step, osteps)) {
+          for (const op_state of my_state.subnext(op_step, osteps)) {
             yield op_state;
           }
         }

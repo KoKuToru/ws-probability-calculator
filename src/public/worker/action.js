@@ -1,4 +1,4 @@
-import Step, { EMPTY } from './step.js';
+import Step from './step.js';
 import StepFast from './step-fast.js';
 
 const EMPTY_STEPS = Object.freeze([ Step.create({}) ]);

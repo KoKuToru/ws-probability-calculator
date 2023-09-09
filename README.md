@@ -6,7 +6,6 @@
 ## Current Limitations
 
 * ignores level-up
-* reshuffle waitingroom is incorrect (uses revealed cards)
 * own deck starts with `my_trg = 15` and `my_not_trg = 35`
 * own waitingroom starts with `w_my_trg = 0` and `w_my_not_trg = 0`
 * opponent waitingroom starts with `w_op_cx = 8 - op_cx` and `w_op_not_cx = 50 - op_cx - op_not_cx`

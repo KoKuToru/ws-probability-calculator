@@ -1,4 +1,4 @@
-import Step, { TRG, NOT_TRG, CX, NOT_CX } from '../step.js';
+import Step, { TRG, NOT_TRG, CX, NOT_CX, WAITINGROOM, STOCK, CLOCK } from '../step.js';
 import Action from '../action.js';
 
 export default class Attack extends Action {
@@ -13,14 +13,17 @@ function *attack(dmg) {
       // cancel case:
       yield Step.create({
         my: trigger ? TRG : NOT_TRG,
+        my_target: STOCK,
         op: NOT_CX.repeat(n) + CX,
-        op_into_w: true
+        op_target: WAITINGROOM
       });
     }
     // not cancel case:
     yield Step.create({
       my: trigger ? TRG : NOT_TRG,
+      my_target: STOCK,
       op: NOT_CX.repeat(dmg + trigger),
+      op_target: CLOCK,
       dmg: dmg + trigger
     });
   }

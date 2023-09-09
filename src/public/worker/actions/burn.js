@@ -1,4 +1,4 @@
-import Step, { EMPTY, CX, NOT_CX } from '../step.js';
+import Step, { EMPTY, CX, NOT_CX, WAITINGROOM, CLOCK } from '../step.js';
 import Action from '../action.js';
 
 export default class Burn extends Action {
@@ -12,12 +12,13 @@ function *burn(dmg) {
     // cancel case:
     yield Step.create({
       op: NOT_CX.repeat(n) + CX,
-      op_into_w: true
+      op_target: WAITINGROOM
     });
   }
   // not cancel case:
   yield Step.create({
     op: NOT_CX.repeat(dmg),
+    op_target: CLOCK,
     dmg
   });
 }

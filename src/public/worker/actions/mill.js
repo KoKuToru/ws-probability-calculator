@@ -1,4 +1,4 @@
-import Step, { EMPTY, CX, NOT_CX } from '../step.js';
+import Step, { EMPTY, CX, NOT_CX, WAITINGROOM } from '../step.js';
 import Action from '../action.js';
 
 export default class Mill extends Action {
@@ -14,7 +14,7 @@ function *mill(count) {
     for (let p of permute(cards)) {
       yield Step.create({
         op: p,
-        op_into_w: true
+        op_target: WAITINGROOM
       });
     }
   }

@@ -7,27 +7,32 @@ export const NOT_TRG = '2';
 export const CX = '3';
 export const NOT_CX = '4';
 
+export const WAITINGROOM = Symbol('waitingroom');
+export const STOCK       = Symbol('stock');
+export const CLOCK       = Symbol('clock');
+export const MEMORY      = Symbol('memory');
+
 export default class Step {
   my;
   my_trg;
   my_not_trg;
-  my_into_w;
+  my_target;
   get my_size() {
     return this.my_trg + this.my_not_trg;
   }
   op;
   op_cx;
   op_not_cx;
-  op_into_w;
+  op_target;
   get op_size() {
     return this.op_cx + this.op_not_cx;
   }
   dmg;
 
-  constructor(my, my_into_w, op, op_into_w, dmg) {
+  constructor(my, my_target, op, op_traget, dmg) {
     this.dmg = dmg;
-    this.my_into_w = my_into_w;
-    this.op_into_w = op_into_w;
+    this.my_target = my_target;
+    this.op_target = op_traget;
     if (typeof my !== 'string') {
       throw new Error('`my` must be a string');
     }
@@ -65,18 +70,18 @@ export default class Step {
     Object.freeze(this);
   }
 
-  static create({my, my_into_w, op, op_into_w, dmg}) {
+  static create({my, my_target, op, op_target, dmg}) {
     my ??= EMPTY;
-    my_into_w ??= false;
+    my_target ??= STOCK;
     op ??= EMPTY;
-    op_into_w ??= true;
+    op_target ??= WAITINGROOM;
     dmg ??= 0;
-    const key = [my, my_into_w, op, op_into_w, dmg].join();
+    const key = [my, my_target, op, op_target, dmg].map(x => x.toString()).join();
     let res = RESULT_CACHE.get(key);
     if (res) {
       return res;
     }
-    res = new Step(my, my_into_w, op, op_into_w, dmg);
+    res = new Step(my, my_target, op, op_target, dmg);
     RESULT_CACHE.set(key);
     return res;
   }

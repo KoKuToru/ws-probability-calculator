@@ -68,14 +68,16 @@ export default class State {
   }
 
   *debug_moves() {
-    for (const s of this.steps ?? [{op:'',my:''}])
-    for (const p of this.prev ?? [{}])
+    const steps = this.steps?.length ? this.steps : [{op:'',my:''}];
+    const prev = this.prev?.length ? this.prev : [{}];
+    for (const s of steps)
+    for (const p of prev)
     for (const n of p?.debug_moves?.() ?? ['']) {
       const my = s.my
         .replace(/1/g, 'TRG ')
         .replace(/2/g, 'NOT_TRG ');
       const op = s.op
-        .replace(/3/g, 'CX')
+        .replace(/3/g, 'CX ')
         .replace(/4/g, 'NOT_CX ');
 
       if (!my?.length && !op?.length) {

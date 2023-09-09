@@ -227,7 +227,8 @@ export default class StateService extends Service {
 
         this.#private.selected = new Set(selected.split('').map((a, b) => a === '1' && [b % 9, Math.floor(b / 9)].join(',')).filter(x => x));
 
-      } catch {
+      } catch (e) {
+        console.error(e);
         alert('error loading state');
         window.history.pushState('', '', `?`);
         return;

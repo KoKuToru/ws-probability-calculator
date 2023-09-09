@@ -39,7 +39,6 @@ self.addEventListener('message', function(e) {
   const data = e.data;
   const code = compiler(data.code);
   const action = build_action(code);
-  debugger;
 
   // execute
   const istate = new State({
@@ -50,7 +49,6 @@ self.addEventListener('message', function(e) {
   });
 
   const states = [...action.execute(istate)];
-  debugger;
   let dmg = [];
   for (const state of states) {
     // calculate probabilty for state

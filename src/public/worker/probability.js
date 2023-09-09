@@ -138,7 +138,6 @@ export class Probability {
       sres.push('…');
     }
     const s = `${sres[0]}.${sres.slice(1).join('')}`;
-    debugger;
     return s;
   }
 };

@@ -124,7 +124,6 @@ function findLimit(code_parents, name) {
       limit += parent[1][0];
       break;
   }
-  debugger;
   return limit;
 }
 

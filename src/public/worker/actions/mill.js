@@ -9,8 +9,8 @@ export default class Mill extends Action {
 
 function *mill(count) {
   // all permutations
-  for (let n = 0; n < count; ++n) {
-    const cards = NOT_CX.repeat(n) + CX.repeat(count - n - 1);
+  for (let n = 0; n <= count; ++n) {
+    const cards = NOT_CX.repeat(n) + CX.repeat(count - n);
     for (let p of permute(cards)) {
       yield Step.create({
         op: p,

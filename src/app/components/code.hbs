@@ -12,7 +12,8 @@
   <:default>
     <div class="main">
       <div class="code">
-      <textarea
+        <textarea
+          spellcheck="false"
           {{on "input" this.updateCode}}
           {{on "keydown" this.onKeyDown}}
           {{on "keydown" this.updateCode}}

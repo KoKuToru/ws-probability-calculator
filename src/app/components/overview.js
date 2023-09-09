@@ -178,7 +178,7 @@ export default class OverviewTable extends Component {
   @action async calculate(el, [code]) {
     el;
 
-    const short_code = this.compressed;
+    const short_code = this.state.overview_open + this.compressed;
     if ( short_code === this.#last_short_code ) {
       return;
     }
@@ -200,10 +200,12 @@ export default class OverviewTable extends Component {
       const [cx, ds] = value.split(',').map(x => parseInt(x));
       queue.push({ op_cx: cx, op_size: ds, code });
     }
-    for (let ds = 1; ds <= 50; ++ds)
-    for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
-      if (!priority.has([cx, ds].join())) {
-        queue.push({ op_cx: cx, op_size: ds, code });
+    if (this.state.overview_open) {
+      for (let ds = 1; ds <= 50; ++ds)
+      for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
+        if (!priority.has([cx, ds].join())) {
+          queue.push({ op_cx: cx, op_size: ds, code });
+        }
       }
     }
 

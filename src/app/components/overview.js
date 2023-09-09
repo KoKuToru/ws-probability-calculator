@@ -186,6 +186,7 @@ export default class OverviewTable extends Component {
 
     this.#abort_controller.abort();
     this.state.result.clear();
+    this.max_mean = COLORS.length;
 
     this.#abort_controller = new AbortController();
 

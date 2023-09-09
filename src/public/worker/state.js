@@ -231,7 +231,8 @@ export default class State {
     if (
       !steps.op_cx && !steps.op_not_cx &&
       !steps.my_trg && !steps.my_not_trg &&
-      !steps.dmg
+      !steps.dmg &&
+      !steps.next.length
     ) {
       // nothing todo
       yield this;

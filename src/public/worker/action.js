@@ -83,7 +83,9 @@ export default class Action {
                   continue;
                 }
                 if (prev === nstate) {
-                  estates.push(next);
+                  if (!estates.includes(next)) {
+                    estates.push(next);
+                  }
                 } else {
                   queue.push(prev);
                 }
@@ -97,7 +99,7 @@ export default class Action {
 
       if (this.#dedup) {
         const k = nstate.key;
-        //dedup.set(k, estates);
+        dedup.set(k, estates);
       }
     }
   }

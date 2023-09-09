@@ -24,6 +24,7 @@ export default class Code extends Component {
   }
 
   @action onKeyDown(e) {
+    return;
     const target = e.currentTarget;
     if (e.keyCode === 9) {
       //XXX todo .. improve this logic

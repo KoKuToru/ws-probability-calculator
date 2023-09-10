@@ -287,8 +287,8 @@ export default class State {
           Step.create({ op: NOT_CX, op_target: CLOCK, dmg: 1 }),
         );
       } else if (steps.next.length) {
-        for (const fast of steps.next) {
-          for (const fstate of state.subnext(fast, osteps)) {
+        for (const snext of steps.next) {
+          for (const fstate of state.subnext(snext, osteps)) {
             yield fstate;
           }
         }

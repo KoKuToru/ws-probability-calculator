@@ -34,6 +34,7 @@ export default class StepFast {
   static create(steps, my_limit, op_limit) {
     my_limit ??= null;
     op_limit ??= null;
+    const hack = my_limit !== null || op_limit !== null;
     let c = 0;
     const fast = new Map();
     for (const step of steps) {
@@ -65,7 +66,10 @@ export default class StepFast {
       } else {
         nstep = EMPTY_STEP;
       }
-      c += 1;
+      if (hack) {
+        // XXX something is wrong with splitting
+        c += 1;
+      }
       const key = [
         kstep.my_trg,
         kstep.my_not_trg,

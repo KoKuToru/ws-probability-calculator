@@ -349,15 +349,12 @@ export default class State {
       return;
     }
     // do the slow mode:
-    const my_steps = StepFast.create(steps.slow.map(x => Step.create({ my: x.my,  my_target: x.my_target })), this.my_size);
-    const op_steps = StepFast.create(steps.slow.map(x => Step.create({ op: x.op,  op_target: x.op_target, dmg: x.dmg })), this.op_size);
-    for (const my_step of my_steps) {
-      for (const my_state of this.subnext(my_step, osteps, true)) {
-        for (const op_step of op_steps) {
-          for (const op_state of my_state.subnext(op_step, osteps, true)) {
-            yield op_state;
-          }
-        }
+    let res = 0;
+    const fsteps = StepFast.create(steps.slow, this.my_size, this.op_size);
+    for (const fstep of fsteps) {
+      for (const rstate of this.subnext(fstep, osteps, true)) {
+        res += 1;
+        yield rstate;
       }
     }
   }

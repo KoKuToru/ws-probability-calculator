@@ -1,5 +1,7 @@
 import Step from './step.js';
 
+const EMPTY_STEP = Step.create({});
+
 export default class StepFast {
   slow;
   next;
@@ -20,37 +22,48 @@ export default class StepFast {
 
   constructor(obj) {
     Object.assign(this, obj);
-    this.next = StepFast.create(this.next);
+    if (this.next.some(x => x != EMPTY_STEP)) {
+      this.next = StepFast.create(this.next);
+    } else {
+      this.next = [];
+    }
     Object.freeze(this);
     Object.freeze(this.slow);
   }
 
-  static create(steps, limit) {
+  static create(steps, my_limit, op_limit) {
+    my_limit ??= null;
+    op_limit ??= null;
     let c = 0;
     const fast = new Map();
     for (const step of steps) {
       let kstep = step;
       let nstep;
       if (
-        limit && (
-          step.my_size > limit ||
-          step.op_size > limit
+        (
+          my_limit !== null ||
+          op_limit !== null
+        ) && (
+          step.my_size > my_limit ||
+          step.op_size > op_limit
         )
       ) {
         // only split if something is to split
         kstep = Step.create({
-          my: step.my.slice(0, limit),
+          my: step.my.slice(0, my_limit),
           my_target: step.my_target,
-          op: step.op.slice(0, limit),
+          op: step.op.slice(0, op_limit),
           op_target: step.op_target,
         });
         nstep = Step.create({
-          my: step.my.slice(limit),
+          my: step.my.slice(my_limit),
           my_target: step.my_target,
-          op: step.op.slice(limit),
+          op: step.op.slice(op_limit),
           op_target: step.op_target,
           dmg: step.dmg
         });
+      } else {
+        nstep = EMPTY_STEP;
       }
       c += 1;
       const key = [

@@ -31,15 +31,19 @@ export default class StepFast {
     for (const step of steps) {
       let kstep = step;
       let nstep;
-      if (limit) {
+      if (
+        limit && (
+          step.my_size > limit ||
+          step.op_size > limit
+        )
+      ) {
+        // only split if something is to split
         kstep = Step.create({
           my: step.my.slice(0, limit),
           my_target: step.my_target,
           op: step.op.slice(0, limit),
           op_target: step.op_target,
         });
-        // the following might generate a EMPTY step
-        // but .. i have no better idea yet
         nstep = Step.create({
           my: step.my.slice(limit),
           my_target: step.my_target,

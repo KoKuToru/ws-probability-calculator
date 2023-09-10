@@ -66,7 +66,7 @@ export default class Action {
           }
           continue;
         }
-        estates = [];
+        estates = new Set();
       }
 
       // calculate new estate
@@ -84,20 +84,19 @@ export default class Action {
 
           // search next step
           if (this.#dedup) {
-            let queue = [estate];
-            while (queue.length) {
-              let next = queue.pop();
+            const queue = new Set([estate]);
+            while (queue.size) {
+              const next = queue.values().next().value;
+              queue.delete(next);
               for (const prev of next.prev ?? EMPTY_ARRAY) {
                 if (prev.id < nstate.id) {
-                  // skip
+                  // skip too old
                   continue;
                 }
                 if (prev === nstate) {
-                  if (!estates.includes(next)) {
-                    estates.push(next);
-                  }
+                  estates.add(next);
                 } else {
-                  queue.push(prev);
+                  queue.add(prev);
                 }
               }
             }

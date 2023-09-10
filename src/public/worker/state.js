@@ -268,33 +268,33 @@ export default class State {
         osteps
       });
       // shuffle dmg
-      const rsteps = [];
-      if (state.my_reshuffled && state.op_reshuffled) {
-        rsteps.push(
-          Step.create({ my: TRG,     my_target: CLOCK, op: CX,     op_target: CLOCK, dmg: 1 }),
-          Step.create({ my: NOT_TRG, my_target: CLOCK, op: CX,     op_target: CLOCK, dmg: 1 }),
-          Step.create({ my: TRG,     my_target: CLOCK, op: NOT_CX, op_target: CLOCK, dmg: 1 }),
-          Step.create({ my: NOT_TRG, my_target: CLOCK, op: NOT_CX, op_target: CLOCK, dmg: 1 }),
-        );
-      } else if (state.my_reshuffled) {
-        rsteps.push(
-          Step.create({ my: TRG    , my_target: CLOCK }),
-          Step.create({ my: NOT_TRG, my_target: CLOCK }),
-        );
-      } else if (state.op_reshuffled) {
-        rsteps.push(
-          Step.create({ op: CX,     op_target: CLOCK, dmg: 1 }),
-          Step.create({ op: NOT_CX, op_target: CLOCK, dmg: 1 }),
-        );
-      } else if (steps.next.length) {
-        for (const snext of steps.next) {
-          for (const fstate of state.subnext(snext, osteps)) {
-            yield fstate;
+      let rsteps = EMPTY_STEPS;
+      if (state.my_reshuffled) {
+        rsteps = rsteps.flatMap(x => {
+          return [
+            Step.create({ ...x, my: TRG    , my_target: CLOCK }),
+            Step.create({ ...x, my: NOT_TRG, my_target: CLOCK }),
+          ];
+        });
+      }
+      if (state.op_reshuffled) {
+        rsteps = rsteps.flatMap(x => {
+          return [
+            Step.create({ ...x, op: CX,     op_target: CLOCK, dmg: 1 }),
+            Step.create({ ...x, op: NOT_CX, op_target: CLOCK, dmg: 1 }),
+          ];
+        });
+      }
+      if (rsteps === EMPTY_STEPS) {
+        if (steps.next.length) {
+          for (const snext of steps.next) {
+            for (const fstate of state.subnext(snext, osteps)) {
+              yield fstate;
+            }
           }
+        } else {
+          yield state;
         }
-        return;
-      } else {
-        yield state;
         return;
       }
       // store pending

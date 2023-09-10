@@ -232,8 +232,8 @@ export default class State {
   *subnext(steps, osteps, retry) {
     retry ??= false;
     if (
-      !steps.op_cx && !steps.op_not_cx &&
-      !steps.my_trg && !steps.my_not_trg &&
+      !steps.op_size &&
+      !steps.my_size &&
       !steps.dmg &&
       !steps.next.length
     ) {

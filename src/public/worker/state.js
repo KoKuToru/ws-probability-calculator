@@ -349,11 +349,9 @@ export default class State {
       return;
     }
     // do the slow mode:
-    let res = 0;
     const fsteps = StepFast.create(steps.slow, this.my_size, this.op_size);
     for (const fstep of fsteps) {
       for (const rstate of this.subnext(fstep, osteps, true)) {
-        res += 1;
         yield rstate;
       }
     }

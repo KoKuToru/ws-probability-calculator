@@ -318,41 +318,27 @@ export default class State {
       // do the steps
       const fsteps = StepFast.create(rsteps, null);
       for (const fstep of fsteps) {
-        for (const rstate of state.next(fstep, osteps)) {
+        for (let rstate of state.next(fstep, osteps)) {
+          if (has_pending) {
+            // readd pending
+            rstate = new State({
+              prev: rstate,
+              p_my_trg,
+              p_my_not_trg,
+              p_op_cx,
+              p_op_not_cx,
+              steps: EMPTY_STEPS,
+              osteps: osteps
+            });
+          }
           if (steps.next.length) {
-            for (const fast of steps.next) {
-              for (let fstate of rstate.subnext(fast, osteps)) {
-                if (has_pending) {
-                  // readd pending
-                  yield new State({
-                    prev: fstate,
-                    p_my_trg,
-                    p_my_not_trg,
-                    p_op_cx,
-                    p_op_not_cx,
-                    steps: EMPTY_STEPS,
-                    osteps: osteps
-                  });
-                } else {
-                  yield fstate;
-                }
+            for (const snext of steps.next) {
+              for (let fstate of rstate.subnext(snext, osteps)) {
+                yield fstate;
               }
             }
           } else {
-            if (has_pending) {
-              // readd pending
-              yield new State({
-                prev: rstate,
-                p_my_trg,
-                p_my_not_trg,
-                p_op_cx,
-                p_op_not_cx,
-                steps: EMPTY_STEPS,
-                osteps: osteps
-              });
-            } else {
-              yield rstate;
-            }
+            yield rstate;
           }
         }
       }

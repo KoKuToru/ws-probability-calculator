@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Weiß Schwarz Probability Calculator</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link integrity="" rel="stylesheet" href="assets/vendor.css">
+    <link integrity="" rel="stylesheet" href="assets/ws.css">
+  </head>
+  <body>
+    <div id="remove1" class="header-section">
+      <summary>
+        <span>Weiß Schwarz</span>
+        <span>Probability Calculator BETA</span>
+        <span class="flex-grow"></span>
+        <span><button>help</button></span>
+      </summary>
+    </div>
+    <div id="remove2" class="code-section">
+      <div class="section" data-open style="padding: 5px">
+        <noscript>
+          Doesn't work without javascript
+        </noscript>
+        <script>
+          var parent = document.currentScript.parentElement;
+          parent.append((function() {
+            var r = document.createElement('span');
+            r.style.fontWeight = 'bold';
+            r.style.marginBottom = '0.5em';
+            r.append(document.createTextNode('Testing Browser'));
+            return r;
+          })());
+          var checks = [
+            ['const & let', 'const x = 0; let y = 0; return true'],
+            ['static import', 'return ("supports" in HTMLScriptElement && HTMLScriptElement.supports("module")) || "noModule" in document.createElement("script")'],
+            ['dynamic import', 'new Function("x", "import(x)"); return true'],
+            //['Web Share API', 'return navigator.share && navigator.canShare'],
+            ['Web Workers API', 'return "Worker" in window'],
+            ['Web Workers API with modules', 'new Worker("blob://", { get type() { throw new Error("ok"); } }).terminate(); return false'],
+            ['Compression Streams API', 'return "DecompressionStream" in window'],
+            ['Compression Streams API with deflate-raw', 'new DecompressionStream("deflate-raw"); return true'],
+            ['BigInt', 'return 0n == 0n && BigInt(0) == BigInt(0)']
+          ];
+          var checks_done = 0;
+          var checks_ok = 0;
+          function done(r) {
+            checks_done += 1;
+            checks_ok += Number(r);
+            if (checks_done < checks.length) {
+              return;
+            }
+            if (checks_ok != checks_done) {
+              parent.append((function() {
+                var r = document.createElement('span');
+                r.style.fontWeight = 'bold';
+                r.style.marginTop = '0.5em';
+                r.style.fontSize = '2em';
+                r.append(document.createTextNode('UNSUPPORTED'));
+                return r;
+              })());
+              return;
+            }
+            // supported load the application
+            const script = document.createElement('script');
+            script.src = 'loader.js';
+            script.onload = function() {
+              load().then(() => {
+                document.querySelectorAll('#remove1, #remove2').forEach(function (el) {
+                  el.remove();
+                });
+              });
+            }
+            document.body.append(script);
+          }
+
+          checks.map(function(x) {
+            var el = document.createElement('span')
+            var el2 = document.createElement('span')
+            var el3 = document.createElement('span')
+            el2.append(document.createTextNode('pending'));
+            el2.style.fontStyle='italic';
+            el2.style.width = '10em';
+            el2.style.display = 'inline-block';
+            el3.append(document.createTextNode(x[0]));
+            el.append(el2);
+            el.append(el3);
+            parent.append(el);
+            x.unshift(el2);
+            return x;
+          }).forEach(function(x) {
+            try {
+              var r = Function(x[2])();
+              if (typeof r === 'object' && 'then' in r) {
+                r.then(function(r) {
+                  x[0].firstChild.nodeValue = r ? 'supported' : 'not supported';
+                  done(r);
+                }, function(r) {
+                  var r = e.message == 'ok';
+                  x[0].firstChild.nodeValue = r ? 'supported' : 'not supported';
+                  done(r);
+                });
+              } else {
+                x[0].firstChild.nodeValue = r ? 'supported' : 'not supported';
+                done(r);
+              }
+            } catch (e) {
+              var r = e.message == 'ok';
+              x[0].firstChild.nodeValue = r ? 'supported' : 'not supported';
+              done(r);
+            }
+          });
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

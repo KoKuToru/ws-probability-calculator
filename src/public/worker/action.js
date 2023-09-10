@@ -72,6 +72,16 @@ export default class Action {
       // calculate new estate
       for (const step of this.#steps) {
         for (const estate of nstate.next(step)) {
+          // validation
+          if (
+            !estate.my_size ||
+            !estate.op_size ||
+            estate.p_my_size ||
+            estate.p_op_size
+          ) {
+            throw new Error('something is wrong');
+          }
+
           // search next step
           if (this.#dedup) {
             let queue = [estate];

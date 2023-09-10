@@ -15,7 +15,7 @@ export default class Push extends Action {
       const stack_values = {
         ecx: nstate.osteps.op_cx,
         encx: nstate.osteps.op_not_cx,
-        iecx: Number(Boolean(nstate.osteps.op_cx)),
+        icx: Number(Boolean(nstate.osteps.op_cx)),
         incx: Number(!Boolean(nstate.osteps.op_cx)),
       };
       const estate = new State({

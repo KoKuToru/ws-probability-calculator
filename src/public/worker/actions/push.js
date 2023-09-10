@@ -21,9 +21,12 @@ export default class Push extends Action {
       const estate = new State({
         prev: nstate,
 
-        stack: [...nstate.stack, ...this.#what.map(n =>
-          [n, stack_values[n]]
-        )],
+        stack: [...nstate.stack, ...this.#what.map(n => {
+          if (!(n in stack_values)) {
+            throw new Error('unknown stack value');
+          }
+          return [n, stack_values[n]]
+        })],
 
         steps: [],
         osteps: []

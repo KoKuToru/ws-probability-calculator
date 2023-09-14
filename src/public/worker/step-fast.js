@@ -68,7 +68,7 @@ export default class StepFast {
       }
       if (hack) {
         // XXX something is wrong with splitting
-        c += 1;
+        //c += 1;
       }
       const key = [
         kstep.my_trg,

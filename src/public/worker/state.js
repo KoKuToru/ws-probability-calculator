@@ -88,6 +88,18 @@ export default class State {
     }
   }
 
+
+  *debug_moves_raw() {
+    const steps = this.steps?.length ? this.steps : [{op:'',my:''}];
+    const prev = this.prev?.length ? this.prev : [{}];
+    for (const s of steps)
+    for (const p of prev)
+    for (const n of p?.debug_moves_raw?.() ?? ['']) {
+      yield [n, s.my, s.op].filter(x => x).join('');
+    }
+  }
+
+
   get probability() {
     if (!this.prev) {
       return new Probability(1, 1);

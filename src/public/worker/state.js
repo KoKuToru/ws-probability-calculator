@@ -387,19 +387,25 @@ export default class State {
     }
   }
 
+  static #setup;
   constructor(obj) {
     ANTI_GC.push(this);
     if (Array.isArray(obj.prev)) {
       throw new Error('prev must not be array');
     }
+
+    if (!State.#setup) {
+      // jit a fast copy function
+      State.#setup = new Function("obj", Object.keys(this).map(x => {
+        x = JSON.stringify(x);
+        return `this[${x}] = obj[${x}] ?? this[${x}];`
+      }).join('\n'));
+    }
     if (obj.prev) {
-      for (const k of Object.keys(this)) {
-        this[k] = obj.prev[k] ?? this[k];
-      }
+      State.#setup.call(this, obj.prev);
     }
-    for (const k of Object.keys(this)) {
-      this[k] = obj[k] ?? this[k];
-    }
+    State.#setup.call(this, obj);
+
     if (this.prev) {
       this.prev = [this.prev];
     }
@@ -419,6 +425,7 @@ export default class State {
       this.w_my_not_trg = 0;
       this.#my_reshuffled = true;
     }
+
     Object.freeze(this);
     Object.freeze(this.stack);
     Object.freeze(this.steps);

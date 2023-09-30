@@ -41,19 +41,20 @@ import burn_tests from './tests/burn.js'
 import mill_tests from './tests/mill.js'
 
 import { strict as assert } from 'node:assert';
+import Probability from './probability.js';
 
 for (const { code, tests } of [
+  ...attack_tests,
   ...burn_tests,
   ...mill_tests
-  ...burn_tests
 ]) {
-  console.log(code)
+  console.log(JSON.stringify(code))
   const compiled_code = compiler(code);
 
   for (const state of tests) {
     const res = []
 
-    for (const dedup of [true, false]) {
+    for (const dedup of [false, true]) {
       const action = build_action(compiled_code, dedup);
 
       console.log('\t', 'op:', state.op_cx, state.op_not_cx, 'my:', state.my_trg, state.my_not_trg, 'dedup:', dedup)
@@ -70,15 +71,21 @@ for (const { code, tests } of [
 
       // sort
       states_mp.sort(SORTER);
-      res.push(states_mp);
 
-      /*
-      if (results) {
-        for (let i = 0; i < Math.max(states_mp.length, results.length); ++i) {
-          console.log('\t\t', states_mp[i])
-          assert.deepStrictEqual(states_mp[i], results[i], 'must be same');
-        }
-      }*/
+      // merge
+      const dmg_p = [];
+      const dmg_c = []
+      let p_g = new Probability(0, 1);
+      for (const x of states_s) {
+        // add probability
+        const p = x.probability;
+        p_g = p_g.add(p)
+        dmg_p[x.dmg] = (dmg_p[x.dmg] ?? new Probability(0, 1)).add(p);
+        dmg_c[x.dmg] = (dmg_c[x.dmg] ?? 0) + 1;
+      }
+      assert.equal(p_g.toNumber(), 1., 'must be 1');
+
+      res.push([states_mp, dmg_p, dmg_c]);
     }
 
     assert.deepStrictEqual(res[0], res[1], 'should be same')

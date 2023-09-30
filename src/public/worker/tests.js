@@ -38,11 +38,13 @@ console.log("start testing")
 
 import attack_tests from './tests/attack.js'
 import burn_tests from './tests/burn.js'
+import mill_tests from './tests/mill.js'
 
 import { strict as assert } from 'node:assert';
 
 for (const { code, tests } of [
-  ...attack_tests,
+  ...burn_tests,
+  ...mill_tests
   ...burn_tests
 ]) {
   console.log(code)

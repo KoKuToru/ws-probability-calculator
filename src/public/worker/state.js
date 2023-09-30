@@ -99,6 +99,22 @@ export default class State {
     }
   }
 
+  *debug_seperated_states() {
+    const steps = this.steps?.length ? this.steps : [Step.create({})];
+    const prev = this.prev?.length ? this.prev : [{}];
+    for (const s of steps)
+    for (const p of prev)
+    for (const p2 of p?.debug_seperated_states?.() ?? [null]) {
+      const o = {
+        ...this,
+        prev: p2,
+        steps: [s],
+        osteps: StepFast.create([s])
+      };
+      yield new State(o);
+    }
+  }
+
 
   get probability() {
     if (!this.prev) {

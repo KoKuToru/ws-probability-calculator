@@ -5,6 +5,8 @@ import Step, { CX, TRG, NOT_CX, NOT_TRG, WAITINGROOM, STOCK, CLOCK, MEMORY } fro
 const EMPTY_STEPS = Object.freeze([ Step.create({}) ]);
 const P_ONE = new Probability(1, 1);
 
+export const ANTI_GC = [];
+
 export default class State {
   static id = 0;
   #id = ++State.id;
@@ -386,6 +388,7 @@ export default class State {
   }
 
   constructor(obj) {
+    ANTI_GC.push(this);
     if (Array.isArray(obj.prev)) {
       throw new Error('prev must not be array');
     }

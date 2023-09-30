@@ -1,6 +1,6 @@
 import Action from './action.js';
 import Probability from './probability.js';
-import State from './state.js';
+import State, {ANTI_GC} from './state.js';
 
 import Attack from './actions/attack.js';
 import Burn from './actions/burn.js';
@@ -71,7 +71,12 @@ self.addEventListener('message', function(e) {
   for (const state of states) {
     // calculate probabilty for state
     const p = state.probability;
+
     // store dmg probability
+    const arr = (dmg[state.dmg] ??= new Map());
+    arr.set(p.denominator, (arr.get(p.denominator) ?? 0n) + p.numerator);
+  }
+  ANTI_GC.splice(0, ANTI_GC.length); // < free memory
     const arr = (dmg[state.dmg] ??= []);
     const idx = arr.findIndex(x => x.denominator === p.denominator);
     if (idx === -1) {
@@ -81,6 +86,9 @@ self.addEventListener('message', function(e) {
     const tmp = arr[idx].add(p);
     arr[idx] = tmp;
   }
+  dmg.forEach((v, i) => {
+    dmg[i] = [...[...v.entries()].map(([k, v]) => new Probability(v, k))];
+  });
 
   dmg = Array.from(dmg);
   const ZERO = new Probability(0, 1);

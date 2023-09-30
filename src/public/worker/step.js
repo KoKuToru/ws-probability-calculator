@@ -82,7 +82,7 @@ export default class Step {
       return res;
     }
     res = new Step(my, my_target, op, op_target, dmg);
-    RESULT_CACHE.set(key);
+    RESULT_CACHE.set(key, res);
     return res;
   }
 }

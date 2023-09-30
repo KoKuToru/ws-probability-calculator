@@ -22,7 +22,7 @@ export default class StepFast {
 
   constructor(obj) {
     Object.assign(this, obj);
-    if (this.next.some(x => x != EMPTY_STEP)) {
+    if (this.next.some(x => x !== EMPTY_STEP)) {
       this.next = StepFast.create(this.next);
     } else {
       this.next = [];
@@ -32,9 +32,10 @@ export default class StepFast {
   }
 
   static create(steps, my_limit, op_limit) {
+    steps = [...steps];
     my_limit ??= null;
     op_limit ??= null;
-    const hack = my_limit !== null || op_limit !== null;
+    const hack = false; //my_limit !== null || op_limit !== null;
     let c = 0;
     const fast = new Map();
     for (const step of steps) {
@@ -68,7 +69,7 @@ export default class StepFast {
       }
       if (hack) {
         // XXX something is wrong with splitting
-        //c += 1;
+        c += 1;
       }
       const key = [
         kstep.my_trg,
@@ -96,11 +97,22 @@ export default class StepFast {
         };
         fast.set(key, tmp);
       }
-      tmp.slow.push(kstep);
+      if (!tmp.slow.includes(kstep)) {
+        tmp.slow.push(kstep);
+      }
       if (nstep) {
-        tmp.next.push(nstep);
+        if (!tmp.next.includes(nstep)) {
+          tmp.next.push(nstep);
+        }
       }
     }
-    return Object.freeze([...fast.values()].map(x => new StepFast(x)));
+    const res = Object.freeze([...fast.values()].map(x => new StepFast(x)));
+    // validation.. must be the same count of steps
+    const l = res.reduce((p, c) => p + c.slow.length * Math.max(1, c.next.reduce((p, c) => p + c.slow.length, 0)), 0);
+    if (l !== steps.length) {
+      // something went wrong
+      debugger;
+    }
+    return res;
   }
 }

@@ -43,7 +43,10 @@ export class Probability {
     if (other.numerator === 1n && other.denominator === 1n) {
       return this;
     }
-    return new Probability(this.numerator * other.numerator, this.denominator * other.denominator);
+    // https://www.matematikazasite.com/en/how-to-simplify-fractions-before-multiplying/
+    const a = new Probability(this.numerator, other.denominator);
+    const b = new Probability(other.numerator, this.denominator);
+    return new Probability(a.numerator * b.numerator, a.denominator * b.denominator);
   }
 
   add(other) {

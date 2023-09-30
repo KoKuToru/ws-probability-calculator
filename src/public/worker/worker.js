@@ -51,22 +51,6 @@ self.addEventListener('message', function(e) {
 
   const states = [...action.execute(istate)];
 
-  // validation step:
-  /*{
-    const moves = states.reduce((p, c) => p + c.debug_count, 0);
-    const props = states.reduce((p, c) => p + c.probability.toNumber(), 0);
-    let moves2 = 0;
-    let props2 = 0;
-    for (const state of build_action(code, false).execute(istate)) {
-      moves2 += state.debug_count;
-      props2 += state.probability.toNumber();
-    }
-    props2;
-    if (moves2 !== moves) {
-      throw new Error('something wrong');
-    }
-  }*/
-
   let dmg = [];
   for (const state of states) {
     // calculate probabilty for state
@@ -77,15 +61,6 @@ self.addEventListener('message', function(e) {
     arr.set(p.denominator, (arr.get(p.denominator) ?? 0n) + p.numerator);
   }
   ANTI_GC.splice(0, ANTI_GC.length); // < free memory
-    const arr = (dmg[state.dmg] ??= []);
-    const idx = arr.findIndex(x => x.denominator === p.denominator);
-    if (idx === -1) {
-      arr.push(p);
-      continue;
-    }
-    const tmp = arr[idx].add(p);
-    arr[idx] = tmp;
-  }
   dmg.forEach((v, i) => {
     dmg[i] = [...[...v.entries()].map(([k, v]) => new Probability(v, k))];
   });

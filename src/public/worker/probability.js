@@ -10,8 +10,10 @@ export class Probability {
       this.#b = 1n;
     } else if (gcd && b !== 1) {
       const d = this.#gcd(this.#a, this.#b);
-      this.#a /= d;
-      this.#b /= d;
+      if (d > 1) {
+        this.#a /= d;
+        this.#b /= d;
+      }
     }
 
     if (this.#a < 0n || this.#b <= 0n) {
@@ -41,18 +43,14 @@ export class Probability {
     if (other.numerator === 1n && other.denominator === 1n) {
       return this;
     }
-    // https://www.matematikazasite.com/en/how-to-simplify-fractions-before-multiplying/
-    const a = new Probability(this.numerator, other.denominator);
-    const b = new Probability(other.numerator, this.denominator);
-    return new Probability(a.numerator * b.numerator, a.denominator * b.denominator);
+    return new Probability(this.numerator * other.numerator, this.denominator * other.denominator);
   }
 
   add(other) {
     if (this.denominator === other.denominator) {
       return new Probability(
         this.numerator + other.numerator,
-        this.denominator,
-        false
+        this.denominator
       );
     }
     // could be improved with LCM..

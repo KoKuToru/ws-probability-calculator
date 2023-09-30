@@ -2,7 +2,6 @@ import Probability from './probability.js';
 import StepFast from './step-fast.js';
 import Step, { CX, TRG, NOT_CX, NOT_TRG, WAITINGROOM, STOCK, CLOCK, MEMORY } from './step.js';
 
-const PROBABILITY_CACHE = new WeakMap();
 const EMPTY_STEPS = Object.freeze([ Step.create({}) ]);
 
 export default class State {
@@ -115,13 +114,13 @@ export default class State {
     }
   }
 
-
+  #probability;
   get probability() {
     if (!this.prev) {
       return new Probability(1, 1);
     }
 
-    let p = PROBABILITY_CACHE.get(this);
+    let p = this.#probability;
     if (p) {
       return p;
     }
@@ -167,7 +166,7 @@ export default class State {
       p = p ? p.add(prev_p) : prev_p;
     }
 
-    PROBABILITY_CACHE.set(this, p);
+    this.#probability = p;
     return p;
   }
 

@@ -3,6 +3,7 @@ import StepFast from './step-fast.js';
 import Step, { CX, TRG, NOT_CX, NOT_TRG, WAITINGROOM, STOCK, CLOCK, MEMORY } from './step.js';
 
 const EMPTY_STEPS = Object.freeze([ Step.create({}) ]);
+const P_ONE = new Probability(1, 1);
 
 export default class State {
   static id = 0;
@@ -117,7 +118,7 @@ export default class State {
   #probability;
   get probability() {
     if (!this.prev) {
-      return new Probability(1, 1);
+      return P_ONE;
     }
 
     let p = this.#probability;
@@ -131,7 +132,7 @@ export default class State {
       let prev_p = prev.probability;
       let steps_p = null;
       for (const step of this.steps) {
-        let step_p = new Probability(1, 1);
+        let step_p = P_ONE;
         if (step.my_size) {
           let my_trg = prev.my_trg;
           let my_not_trg = prev.my_not_trg;

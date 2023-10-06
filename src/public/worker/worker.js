@@ -49,8 +49,15 @@ self.addEventListener('message', function(e) {
     w_op_not_cx: 50 - data.op_size
   });
 
-  const states = [...action.execute(istate)];
+  const DEBUG = false;
 
+  DEBUG && console.profile();
+
+  DEBUG && console.time('execute');
+  const states = [...action.execute(istate)];
+  DEBUG && console.timeEnd('execute');
+
+  DEBUG && console.time('probability');
   let dmg = [];
   for (const state of states) {
     // calculate probabilty for state
@@ -61,9 +68,15 @@ self.addEventListener('message', function(e) {
     arr.set(p.denominator, (arr.get(p.denominator) ?? 0n) + p.numerator);
   }
   ANTI_GC.splice(0, ANTI_GC.length); // < free memory
+  DEBUG && console.timeEnd('probability');
+
+  DEBUG && console.time('accumulate');
   dmg.forEach((v, i) => {
     dmg[i] = [...[...v.entries()].map(([k, v]) => new Probability(v, k))];
   });
+  DEBUG && console.timeEnd('accumulate');
+
+  DEBUG && console.profileEnd();
 
   dmg = Array.from(dmg);
   const ZERO = new Probability(0, 1);

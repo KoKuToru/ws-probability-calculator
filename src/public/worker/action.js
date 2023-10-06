@@ -29,6 +29,10 @@ export default class Action {
     }
   }
 
+  setSteps(steps) {
+    this.#steps = steps;
+  }
+
   setDedup(v) {
     this.#dedup = v;
   }
@@ -71,7 +75,7 @@ export default class Action {
 
       // calculate new estate
       for (const step of this.#steps) {
-        for (const estate of nstate.next(step)) {
+        for (const estate of (step instanceof Action) ? step.subExecute(nstate) : nstate.next(step)) {
           // validation
           if (
             !estate.my_size ||

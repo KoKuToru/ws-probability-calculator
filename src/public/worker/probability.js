@@ -143,4 +143,60 @@ export class Probability {
   }
 };
 
-export default Probability;
+export class ProbabilityNotExact {
+  #f;
+  constructor(a, b) {
+    this.#f = Number(a) / Number(b);
+  }
+  mul(other) {
+    return new ProbabilityNotExact(this.#f * other.toNumber() , 1);
+  }
+  add(other) {
+    return new ProbabilityNotExact(this.#f + other.toNumber() , 1);
+  }
+  #gcd(a, b) {
+    while (b !== 0n) {
+      const r = a % b;
+      a = b;
+      b = r;
+    }
+    return a;
+  }
+  toJSON() {
+    let a = this.numerator;
+    let b = this.denominator;
+    const d = this.#gcd(a, b);
+    a /= d;
+    b /= d;
+    return [a.toString(), b.toString()].join('/');
+  }
+  toNumber() {
+    return this.#f;
+  }
+  toString() {
+    let n = this.numerator;
+    let d = this.denominator;
+
+    const dd = this.#gcd(n, d);
+    n /= dd;
+    d /= dd;
+
+    n = n.toString();
+    d = d.toString();
+
+    const ts = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    const bs = '₀₁₂₃₄₅₆₇₈₉';
+    const t = n.split('').map(x => ts[parseInt(x)]).join('');
+    const b = d.split('').map(x => bs[parseInt(x)]).join('');
+    return `${t}\u2044${b}`;
+  }
+  get numerator() {
+    return BigInt(Math.floor(this.#f * Number.MAX_SAFE_INTEGER));
+  }
+
+  get denominator() {
+    return BigInt(Number.MAX_SAFE_INTEGER);
+  }
+}
+
+export default ProbabilityNotExact;

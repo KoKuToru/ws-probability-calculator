@@ -17,7 +17,7 @@ DISCLAIMER: no idea if correct
 * [3x Ichika 5HY/W83](https://kokutoru.github.io/ws-probability-calculator/?*9il8zWi5yAC0tHkk9W3LtzdQ9l9XzKZkk5O8_3u-r0aiBTXArcEwwVJ9xGq8bYJM6p3lSDEb_8Qe4*N.jPkhcRxAX-)
 * [3x Itsuki 5HY/W90](https://kokutoru.github.io/ws-probability-calculator/?mTAdHkyYWiBFjPnSoo9QChNSyPiqZOjsRVTmuHoN*f4xGATxpCl9gkQX_GndfDf..6mU3di3SERXVvTbZmzmQ)
 * [1x Yuyu + 2x Riri ALL/S76](https://kokutoru.github.io/ws-probability-calculator/?mNuf9spToe_hsSvgCzszvYSAwkwSB8lY_uzTBmNoz3bx4qIv4HMZvY*H8rRsAhEkHLQOYqQZWHJJhVTVEEjC.t3rTk4u2nQZ.VRg4PS1Sw)
-  * extremely slow
+  * slow
 
 ## Code
 

@@ -8,6 +8,9 @@ module.exports = function (defaults) {
       app : {
         html : 'app.html',
       }
+    },
+    fingerprint: {
+      extensions: ['js', 'css', 'png', 'jpg', 'gif', 'map', 'wasm']
     }
   });
 

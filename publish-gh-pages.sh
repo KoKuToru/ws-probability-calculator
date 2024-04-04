@@ -3,6 +3,7 @@ set -e
 git checkout --orphan gh-pages
 cd cpp
 bash build.sh ../ember/public/worker
+cd ..
 cd ember
 yarn
 yarn build --output-path ../docs

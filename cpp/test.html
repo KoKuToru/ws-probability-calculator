@@ -1,0 +1,119 @@
+<script>
+async function load() {
+    const bytes = await fetch('engine.wasm').then(x => x.arrayBuffer());
+    const imports = {
+        wasi_snapshot_preview1: {
+            fd_close() { debugger; },
+            fd_seek() { debugger; },
+            fd_write() { debugger; }
+        },
+        engine: {
+            log: function(a, b) {
+                console.log(a, b);
+            },
+            dump: function(data_ptr, size) {
+                const data = new Float64Array(module.instance.exports.memory.buffer, data_ptr, size);
+                document.body.style.fontFamily = 'monospace';
+                document.body.style.whiteSpace = 'pre';
+
+                document.body.appendChild(document.createTextNode('|'));
+                for (let i = 0; i < data.length; ++i) {
+                    let p = i.toFixed(0);
+                    if (i > 0) {
+                        p = `\u2265${p}`
+                    }
+                    p = p.padStart(7, ' ');
+                    p = ` ${p} |`
+                    document.body.appendChild(document.createTextNode(p));
+                }
+                document.body.appendChild(document.createTextNode('\n'));
+
+                document.body.appendChild(document.createTextNode('|'));
+                for (let i = 0; i < data.length; ++i) {
+                    let p = '';
+                    p = p.padStart(7, '-');
+                    p = `-${p}:|`
+                    document.body.appendChild(document.createTextNode(p));
+                }
+                document.body.appendChild(document.createTextNode('\n'));
+
+                document.body.appendChild(document.createTextNode('|'));
+                for (let i = 0; i < data.length; ++i) {
+                    let p = 0;
+                    for (let j = i; j < data.length; ++j) {
+                        p += data[j];
+                        if (!i) {
+                            break;
+                        }
+                    }
+                    p *= 100;
+                    p = p.toFixed(3);
+                    p = p.padStart(7, ' ');
+                    p = ` ${p} |`
+                    document.body.appendChild(document.createTextNode(p));
+                }
+                document.body.appendChild(document.createTextNode('\n'));
+
+            }
+        }
+    };
+    const module = await WebAssembly.instantiate(bytes, imports);
+
+    const EQUALS = 2,
+          TRG = 5,
+          NTRG = 6,
+          CX = 3,
+          NCX = 4;
+    const e = module.instance.exports;
+
+    e._initialize();
+
+    for (let k = 0; k < 10; ++k) {
+        await new Promise(r => r());
+
+        {
+            const start = performance.now();
+            e.reset();
+            for (let i = 0; i < 2; ++i) {
+                for (let j = 0; j < 2; ++j) {
+                    e.mill(3); e.push(CX); e.flush();
+                    e.check(0, EQUALS, 1); e.burn(1); e.flush();
+                    e.check(0, EQUALS, 2); e.burn(2); e.flush();
+                    e.check(0, EQUALS, 3); e.burn(3); e.flush();
+                    e.pop(1);    e.flush();
+                }
+                e.attack(3); e.flush();
+            }
+            for (let i = 0; i < 2; ++i) {
+                e.mill(3); e.push(CX); e.flush();
+                e.check(0, EQUALS, 1); e.burn(1); e.flush();
+                e.check(0, EQUALS, 2); e.burn(2); e.flush();
+                e.check(0, EQUALS, 3); e.burn(3); e.flush();
+                e.pop(1);    e.flush();
+                e.attack(3); e.flush();
+            }
+            const end = performance.now();
+            performance.measure('wasm_code 1', { start, end });
+            e.dump();
+            const d = (end - start).toFixed(3).padStart(8, ' ');
+            document.body.appendChild(document.createTextNode(`Elapsed Time: ${d}ms\n\n`));
+        }
+
+        {
+            const start = performance.now();
+            e.reset();
+            for (let j = 0; j < 3; ++j) {
+                e.burn(1); e.flush();
+                e.burn(4); e.flush();
+                e.attack(3); e.flush();
+            }
+            const end = performance.now();
+            performance.measure('wasm_code 2', { start, end });
+            e.dump();
+            const d = (end - start).toFixed(3).padStart(8, ' ');
+            document.body.appendChild(document.createTextNode(`Elapsed Time: ${d}ms\n\n`));
+        }
+    }
+}
+load();
+</script>

@@ -1,7 +1,9 @@
 git branch -D gh-pages
 set -e
 git checkout --orphan gh-pages
-cd src
+cd cpp
+bash build.sh ../ember/public/worker
+cd ember
 yarn
 yarn build --output-path ../docs
 cd ..

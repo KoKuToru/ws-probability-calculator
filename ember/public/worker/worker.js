@@ -1,101 +1,107 @@
-import Action from './action.js';
-import Probability from './probability.js';
-import State, {ANTI_GC} from './state.js';
-
-import Attack from './actions/attack.js';
-import Burn from './actions/burn.js';
-import Mill from './actions/mill.js';
-import Damage from './actions/damage.js';
-import Push from './actions/push.js';
-import Pop from './actions/pop.js';
-
 import compiler from './compiler.js';
 
-const ALLOWED_ACTIONS = new Map([
-  ['attack', Attack],
-  ['burn', Burn],
-  ['mill', Mill],
-  ['damage', Damage],
-  ['push', Push],
-  ['pop', Pop],
-]);
+let ENGINE_RESULT = [];
 
-function build_action(code, allow_dedup) {
-  allow_dedup ??= true;
-  let action = new Action();
-  for (const [cmd, params, condition, dedup] of code) {
-    const cls = ALLOWED_ACTIONS.get(cmd);
-    if (cls) {
-      action = new cls(action, ...params);
-      action.setConditions(condition);
-      action.setDedup(allow_dedup && dedup);
-    } else {
-      console.error(`unknown action ${cmd}`);
+const imports = {
+  engine: {
+    dump: function(data_ptr, size) {
+      ENGINE_RESULT = [...new Float64Array(module.instance.exports.memory.buffer, data_ptr, size)];
     }
   }
-  return action;
+};
+
+let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => {
+  module = x
+  module.instance.exports._initialize();
+});
+
+const pushs = Object.freeze({
+  PUSH_ECX:   7,
+  PUSH_ENCX:  8,
+  PUSH_ICX:   9,
+  PUSH_INCX: 10
+});
+
+const ops = Object.freeze({
+  EQUALS:         1,
+  NOT_EQUALS:     2,
+  LESS:           3,
+  LESS_EQUALS:    4,
+  GREATER:        5,
+  GREATER_EQUALS: 6
+});
+
+function build_actions(engine, code) {
+  const res = [];
+
+  for (const [cmd, params] of code) {
+    switch (cmd) {
+      case 'burn':
+        res.push([engine.burn, params[0]]);
+        break;
+      case 'attack':
+        res.push([engine.attack, params[0]]);
+        break;
+      case 'damage':
+        res.push([engine.damage, params[0]]);
+        break;
+      case 'mill':
+        res.push([engine.mill, params[0]]);
+        break;
+      case 'pop':
+        res.push([engine.pop, params[0]]);
+        break;
+      case 'push':
+        res.push([engine.push, pushs[params[0]]]);
+        break;
+      case 'check':
+        res.push([engine.check, params[0], ops[params[1]], params[2]]);
+        break;
+      case 'flush':
+        res.push([engine.flush]);
+        break;
+    }
+  }
+
+  res.push([engine.dump]);
+
+  return res.map(([x, ...y]) => x.bind(engine, ...y));
 }
 
-self.addEventListener('message', function(e) {
-  const data = e.data;
-  const code = compiler(data.code);
-  const action = build_action(code);
+self.addEventListener('message', async (e) => {
 
-  // execute
-  const istate = new State({
-    op_cx: data.op_cx,
-    op_not_cx: data.op_size - data.op_cx,
-    w_op_cx: 8 - data.op_cx,
-    w_op_not_cx: 50 - data.op_size
-  });
-
-  const DEBUG = false;
-
-  DEBUG && console.profile();
-
-  DEBUG && console.time('execute');
-  const states = [...action.execute(istate)];
-  DEBUG && console.timeEnd('execute');
-
-  DEBUG && console.time('probability');
-  let dmg = [];
-  for (const state of states) {
-    // calculate probabilty for state
-    const p = state.probability;
-
-    // store dmg probability
-    const arr = (dmg[state.dmg] ??= new Map());
-    arr.set(p.denominator, (arr.get(p.denominator) ?? 0n) + p.numerator);
-  }
-  ANTI_GC.splice(0, ANTI_GC.length); // < free memory
-  DEBUG && console.timeEnd('probability');
-
-  DEBUG && console.time('accumulate');
-  dmg.forEach((v, i) => {
-    dmg[i] = [...[...v.entries()].map(([k, v]) => new Probability(v, k))];
-  });
-  DEBUG && console.timeEnd('accumulate');
-
-  DEBUG && console.profileEnd();
-
-  dmg = Array.from(dmg);
-  const ZERO = new Probability(0, 1);
-  for (let i = 0; i < dmg.length; ++i) {
-    if (dmg[i] === undefined) {
-      dmg[i] = ZERO;
-      continue;
-    }
-    dmg[i] = dmg[i].reduce((p, c) => p.add(c));
+  if (module instanceof Promise) {
+    await module;
   }
 
-  let mean = new Probability(0, 1);
-  for (let i = 0; i < dmg.length; i++) {
-    mean = mean.add(dmg[i].mul(new Probability(i, 1)));
+  const data    = e.data;
+  const code    = compiler(data.code);
+  const actions = build_actions(module.instance.exports, code);
+
+  const op_cx  = data.op_cx;
+  const op_ncx = data.op_size - op_cx;
+  const w_op_cx = 8 - op_cx;
+  const w_op_ncx = 50 - 8 - op_ncx;
+
+  module.instance.exports.reset(
+    // oponent deck:
+    op_cx,
+    op_ncx,
+    // opponent waiting room:
+    w_op_cx,
+    w_op_ncx
+  );
+
+  const start = performance.now();
+  for (const ac of actions) {
+    ac();
   }
-  if (mean.numerator > 0n) {
-    const dmg_sum = dmg.reduce((c, p) => c.add(p));
-    mean = mean.mul(new Probability(dmg_sum.denominator, dmg_sum.numerator));
-  }
+  const end = performance.now();
+  performance.measure('execute', { start, end });
+
+  const dmg = ENGINE_RESULT;
+  const dmg_sum = dmg.reduce((p, c) => p + c);
+  let mean = dmg.reduce((p, c, i) => p + c * i, 0) * dmg_sum;
 
   const dmg_acc = [];
   for (let i = 0; i < dmg.length; ++i) {
@@ -103,17 +109,14 @@ self.addEventListener('message', function(e) {
       dmg_acc[i] = dmg[i];
       continue;
     }
-    dmg_acc[i] = dmg.slice(i).reduce((c, p) => c.add(p));
+    dmg_acc[i] = dmg.slice(i).reduce((c, p) => c + p);
   }
 
   e.ports[0].postMessage({
     data,
     code,
-    exact_dmg: dmg.map(x => x.toString()),
-    exact_dmg_acc: dmg_acc.map(x => x.toString()),
-    dmg: dmg.map(x => x.toNumber()),
-    dmg_acc: dmg_acc.map(x => x.toNumber()),
-    exact_mean: mean.toString(),
-    mean: mean.toNumber()
+    dmg: dmg,
+    dmg_acc: dmg_acc,
+    mean: mean
   });
 });

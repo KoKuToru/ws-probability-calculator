@@ -110,19 +110,6 @@ export default class OverviewTable extends Component {
     return value.dmg_acc[selected_dmg] * 100;
   }
 
-  @action getCellTitle(value) {
-    const vv = this.getCellValue(value);
-    value = this.state.result.get(...value);
-    if (!value) {
-      return undefined;
-    }
-    const selected_dmg = this.state.selected_dmg ?? null;
-    const v = selected_dmg === null
-      ? value.exact_mean
-      : value.exact_dmg_acc[selected_dmg];
-    return `${v} = ${vv}`;
-  }
-
   @action toggleCell(value) {
     this.state.toggleSelected(value.join());
     this.state.store();
@@ -204,7 +191,9 @@ export default class OverviewTable extends Component {
       for (let ds = 1; ds <= 50; ++ds)
       for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
         if (!priority.has([cx, ds].join())) {
-          queue.push({ op_cx: cx, op_size: ds, code });
+          if (ds + (8 - cx) <= 50) {
+            queue.push({ op_cx: cx, op_size: ds, code });
+          }
         }
       }
     }
@@ -227,26 +216,24 @@ export default class OverviewTable extends Component {
 
       if (first) {
         first = false;
-        const tmp = res.code.map(([action, params, condition, dedup]) => {
-          if (condition.length) {
-            condition = `if (${condition.map(([left, opt, right]) => `stack[${left}] ${opt} ${right}`).join(' && ')}) `;
-          } else {
-            condition = '';
+        let tmp = [];
+        let sizes = [];
+        for (const [action, params] of res.code) {
+          if (!tmp.length) {
+            tmp.push([]);
           }
-          if (!dedup) {
-            return [condition, `{ ${action}(${params.join(', ')}); `, '         }'];
-          } else {
-            return [condition, `{ ${action}(${params.join(', ')}); `, 'dedup(); }'];
+          const p = `e.${action}(${(params??[]).join(', ')}); `;
+          sizes[tmp.at(-1).length] = Math.max(sizes[tmp.at(-1).length] ?? 0, p.length);
+          tmp.at(-1).push(p);
+          if (action === 'flush') {
+            tmp.push([]);
           }
+        }
+        tmp.forEach((a) => {
+          a.forEach((b, i) => {
+            a[i] = b.padEnd(sizes[i], ' ');
+          })
         });
-        {
-          const condition_size = tmp.reduce((p, c) => Math.max(p, c[0].length), 0);
-          tmp.forEach(a => a[0] = a[0].padEnd(condition_size, ' '));
-        }
-        {
-          const code_size = tmp.reduce((p, c) => Math.max(p, c[1].length), 0);
-          tmp.forEach(a => a[1] = a[1].padEnd(code_size, ' '));
-        }
         this.state.debug_code = tmp.map(x => x.join('')).join('\n');
       }
     }

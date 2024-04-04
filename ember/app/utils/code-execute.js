@@ -1,6 +1,6 @@
 export default async function *execute(queue, signal) {
   // boot workers
-  const parallel_size = 1; //Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
+  const parallel_size = Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
   const workers = Array(parallel_size).fill(null).map(() => {
     const worker = new Worker('./worker/worker.js', {type: 'module'})
     worker.promise = new Promise(r => r());

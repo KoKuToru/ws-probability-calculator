@@ -1,6 +1,5 @@
 <script>
 async function load() {
-    const bytes = await fetch('engine.wasm').then(x => x.arrayBuffer());
     const imports = {
         wasi_snapshot_preview1: {
             fd_close() { debugger; },
@@ -57,7 +56,7 @@ async function load() {
             }
         }
     };
-    const module = await WebAssembly.instantiate(bytes, imports);
+    const module = await WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports);
 
     const EQUALS = 2,
           TRG = 5,

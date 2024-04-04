@@ -90,15 +90,6 @@ export default class ProbabilityComponent extends Component {
     }
     return `color-${idx}`;
   }
-  @action getCellTitle(x, y) {
-    const vv = this.getCellValue(x, y);
-    const value = this.state.result.get(...x);
-    if (!value) {
-      return undefined;
-    }
-    const v = value.exact_dmg_acc[y];
-    return `${v} = ${vv}`;
-  }
 
   @action reset(e) {
     e.stopPropagation();

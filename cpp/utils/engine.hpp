@@ -43,15 +43,20 @@ struct Engine {
         reset();
     }
 
-    void reset() {
+    void reset(
+        int op_cx = 8,
+        int op_ncx = 22,
+        int w_op_cx = 0,
+        int w_op_ncx = 20
+    ) {
         inputs.reset();
         inputs->clear(
             0, //< stack
             0, 0, 0, 0, //< pending stats
-            15, 35+15, //< my deck
+            15, 35, //< my deck
              0,  0, //< my waiting room
-             8, 30, //< op deck
-             8 - 8,  50 - 30 - 8  //< op waiting room
+             op_cx, op_ncx, //< op deck
+             w_op_cx,  w_op_ncx  //< op waiting room
         );
         inputs->add(0, 1); //<- intial state
         inputs.commit();
@@ -333,7 +338,12 @@ struct Engine {
     }
 
     void push(WHAT what) {
-        assert(what == CX || what == NCX || what == TRG || what == NTRG);
+        assert(
+            what == PUSH_ECX ||
+            what == PUSH_ENCX ||
+            what == PUSH_ICX ||
+            what == PUSH_INCX
+        );
         auto idx = stack_size;
         assert(idx * 4 < 47);
         stack_size += 1;
@@ -341,17 +351,17 @@ struct Engine {
             [=](State* state) {
                 decltype(state->stack) v;
                 switch (what) {
-                    case CX:
+                    case PUSH_ECX:
                         v = state->p_op_cx;
                         break;
-                    case NCX:
+                    case PUSH_ENCX:
                         v = state->p_op_ncx;
                         break;
-                    case TRG:
-                        v = state->p_my_trg;
+                    case PUSH_ICX:
+                        v = (state->p_op_cx != 0) ? 1 : 0;
                         break;
-                    case NTRG:
-                        v = state->p_my_ntrg;
+                    case PUSH_INCX:
+                        v = (state->p_op_ncx == 0) ? 1 : 0;
                         break;
                     default:
                         return;
@@ -387,13 +397,23 @@ struct Engine {
                 assert(state->p_op_ncx == 0);
                 int stack_value = (state->stack >> (stack * 4)) & 0x0F;
                 switch (what) {
-                    case NEQUALS:
+                    case NOT_EQUALS:
                         state->active &= stack_value != value;
                         break;
                     case EQUALS:
                         state->active &= stack_value == value;
                         break;
-                    case NOTHING:
+                    case LESS:
+                        state->active &= stack_value < value;
+                        break;
+                    case LESS_EQUALS:
+                        state->active &= stack_value <= value;
+                        break;
+                    case GREATER:
+                        state->active &= stack_value > value;
+                        break;
+                    case GREATER_EQUALS:
+                        state->active &= stack_value >= value;
                         break;
                     default:
                         state->active = false;

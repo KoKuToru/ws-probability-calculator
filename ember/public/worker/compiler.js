@@ -15,7 +15,7 @@
     code: [action, params, code]
 
   output format:
-    code: [action, params, conditions, dedup]
+    code: [action, params]
 */
 export default function compile(code, code_parents, stack, conditions) {
   const res = [];
@@ -31,7 +31,7 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'each': {
-        const name = `e${params[0]}`;
+        const name = `push_e${params[0]}`.toUpperCase();
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
@@ -42,7 +42,7 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'if': {
-        const name = `i${params[0]}`;
+        const name = `push_i${params[0]}`.toUpperCase();
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
@@ -54,7 +54,7 @@ export default function compile(code, code_parents, stack, conditions) {
       case 'mill':
       case 'damage':
         if (params[0] === 'cx' || params[0] === 'ncx') {
-          const name = `e${params[0]}`;
+          const name = `push_e${params[0]}`.toUpperCase();
           const index = stack.lastIndexOf(name);
           if (index < 0) {
             throw new Error('stack var not found');
@@ -62,40 +62,49 @@ export default function compile(code, code_parents, stack, conditions) {
           const nstack = collect_stack(children);
           const limit = findLimit(code_parents, name);
           for (let i = 1; i <= limit; ++i) {
-            const c = [...conditions, [index, '==', i]];
-            res.push([cmd, [i], c, false]);
+            const extra_conditions = [...conditions, [index, 'EQUALS', i]];
+            for (const c of extra_conditions) {
+              res.push(['check', c]);
+            }
+            res.push([cmd, [i]]);
+            for (const s of nstack) {
+              res.push(['push', [s]]);
+            }
+            res.push(['flush']);
           }
-          const c = [...conditions, [index, '>=', 1]];
+          const new_conditions = [...conditions, [index, 'GREATER_EQUALS', 1]];
+          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions));
           if (nstack.length > 0) {
-            res.push(['push', nstack, c, true]);
+            res.push(['pop', [nstack.length]]);
+            res.push(['flush']);
           }
-          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], c));
-          if (nstack.length > 0) {
-            res.push(['pop', [nstack.length], c, true]);
-          }
+
           break;
         }
       default: {
         const nstack = collect_stack(children);
-        res.push([cmd, params, conditions, nstack.length == 0]);
-        if (nstack.length > 0) {
-          res.push(['push', nstack, conditions, true]);
+        for (const c of conditions) {
+          res.push(['check', c]);
         }
+        res.push([cmd, params]);
+        for (const s of nstack) {
+          res.push(['push', [s]]);
+        }
+        res.push(['flush']);
         res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions));
         if (nstack.length > 0) {
-          res.push(['pop', [nstack.length], conditions, true]);
+          res.push(['pop', [nstack.length]]);
+          res.push(['flush']);
         }
       }
     }
   }
 
   return Object.freeze(
-    res.map(([action, params, conditions, dedup]) =>
+    res.map(([action, params]) =>
       Object.freeze([
         action,
-        Object.freeze(params),
-        Object.freeze(conditions.map(x => Object.freeze(x))),
-        dedup
+        Object.freeze(params)
       ])
     )
   );
@@ -132,7 +141,7 @@ function collect_stack(code, stack) {
   for (const [cmd, params, children] of code) {
     switch (cmd) {
       case 'each': {
-        const name = `e${params[0]}`;
+        const name = `push_e${params[0]}`.toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);
         }
@@ -140,7 +149,7 @@ function collect_stack(code, stack) {
         collect_stack(children, stack);
       } break;
       case 'if': {
-        const name = `i${params[0]}`;
+        const name = `push_i${params[0]}`.toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);
         }
@@ -156,7 +165,7 @@ function collect_stack(code, stack) {
       case 'mill':
       case 'damage':
         if (params[0] === 'cx' || params[0] === 'ncx') {
-          const name = `e${params[0]}`;
+          const name = `push_e${params[0]}`.toUpperCase();
           if (!stack.includes(name)) {
             stack.push(name);
           }
@@ -171,11 +180,3 @@ function collect_stack(code, stack) {
   }
   return stack;
 }
-
-const res = compile([
-  ['mill', [3], [
-    ['each', ['cx'], [
-      ['burn', [1], []]
-    ]]
-  ]]
-]);

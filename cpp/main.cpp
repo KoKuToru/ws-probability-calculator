@@ -22,7 +22,7 @@ int main() {
     e.reset();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 2; ++j) {
-            e.mill(3); e.push(CX); e.flush();
+            e.mill(3); e.push(PUSH_ECX); e.flush();
             e.check(0, EQUALS, 1); e.burn(1); e.flush();
             e.check(0, EQUALS, 2); e.burn(2); e.flush();
             e.check(0, EQUALS, 3); e.burn(3); e.flush();
@@ -31,7 +31,7 @@ int main() {
         e.attack(3); e.flush();
     }
     for (int i = 0; i < 2; ++i) {
-        e.mill(3); e.push(CX); e.flush();
+        e.mill(3); e.push(PUSH_ECX); e.flush();
         e.check(0, EQUALS, 1); e.burn(1); e.flush();
         e.check(0, EQUALS, 2); e.burn(2); e.flush();
         e.check(0, EQUALS, 3); e.burn(3); e.flush();
@@ -54,8 +54,13 @@ int main() {
     static Engine e;
 
     __attribute__((export_name("reset"), visibility("default"), flatten))
-    extern "C" void reset() {
-        e.reset();
+    extern "C" void reset(
+        int op_cx,
+        int op_ncx,
+        int w_op_cx,
+        int w_op_ncx
+    ) {
+        e.reset(op_cx, op_ncx, w_op_cx, w_op_ncx);
     }
 
     __attribute__((export_name("burn"), visibility("default"), flatten))
@@ -68,7 +73,7 @@ int main() {
         e.attack(try_dmg);
     }
 
-    __attribute__((export_name("dmg"), visibility("default"), flatten))
+    __attribute__((export_name("damage"), visibility("default"), flatten))
     extern "C" void damage(int dmg) {
         e.damage(dmg);
     }

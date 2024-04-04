@@ -143,13 +143,13 @@ struct State : StateBase {
         uint8_t  n_p_op_cx   = 0,
         uint8_t  n_p_op_ncx  = 0,
         uint8_t  n_my_trg = 15,
-        uint8_t  n_my_size = 50,
+        uint8_t  n_my_ntrg = 35,
         uint8_t  n_w_my_trg = 0,
-        uint8_t  n_w_my_size = 0,
+        uint8_t  n_w_my_ntrg = 0,
         uint8_t  n_op_cx = 8,
-        uint8_t  n_op_size = 30,
+        uint8_t  n_op_ncx = 22,
         uint8_t  n_w_op_cx = 0,
-        uint8_t  n_w_op_size = 12
+        uint8_t  n_w_op_ncx = 12
     ) {
         assert (n_my_trg    <= 0x0F);
         assert (n_op_cx     <= 0x0F);
@@ -165,13 +165,13 @@ struct State : StateBase {
         p_op_cx   = n_p_op_cx;
         p_op_ncx  = n_p_op_ncx;
         my_trg  = n_my_trg;
-        my_ntrg = n_my_size - n_my_trg;
+        my_ntrg = n_my_ntrg;
         op_cx  = n_op_cx;
-        op_ncx = n_op_size - n_op_cx;
+        op_ncx = n_op_ncx;
         w_my_trg  = n_w_my_trg;
-        w_my_ntrg = n_w_my_size - n_w_my_trg;
+        w_my_ntrg = n_w_my_ntrg;
         w_op_cx  = n_w_op_cx;
-        w_op_ncx = n_w_op_size - n_w_op_cx;
+        w_op_ncx = n_w_op_ncx;
     }
 
     void my_stock(int trg, int ntrg) {

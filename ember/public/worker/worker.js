@@ -10,10 +10,7 @@ const imports = {
   }
 };
 
-let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => {
-  module = x
-  module.instance.exports._initialize();
-});
+let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => module = x);
 
 const pushs = Object.freeze({
   PUSH_ECX:   7,

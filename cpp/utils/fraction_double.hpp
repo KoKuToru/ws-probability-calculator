@@ -22,7 +22,7 @@ struct Fraction {
         numerator(other.numerator),
         denominator(other.denominator)
     { rescale(); }
-    Fraction(double numerator, double denominator = 1):
+    Fraction(long double numerator, long double denominator = 1):
         numerator(numerator),
         denominator(denominator)
     { rescale(); }

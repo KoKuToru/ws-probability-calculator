@@ -2,10 +2,90 @@ import compiler from './compiler.js';
 
 let ENGINE_RESULT = [];
 
+function bigint_view(...res) {
+  const size = res.at(-1);
+  return res.slice(0, -1).map(
+    x => new Uint32Array(module.instance.exports.memory.buffer, x, size)
+  );
+}
+
+function read_bigint(...views) {
+  return views.map(x => {
+    let y = 0n;
+    let j = BigInt(x.length) * 32n;
+    for (let i = 0; i < x.length; ++i) {
+      j -= 32n;
+      y |= BigInt(x[i]) << j;
+    }
+    return y;
+  });
+}
+
+function write_bigint(dest, value) {
+  if (value > 2n ** (BigInt(dest.length) * 32n - 1n)) {
+    throw Error('value to big for dest');
+  }
+  const x = dest;
+  const y = value;
+  let j = BigInt(x.length) * 32n;
+  for (let i = 0; i < x.length; ++i) {
+    j -= 32n;
+    x[i] = Number(BigInt.asUintN(32, y >> j));
+  }
+}
+
 const imports = {
   engine: {
-    dump: function(data_ptr, size) {
+    dump(data_ptr, size) {
       ENGINE_RESULT = [...new Float64Array(module.instance.exports.memory.buffer, data_ptr, size)];
+    }
+  },
+  bigint: {
+    add(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+      const res = a + b;
+      write_bigint(res_view, res);
+    },
+    sub(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+      const res = a - b;
+      write_bigint(res_view, res);
+    },
+    div(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+      const res = a / b;
+      write_bigint(res_view, res);
+    },
+    mul(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+      const res = a * b;
+      write_bigint(res_view, res);
+    },
+    mod(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+      const res = a % b;
+      write_bigint(res_view, res);
+    },
+    gcd(res_ptr, a_ptr, b_ptr, size) {
+      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
+      const [ a, b ] = read_bigint(a_view, b_view);
+
+      let [d, e] = [a, b];
+      while (e) {
+        [d, e] = [e, d % e];
+      }
+      write_bigint(res_view, d);
+    },
+    double(res_ptr, a_ptr, size) {
+      const [ a_view ] = bigint_view(a_ptr, size);
+      const [ a ] = read_bigint(a_view);
+      const res = new Float64Array(module.instance.exports.memory.buffer, res_ptr, 1);
+      res[0] = Number(a);
     }
   }
 };

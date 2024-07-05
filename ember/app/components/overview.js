@@ -218,11 +218,12 @@ export default class OverviewTable extends Component {
         first = false;
         let tmp = [];
         let sizes = [];
-        for (const [action, params] of res.code) {
+        for (let [action, params] of res.code) {
           if (!tmp.length) {
             tmp.push([]);
           }
           if (action === 'check') {
+            params = [...params];
             params[0] = `stack[${params[0]}]`;
           }
           const p = `e.${action}(${(params??[]).join(', ')}); `;

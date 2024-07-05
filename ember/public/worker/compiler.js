@@ -38,7 +38,7 @@ export default function compile(code, code_parents, stack, conditions) {
         }
         const limit = findLimit(code_parents, name);
         for (let i = 0; i < limit; ++i) {
-          res.push(...compile(children, code_parents, stack, [...conditions, [index, '>', i]]));
+          res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]]));
         }
       } break;
       case 'if': {
@@ -47,7 +47,7 @@ export default function compile(code, code_parents, stack, conditions) {
         if (index < 0) {
           throw new Error('stack var not found');
         }
-        res.push(...compile(children, code_parents, stack, [...conditions, [index, '!=', 0]]));
+        res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]]));
       } break;
       case 'attack':
       case 'burn':

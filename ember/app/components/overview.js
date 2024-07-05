@@ -222,6 +222,9 @@ export default class OverviewTable extends Component {
           if (!tmp.length) {
             tmp.push([]);
           }
+          if (action === 'check') {
+            params[0] = `stack[${params[0]}]`;
+          }
           const p = `e.${action}(${(params??[]).join(', ')}); `;
           sizes[tmp.at(-1).length] = Math.max(sizes[tmp.at(-1).length] ?? 0, p.length);
           tmp.at(-1).push(p);

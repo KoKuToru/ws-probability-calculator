@@ -361,7 +361,7 @@ struct Engine {
                         v = (state->p_op_cx != 0) ? 1 : 0;
                         break;
                     case PUSH_INCX:
-                        v = (state->p_op_ncx == 0) ? 1 : 0;
+                        v = (state->p_op_cx == 0) ? 1 : 0;
                         break;
                     default:
                         return;

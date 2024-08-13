@@ -86,7 +86,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
           const new_conditions = [...conditions, [index, 'GREATER_EQUALS', 1]];
           res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions, new_limits));
           if (nstack.length > 0) {
-            for (const c of conditions) {
+            for (const c of new_conditions) {
               res.push(['check', c]);
             }
             res.push(['pop', [nstack.length]]);

@@ -42,12 +42,21 @@ export default function compile(code, code_parents, stack, conditions) {
         }
       } break;
       case 'if': {
-        const name = `push_i${params[0]}`.toUpperCase();
+        const name = `push_icx`.toUpperCase();
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
         }
-        res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]]));
+        switch (params[0]) {
+          case 'cx':
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]]));
+            break;
+          case 'ncx':
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]]));
+            break;
+          default:
+            throw new Error('stack var not found');
+        }
       } break;
       case 'attack':
       case 'burn':
@@ -149,7 +158,7 @@ function collect_stack(code, stack) {
         collect_stack(children, stack);
       } break;
       case 'if': {
-        const name = `push_i${params[0]}`.toUpperCase();
+        const name = `push_icx`.toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);
         }

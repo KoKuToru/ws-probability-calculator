@@ -389,6 +389,7 @@ struct Engine {
     void check(int stack, WHAT what, int value) {
         assert(stack >= 0 && stack * 4 < 47);
         assert(value >= 0 && value <= 0x0F);
+        assert(this->stack_size >= stack);
         execute(
             [=](State* state) {
                 assert(state->p_my_trg == 0);

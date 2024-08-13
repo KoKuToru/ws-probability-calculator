@@ -17,17 +17,18 @@
   output format:
     code: [action, params]
 */
-export default function compile(code, code_parents, stack, conditions) {
+export default function compile(code, code_parents, stack, conditions, limits) {
   const res = [];
   stack ??= [];
   conditions ??= [];
   code_parents ??= [];
+  limits ??= [];
 
   for (const [cmd, params, children] of code) {
     switch (cmd) {
       case 'repeat': {
         for (let i = 0; i < params[0]; ++i) {
-          res.push(...compile(children, code_parents, stack, conditions));
+          res.push(...compile(children, code_parents, stack, conditions, limits));
         }
       } break;
       case 'each': {
@@ -36,9 +37,9 @@ export default function compile(code, code_parents, stack, conditions) {
         if (index < 0) {
           throw new Error('stack var not found');
         }
-        const limit = findLimit(code_parents, name);
+        const limit = get_limit(limits, params[0]);
         for (let i = 0; i < limit; ++i) {
-          res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]]));
+          res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]], limits));
         }
       } break;
       case 'if': {
@@ -49,10 +50,10 @@ export default function compile(code, code_parents, stack, conditions) {
         }
         switch (params[0]) {
           case 'cx':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]]));
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
             break;
           case 'ncx':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]]));
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
             break;
           default:
             throw new Error('stack var not found');
@@ -69,7 +70,7 @@ export default function compile(code, code_parents, stack, conditions) {
             throw new Error('stack var not found');
           }
           const nstack = collect_stack(children);
-          const limit = findLimit(code_parents, name);
+          const limit = get_limit(limits, params[0]);
           for (let i = 1; i <= limit; ++i) {
             const extra_conditions = [...conditions, [index, 'EQUALS', i]];
             for (const c of extra_conditions) {
@@ -81,8 +82,9 @@ export default function compile(code, code_parents, stack, conditions) {
             }
             res.push(['flush']);
           }
+          const new_limits = [...limits, ...next_limit(cmd, limit)];
           const new_conditions = [...conditions, [index, 'GREATER_EQUALS', 1]];
-          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions));
+          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions, new_limits));
           if (nstack.length > 0) {
             for (const c of conditions) {
               res.push(['check', c]);
@@ -102,7 +104,8 @@ export default function compile(code, code_parents, stack, conditions) {
           res.push(['push', [s]]);
         }
         res.push(['flush']);
-        res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions));
+        const new_limits = [...limits, ...next_limit(cmd, params[0])];
+        res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions, new_limits));
         if (nstack.length > 0) {
           for (const c of conditions) {
             res.push(['check', c]);
@@ -124,30 +127,27 @@ export default function compile(code, code_parents, stack, conditions) {
   );
 }
 
-function findLimit(code_parents, name) {
-  const parent =  code_parents.findLast(x => ['attack', 'burn', 'mill'].includes(x[0]) && !['cx', 'ncx'].includes(x[1]));
-  if (!parent) {
-    throw new Error('no parent found for limit');
-  }
-  let limit = 0;
-  switch (parent[0]) {
+function get_limit(limits, what) {
+  return limits.at(-1)[what === 'cx' ? 0 : 1];
+}
+
+function next_limit(cmd, limit) {
+  const new_limits = [];
+  switch (cmd) {
     case 'attack':
-      if (name !== 'ecx') {
-        limit += 1; // might trigger
-      }
+      new_limits.push([1, limit + 1]);
+      break;
     case 'burn':
-      if (name !== 'ecx') {
-        limit += parent[1][0];
-      } else {
-        // there will be max 1 cx
-        limit += 1;
-      }
+      new_limits.push([1, limit]);
       break;
     case 'mill':
-      limit += parent[1][0];
+      new_limits.push([limit, limit]);
+      break;
+    case 'damage':
+      new_limits.push([limit, limit]);
       break;
   }
-  return limit;
+  return new_limits;
 }
 
 function collect_stack(code, stack) {

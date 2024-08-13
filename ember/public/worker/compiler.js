@@ -84,10 +84,12 @@ export default function compile(code, code_parents, stack, conditions) {
           const new_conditions = [...conditions, [index, 'GREATER_EQUALS', 1]];
           res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions));
           if (nstack.length > 0) {
+            for (const c of conditions) {
+              res.push(['check', c]);
+            }
             res.push(['pop', [nstack.length]]);
             res.push(['flush']);
           }
-
           break;
         }
       default: {
@@ -102,6 +104,9 @@ export default function compile(code, code_parents, stack, conditions) {
         res.push(['flush']);
         res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions));
         if (nstack.length > 0) {
+          for (const c of conditions) {
+            res.push(['check', c]);
+          }
           res.push(['pop', [nstack.length]]);
           res.push(['flush']);
         }

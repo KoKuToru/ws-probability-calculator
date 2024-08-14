@@ -159,14 +159,17 @@ function collect_stack(code, stack) {
         if (!stack.includes(name)) {
           stack.push(name);
         }
+        collect_stack(children, stack);
       } break;
       case 'if': {
         const name = `push_icx`.toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);
         }
+        collect_stack(children, stack);
       } break;
       case 'repeat':
+        collect_stack(children, stack);
         break;
       case 'attack':
       case 'burn':

@@ -74,5 +74,10 @@
   },
   "ember": {
     "edition": "octane"
+  },
+  "ember-addon": {
+    "paths": [
+      "lib/broccoli-asset-rev-hack"
+    ]
   }
 }

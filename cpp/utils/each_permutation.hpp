@@ -9,20 +9,25 @@
 struct PermutationState {
     void reset() {
         idx = 1;
+        cmask = 0;
     }
     void next() {
         idx = 0;
         state += 1;
+        mask |= cmask;
     }
     bool check() {
         assert(idx != 0); //<- check if reset got called
         const auto v = state & idx;
-        mask |= idx;
+        cmask |= idx;
         idx <<= 1;
         return v;
     }
     bool done() {
         return (state & mask) == 0;
+    }
+    bool skip() {
+        return (state & (mask ^ cmask)) != 0;
     }
 
     PermutationState() {}
@@ -32,9 +37,10 @@ struct PermutationState {
     PermutationState& operator=(const PermutationState&) = delete;
 
     private:
-    uint64_t state = 0;
-    uint64_t idx   = 0;
-    uint64_t mask  = 0;
+    uint64_t state  = 0;
+    uint64_t idx    = 0;
+    uint64_t mask   = 0;
+    uint64_t cmask  = 0;
 };
 
 template<typename F>

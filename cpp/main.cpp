@@ -2,17 +2,43 @@
 
 #ifndef __wasi__
 int main() {
-
     std::cout << "test permutations:" << std::endl;
     each_permutation([](PermutationState& state) {
         state.reset();
-        std::cout << "state: " << state.check() << ", " << state.check() << ", " << state.check() << std::endl;
+        int a = state.check();
+        int b = state.check();
+        int c = state.check();
+       if (state.skip()) {
+            std::cout << "skip: ";
+        } else {
+            std::cout << "take: ";
+        }
+        if (b == 2) {
+            std::cout << a << ", " << c << std::endl;
+        } else {
+            std::cout << a << ", " << b << ", " << c << std::endl;
+        }
     });
 
     std::cout << "test reshuffle:" << std::endl;
     each_reshuffle([](ReshuffleState& state) {
         state.reset();
-        std::cout << "state: " << state.check() << ", " << state.check() << ", " << state.check() << std::endl;
+        int a = state.check();
+        int b = 2;
+        if (!a) {
+            b = state.check();
+        }
+        int c = state.check();
+        if (state.skip()) {
+            std::cout << "skip: ";
+        } else {
+            std::cout << "take: ";
+        }
+        if (b == 2) {
+            std::cout << a << ", " << c << std::endl;
+        } else {
+            std::cout << a << ", " << b << ", " << c << std::endl;
+        }
     });
 
     Engine e;

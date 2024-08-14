@@ -196,6 +196,10 @@ struct Engine {
                             }
                         }
 
+                        if (reshuffle.skip()) {
+                            return;
+                        }
+
                         if (dmg == 0) {
                             output->op_waitingroom(output->p_op_cx, output->p_op_ncx);
                         } else {
@@ -265,6 +269,10 @@ struct Engine {
                             }
                         }
 
+                        if (reshuffle.skip()) {
+                            return;
+                        }
+
                         if (dmg == 0) {
                             output->op_waitingroom(output->p_op_cx, output->p_op_ncx);
                         } else {
@@ -313,6 +321,10 @@ struct Engine {
                                 // XXX: nothing in deck..
                                 return;
                             }
+                        }
+
+                        if (permutation.skip() || reshuffle.skip()) {
+                            return;
                         }
 
                         output->op_waitingroom(output->p_op_cx, output->p_op_ncx);

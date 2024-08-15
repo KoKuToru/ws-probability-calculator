@@ -266,19 +266,6 @@ code {
   justify-content: center;
   z-index: 10;
 }
-.code .bad {
-  color: #b25454df;
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: red;
-}
-.code .comment {
-  color: gray;
-  font-style: italic;
-}
-.code .ok {
-  color: black;
-}
 .code .indicator.bad {
   background-color: #b25454df;
   color: white;
@@ -516,4 +503,56 @@ button {
 
 code {
   white-space: pre-wrap;
+}
+
+.problem {
+  background: #fdd;
+  border-bottom: 1px solid #f22;
+  margin-bottom: -1px;
+}
+
+.lint-code-ok {
+  color: black;
+  font-style: normal;
+}
+.lint-code-error {
+  color: #b25454df;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: red;
+  font-style: normal;
+}
+
+.code ul {
+  margin: 0;
+  padding: 0;
+  list-style: square;
+  padding-left: 2ch;
+}
+.code li {
+  margin: 0;
+  padding: 0;
+  padding-left: 0.5ch;
+}
+.code p {
+  margin: 0;
+  padding: 0;
+}
+.code > div > ul > li {
+  padding-left: 0;
+}
+.code > div {
+  font-style: italic;
+  color: gray;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1em;
+  background: white;
+}
+.code li::marker {
+  content: '▫ ';
+  color: black;
+  font-style: normal;
+}
+.code li.has-focus::marker {
+  content: '▪ ';
 }

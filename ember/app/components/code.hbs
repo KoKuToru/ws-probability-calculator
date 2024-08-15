@@ -4,22 +4,14 @@
     <span>Code</span>
     <span title={{this.state.code}}>{{this.compressed}}</span>
     <span class="flex-grow"></span>
-    {{!--
-    <span><button>settings</button></span>
-    <span><button {{on "click" this.reset}}>reset</button></span>
-    --}}
   </:header>
   <:default>
     <div class="main">
-      <div class="code">
-        <textarea
-          spellcheck="false"
-          {{on "input" this.updateCode}}
-          {{on "keydown" this.onKeyDown}}
-          {{on "keydown" this.updateCode}}
-          {{on "change" this.store}}
-          placeholder="no code"
-        >{{this.state.code}}</textarea>
+      <div class="code"
+        {{did-insert this.setupEditor}}
+        {{did-update this.updateEditor this.state.code}}
+        {{will-destroy this.destroyEditor}}
+      >
         <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
       </div>
     </div>

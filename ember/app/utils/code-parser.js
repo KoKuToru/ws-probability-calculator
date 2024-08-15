@@ -32,11 +32,23 @@ export function unparse(code) {
 
 export default function parse(code) {
   code ??= '';
-  code = code.split('\n');
+
+  const rex = /^(.*)$/gm;
+  const code_offset = [];
+  while (true) {
+    const r = rex.exec(code);
+    if (!r) {
+      break;
+    }
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (r.index === rex.lastIndex) {
+      rex.lastIndex++;
+    }
+    code_offset.push({ text: r[1], lineoffset: r.index});
+  }
 
   const parent_stack = [];
-
-  const ast = code.map(text => {
+  const ast = code_offset.map(({text, lineoffset}) => {
     let indent = 0;
     let offset = 0;
     for (let i = 0; i < text.length; ++i) {
@@ -71,7 +83,8 @@ export default function parse(code) {
           text,
           indent,
           code: [ s.name, m.slice(1).map((x, i) => s.params[i] ? s.params[i](x) : x) ],
-          children: []
+          children: [],
+          offset: lineoffset + offset
         };
         if (c.code.length > 2) {
           c.short = `${c.short}(${c.code.slice(1).join(',')})`;
@@ -90,7 +103,7 @@ export default function parse(code) {
         }
       }
     }
-    const c = { text, indent, error, children: [] };
+    const c = { text, indent, error, children: [], offset: lineoffset };
     if (parent) {
       parent.children.push(c);
       return null;

@@ -7,8 +7,4 @@ export default class CodeValidation extends Component {
     }
     return this.args.value?.code ? 'ok' : 'comment';
   }
-
-  updateTabSpacing(el, [spaceCount]) {
-    el.style.setProperty('--space-count', spaceCount);
-  }
 }

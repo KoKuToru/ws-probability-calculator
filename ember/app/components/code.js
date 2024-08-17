@@ -16,6 +16,7 @@ import Gapcursor from '@tiptap/extension-gapcursor';
 import Linter from 'ws/utils/tiptap/linter';
 import WsCode from 'ws/utils/tiptap/linter-ws-code';
 import FixCopy from 'ws/utils/tiptap/fix-copy';
+import IdeTab from 'ws/utils/tiptap/ide-tab';
 
 export default class Code extends Component {
   @service state;
@@ -100,7 +101,8 @@ export default class Code extends Component {
             WsCode
           ]
         }),
-        FixCopy
+        FixCopy,
+        IdeTab
       ],
       content: this.getCode(),
       onUpdate: this.updateCode,

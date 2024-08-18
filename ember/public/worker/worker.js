@@ -2,44 +2,47 @@ import compiler from './compiler.js';
 
 let ENGINE_RESULT = [];
 
-function bigint_view(...res) {
-  const size = res.at(-1);
-  return res.slice(0, -1).map(
-    x => new Uint32Array(module.instance.exports.memory.buffer, x, size)
-  );
+let MEM_CACHE;
+function GET_MEM_CACHE() {
+  const buffer = module.instance.exports.memory.buffer;
+  if (MEM_CACHE?.buffer !== buffer) {
+    MEM_CACHE = {
+      buffer,
+      uint32: new Uint32Array(buffer),
+      double: new Float64Array(buffer)
+    };
+  }
+  return MEM_CACHE;
 }
 
-function read_bigint(...views) {
-  return views.map(x => {
-    let y = 0n;
-    let j = BigInt(x.length) * 32n;
-    for (let i = 0; i < x.length; ++i) {
-      j -= 32n;
-      y |= BigInt(x[i]) << j;
-    }
-    return y;
-  });
+function write_uint32(dest, value) {
+  GET_MEM_CACHE().uint32[dest >> 2] = value;
 }
 
-function write_bigint(dest, value) {
-  if (value > 2n ** (BigInt(dest.length) * 32n - 1n)) {
-    throw Error('value to big for dest');
-  }
-  const x = dest;
-  const y = value;
-  let j = BigInt(x.length) * 32n;
-  for (let i = 0; i < x.length; ++i) {
-    j -= 32n;
-    x[i] = Number(BigInt.asUintN(32, y >> j));
-  }
+function write_double(dest, value) {
+  GET_MEM_CACHE().double[dest >> 3] = value;
+}
+
+const BIGINT_USED = [];
+const BIGINT_FREE = [];
+function StoreBigInt(value) {
+  const id = BIGINT_FREE.length ? BIGINT_FREE.pop() : BIGINT_USED.length;
+  BIGINT_USED[id] = value;
+  return id;
+}
+function DestroyBigInt(idx) {
+  BIGINT_FREE.push(idx);
+}
+function GetBigInt(idx) {
+  return BIGINT_USED[idx];
 }
 
 class EngineError extends Error {}
 
 const imports = {
   engine: {
-    dump(data_ptr, size) {
-      ENGINE_RESULT = [...new Float64Array(module.instance.exports.memory.buffer, data_ptr, size)];
+    dump(data_id, size) {
+      ENGINE_RESULT = [...GET_MEM_CACHE().double.subarray(data_id >> 3, (data_id >> 3) + size)];
     },
     assert(message_ptr, message_size, file_ptr, file_size, line) {
       const decoder = new TextDecoder();
@@ -49,52 +52,79 @@ const imports = {
     }
   },
   bigint: {
-    add(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    create(id_ptr, high, low) {
+      const value = (BigInt(high) << 32n) + BigInt(low);
+      write_uint32(id_ptr, StoreBigInt(value));
+    },
+    copy(id_ptr, id) {
+      write_uint32(id_ptr, StoreBigInt(GetBigInt(id)));
+    },
+    destroy(id) {
+      DestroyBigInt(id);
+    },
+    add(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
       const res = a + b;
-      write_bigint(res_view, res);
+      write_uint32(id_ptr, StoreBigInt(res));
     },
-    sub(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    sub(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
       const res = a - b;
-      write_bigint(res_view, res);
+      write_uint32(id_ptr, StoreBigInt(res));
     },
-    div(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    div(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
       const res = a / b;
-      write_bigint(res_view, res);
+      write_uint32(id_ptr, StoreBigInt(res));
     },
-    mul(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    mul(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
       const res = a * b;
-      write_bigint(res_view, res);
+      write_uint32(id_ptr, StoreBigInt(res));
     },
-    mod(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    mod(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
       const res = a % b;
-      write_bigint(res_view, res);
+      write_uint32(id_ptr, StoreBigInt(res));
     },
-    gcd(res_ptr, a_ptr, b_ptr, size) {
-      const [ res_view, a_view, b_view ] = bigint_view(res_ptr, a_ptr, b_ptr, size);
-      const [ a, b ] = read_bigint(a_view, b_view);
+    gcd(id_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
 
       let [d, e] = [a, b];
       while (e) {
         [d, e] = [e, d % e];
       }
-      write_bigint(res_view, d);
+
+      write_uint32(id_ptr, StoreBigInt(d));
     },
-    double(res_ptr, a_ptr, size) {
-      const [ a_view ] = bigint_view(a_ptr, size);
-      const [ a ] = read_bigint(a_view);
-      const res = new Float64Array(module.instance.exports.memory.buffer, res_ptr, 1);
-      res[0] = Number(a);
-    }
+    double(double_ptr, a_id) {
+      const a = GetBigInt(a_id);
+      write_double(double_ptr, Number(a));
+    },
+    equal(res_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
+      const res = a === b;
+      write_uint32(res_ptr, res);
+    },
+    greater(res_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
+      const res = a > b;
+      write_uint32(res_ptr, res);
+    },
+    less(res_ptr, a_id, b_id) {
+      const a = GetBigInt(a_id);
+      const b = GetBigInt(b_id);
+      const res = a < b;
+      write_uint32(res_ptr, res);
+    },
   }
 };
 
@@ -107,6 +137,9 @@ let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).the
 function reset() {
   const memory = new Uint8Array(module.instance.exports.memory.buffer);
   memory.set(reset_memory);
+  // free bigint stuff
+  BIGINT_USED.splice(0);
+  BIGINT_FREE.splice(0);
 }
 
 const pushs = Object.freeze({

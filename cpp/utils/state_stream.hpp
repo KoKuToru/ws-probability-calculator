@@ -31,6 +31,7 @@ struct StateStream {
     }
 
     ~StateStream() {
+        reset();
         free(tmp);
         for (size_t i = 0; i < chunk_reserved; ++i) {
             if (!chunk[i]) {
@@ -58,6 +59,9 @@ struct StateStream {
     }
 
     void reset() {
+        for (const State* state : *this) {
+            state->~State();
+        }
         chunk_idx = 0;
         order_idx = 0;
         next = nullptr;

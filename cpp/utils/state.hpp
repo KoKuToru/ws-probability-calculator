@@ -40,16 +40,17 @@ struct State : StateBase {
     private:
 
     // 0x40
-    Result result[];
+    //XXX: flexible array member 'result' of type 'Result[]' with non-trivial destruction
+    std::array<uint8_t, sizeof(Result)> result[];
 
     Result* get_result(int idx) {
         assert(idx >= 0 && idx < count);
-        return result + idx;
+        return reinterpret_cast<Result*>(result) + idx;
     }
 
     const Result* get_result(int idx) const {
         assert(idx >= 0 && idx < count);
-        return result + idx;
+        return reinterpret_cast<const Result*>(result) + idx;
     }
 
     int compare_with(const State& other) const {
@@ -109,7 +110,14 @@ struct State : StateBase {
     }
 
     State& operator=(const State& other) {
-        std::memmove(reinterpret_cast<unsigned char*>(this), reinterpret_cast<const unsigned char*>(&other), other.byte_size());
+        for (size_t i = 0; i < count; ++i) {
+            probability(i).~Fraction();
+        }
+        std::memmove(reinterpret_cast<unsigned char*>(this), reinterpret_cast<const unsigned char*>(&other), sizeof(State));
+        for (size_t i = 0; i < other.count; ++i) {
+            get_result(i)->dmg = other.dmg(i);
+            get_result(i)->probability = other.probability(i);
+        }
         return *this;
     }
 
@@ -135,6 +143,13 @@ struct State : StateBase {
 
     State(State&&) = delete;
     State(const State&) = delete;
+
+    ~State() {
+        for (size_t i = 0; i < count; ++i) {
+            probability(i).~Fraction();
+        }
+        count = 0;
+    }
 
     void clear(
         uint32_t n_stack = 0,

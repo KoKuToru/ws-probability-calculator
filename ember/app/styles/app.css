@@ -422,6 +422,28 @@ textarea {
   overflow: auto;
 }
 
+.error {
+  justify-content: center !important;
+  color: red;
+  font-weight: bold;
+  font-style: italic;
+}
+.error::before {
+  content: 'ERR';
+}
+
+.code-error {
+  color: red;
+  font-weight: bold;
+  font-style: italic;
+  border: 2px solid red;
+  margin: 5px;
+  padding: 3px;
+}
+.code-error::before {
+  content: 'ERR: ';
+  font-style: italic;
+}
 
 .table.pivot {
   grid-auto-flow: column;

@@ -34,10 +34,18 @@ function write_bigint(dest, value) {
   }
 }
 
+class EngineError extends Error {}
+
 const imports = {
   engine: {
     dump(data_ptr, size) {
       ENGINE_RESULT = [...new Float64Array(module.instance.exports.memory.buffer, data_ptr, size)];
+    },
+    assert(message_ptr, message_size, file_ptr, file_size, line) {
+      const decoder = new TextDecoder();
+      let message = decoder.decode(new Uint8Array(module.instance.exports.memory.buffer, message_ptr, message_size));
+      let file = decoder.decode(new Uint8Array(module.instance.exports.memory.buffer, file_ptr, file_size));
+      throw new EngineError(`condition \`${message}\` @${file}:${line} failed!`);
     }
   },
   bigint: {
@@ -90,7 +98,16 @@ const imports = {
   }
 };
 
-let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => module = x);
+let reset_memory;
+let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => {
+  module = x;
+  const memory = new Uint8Array(module.instance.exports.memory.buffer);
+  reset_memory = new Uint8Array(memory);
+});
+function reset() {
+  const memory = new Uint8Array(module.instance.exports.memory.buffer);
+  memory.set(reset_memory);
+}
 
 const pushs = Object.freeze({
   PUSH_ECX:   7,
@@ -151,49 +168,63 @@ self.addEventListener('message', async (e) => {
     await module;
   }
 
-  const data    = e.data;
-  const code    = compiler(data.code);
-  const actions = build_actions(module.instance.exports, code);
+  reset(); //< reset everything
 
-  const op_cx  = data.op_cx;
-  const op_ncx = data.op_size - op_cx;
-  const w_op_cx = 8 - op_cx;
-  const w_op_ncx = 50 - 8 - op_ncx;
+  try {
+    var   data    = e.data;
+    var   code    = compiler(data.code);
+    const actions = build_actions(module.instance.exports, code);
 
-  module.instance.exports.reset(
-    // oponent deck:
-    op_cx,
-    op_ncx,
-    // opponent waiting room:
-    w_op_cx,
-    w_op_ncx
-  );
+    const op_cx  = data.op_cx;
+    const op_ncx = data.op_size - op_cx;
+    const w_op_cx = 8 - op_cx;
+    const w_op_ncx = 50 - 8 - op_ncx;
 
-  const start = performance.now();
-  for (const ac of actions) {
-    ac();
-  }
-  const end = performance.now();
-  performance.measure('execute', { start, end });
+    module.instance.exports.reset(
+      // oponent deck:
+      op_cx,
+      op_ncx,
+      // opponent waiting room:
+      w_op_cx,
+      w_op_ncx
+    );
 
-  const dmg = ENGINE_RESULT;
-  const dmg_sum = dmg.reduce((p, c) => p + c);
-  let mean = dmg.reduce((p, c, i) => p + c * i, 0) * dmg_sum;
-
-  const dmg_acc = [];
-  for (let i = 0; i < dmg.length; ++i) {
-    if (i == 0) {
-      dmg_acc[i] = dmg[i];
-      continue;
+    const start = performance.now();
+    for (const ac of actions) {
+      ac();
     }
-    dmg_acc[i] = dmg.slice(i).reduce((c, p) => c + p);
-  }
+    const end = performance.now();
+    performance.measure('execute', { start, end });
 
-  e.ports[0].postMessage({
-    data,
-    code,
-    dmg: dmg,
-    dmg_acc: dmg_acc,
-    mean: mean
-  });
+    const dmg = ENGINE_RESULT;
+    const dmg_sum = dmg.reduce((p, c) => p + c);
+    let mean = dmg.reduce((p, c, i) => p + c * i, 0) * dmg_sum;
+
+    const dmg_acc = [];
+    for (let i = 0; i < dmg.length; ++i) {
+      if (i == 0) {
+        dmg_acc[i] = dmg[i];
+        continue;
+      }
+      dmg_acc[i] = dmg.slice(i).reduce((c, p) => c + p);
+    }
+
+    e.ports[0].postMessage({
+      data,
+      code,
+      dmg: dmg,
+      dmg_acc: dmg_acc,
+      mean: mean
+    });
+  } catch (ex) {
+    if (ex instanceof EngineError) {
+      console.error(ex);
+      e.ports[0].postMessage({
+        data,
+        error: ex.message,
+        code
+      });
+    }
+    throw ex;
+  }
 });

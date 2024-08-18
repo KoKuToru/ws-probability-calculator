@@ -18,6 +18,7 @@ repeat 3
 class Private {
   @tracked loaded = false;
   @tracked code;
+  @tracked code_error;
   @tracked selected = new Set([
     '8,30',
     '8,25',
@@ -97,6 +98,12 @@ export default class StateService extends Service {
   }
   set code(code) {
     this.#private.code = code;
+  }
+  get code_error() {
+    return this.#private.code_error;
+  }
+  set code_error(code_error) {
+    this.#private.code_error = code_error;
   }
 
   get result() {

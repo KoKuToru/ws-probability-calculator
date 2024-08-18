@@ -14,6 +14,11 @@
       >
         <div>{{#each this.codeParsed as |line|}}<CodeValidation @value={{line}}/>{{/each}}</div>
       </div>
+      {{#if this.state.code_error}}
+        <div class="code-error">
+          {{~this.state.code_error~}}
+        </div>
+      {{/if}}
     </div>
     <div class="settings">
       <Section @name="settings_open">

@@ -77,7 +77,18 @@ int main() {
     e.dump();
 }
 #else
-    static Engine e;
+
+    Engine* lazy_engine() {
+        static Engine* e = nullptr;
+        if (e) [[likely]] {
+            return e;
+        }
+        // not using new directly because it adds lots of stuff to wasm
+        void* memory = malloc(sizeof(Engine));
+        assert(memory);
+        e = new(memory) Engine();
+        return e;
+    }
 
     __attribute__((export_name("reset"), visibility("default"), flatten))
     extern "C" void reset(
@@ -86,51 +97,51 @@ int main() {
         int w_op_cx,
         int w_op_ncx
     ) {
-        e.reset(op_cx, op_ncx, w_op_cx, w_op_ncx);
+        lazy_engine()->reset(op_cx, op_ncx, w_op_cx, w_op_ncx);
     }
 
     __attribute__((export_name("burn"), visibility("default"), flatten))
     extern "C" void burn(int try_dmg) {
-        e.burn(try_dmg);
+        lazy_engine()->burn(try_dmg);
     }
 
     __attribute__((export_name("attack"), visibility("default"), flatten))
     extern "C" void attack(int try_dmg) {
-        e.attack(try_dmg);
+        lazy_engine()->attack(try_dmg);
     }
 
     __attribute__((export_name("damage"), visibility("default"), flatten))
     extern "C" void damage(int dmg) {
-        e.damage(dmg);
+        lazy_engine()->damage(dmg);
     }
 
     __attribute__((export_name("mill"), visibility("default"), flatten))
     extern "C" void mill(int amount) {
-        e.mill(amount);
+        lazy_engine()->mill(amount);
     }
 
     __attribute__((export_name("pop"), visibility("default"), flatten))
     extern "C" void pop(int amount) {
-        e.pop(amount);
+        lazy_engine()->pop(amount);
     }
 
     __attribute__((export_name("push"), visibility("default"), flatten))
     extern "C" void push(int what) {
-        e.push(static_cast<WHAT>(what));
+        lazy_engine()->push(static_cast<WHAT>(what));
     }
 
     __attribute__((export_name("check"), visibility("default"), flatten))
     extern "C" void check(int stack, int op, int value) {
-        e.check(stack, static_cast<WHAT>(op), value);
+        lazy_engine()->check(stack, static_cast<WHAT>(op), value);
     }
 
     __attribute__((export_name("flush"), visibility("default"), flatten))
     extern "C" void flush() {
-        e.flush();
+        lazy_engine()->flush();
     }
 
     __attribute__((export_name("dump"), visibility("default"), flatten))
     extern "C" void dump() {
-        e.dump();
+        lazy_engine()->dump();
     }
 #endif

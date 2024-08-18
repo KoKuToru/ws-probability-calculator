@@ -3,8 +3,8 @@
 
 #include <cstdint>
 #include <cstring>
-#include <cassert>
 
+#include "assert.h"
 #include "consts.hpp"
 #include "result.hpp"
 #include "fraction.hpp"
@@ -43,12 +43,12 @@ struct State : StateBase {
     Result result[];
 
     Result* get_result(int idx) {
-        assert (idx >= 0 && idx < count);
+        assert(idx >= 0 && idx < count);
         return result + idx;
     }
 
     const Result* get_result(int idx) const {
-        assert (idx >= 0 && idx < count);
+        assert(idx >= 0 && idx < count);
         return result + idx;
     }
 
@@ -151,12 +151,12 @@ struct State : StateBase {
         uint8_t  n_w_op_cx = 0,
         uint8_t  n_w_op_ncx = 12
     ) {
-        assert (n_my_trg    <= 0x0F);
-        assert (n_op_cx     <= 0x0F);
-        assert (n_p_my_trg  <= 0x0F);
-        assert (n_p_my_ntrg <= 0x0F);
-        assert (n_p_op_cx   <= 0x0F);
-        assert (n_p_op_ncx  <= 0x0F);
+        assert(n_my_trg    <= 0x0F);
+        assert(n_op_cx     <= 0x0F);
+        assert(n_p_my_trg  <= 0x0F);
+        assert(n_p_my_ntrg <= 0x0F);
+        assert(n_p_op_cx   <= 0x0F);
+        assert(n_p_op_ncx  <= 0x0F);
         count = 0;
         stack = n_stack;
         active = 1;

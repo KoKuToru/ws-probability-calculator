@@ -70,6 +70,9 @@ export default class ProbabilityComponent extends Component {
     if (!res) {
       return null;
     }
+    if (res.error) {
+      return 'ERR';
+    }
     let v = res.dmg_acc[y];
     if (!v) {
       return null;
@@ -80,6 +83,9 @@ export default class ProbabilityComponent extends Component {
     v ??= null;
     if (v === null) {
       return null;
+    }
+    if (v === 'ERR') {
+      return 'error';
     }
     let idx;
     if (y == 0) {

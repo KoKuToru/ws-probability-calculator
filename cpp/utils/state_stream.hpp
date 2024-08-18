@@ -2,10 +2,10 @@
 #define STATE_STREAM_H
 
 #include <cstdint>
-#include <cassert>
 #include <cstring>
 #include <algorithm>
 
+#include "assert.h"
 #include "consts.hpp"
 #include "state.hpp"
 

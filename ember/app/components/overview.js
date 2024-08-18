@@ -73,6 +73,9 @@ export default class OverviewTable extends Component {
     if (!value) {
       return undefined;
     }
+    if (value.error) {
+      return 'error';
+    }
     let idx = null;
     const selected_dmg = this.state.selected_dmg ?? null;
     let v = value.mean;
@@ -102,6 +105,9 @@ export default class OverviewTable extends Component {
     value = this.state.result.get(...value);
     if (!value) {
       return undefined;
+    }
+    if (value.error) {
+      return 'ERR';
     }
     const selected_dmg = this.state.selected_dmg ?? null;
     if (selected_dmg === null) {
@@ -199,6 +205,7 @@ export default class OverviewTable extends Component {
     }
 
     let first = true;
+    let error = null;
     for await (const res of codeExecute(queue, signal)) {
       signal.throwIfAborted();
 
@@ -240,7 +247,11 @@ export default class OverviewTable extends Component {
         });
         this.state.debug_code = tmp.map(x => x.join('')).join('\n');
       }
+      if (!error && res.error) {
+        error = res.error;
+      }
     }
+    this.state.code_error = error;
   }
 
   @action forceCalculate(el) {

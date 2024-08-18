@@ -2,10 +2,10 @@
 #define ENGINE_H
 
 #include <cstdint>
-#include <cassert>
 #include <concepts>
 #include <array>
 
+#include "assert.h"
 #include "state.hpp"
 #include "state_stream.hpp"
 #include "each.hpp"

@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <numeric>
-#include <cassert>
 #include <tuple>
 #include <functional>
 #include <ranges>

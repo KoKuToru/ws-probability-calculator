@@ -3,7 +3,7 @@
 
 #include <cmath>
 #include <numeric>
-#include <cassert>
+#include "assert.h"
 /*
     is there even any benefit in doing this ?..
     with this execution takes twice as long

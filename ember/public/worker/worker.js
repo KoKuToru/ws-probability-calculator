@@ -4,9 +4,11 @@ let ENGINE_RESULT = [];
 
 let MEM_CACHE;
 function GET_MEM_CACHE() {
-  const buffer = module.instance.exports.memory.buffer;
-  if (MEM_CACHE?.buffer !== buffer) {
+  const instance = module.instance;
+  if (MEM_CACHE?.instance !== instance) {
+    const buffer = instance.exports.memory.buffer;
     MEM_CACHE = {
+      instance,
       buffer,
       uint32: new Uint32Array(buffer),
       double: new Float64Array(buffer)

@@ -76,7 +76,7 @@ struct State : StateBase {
         return get_result(idx)->probability;
     }
 
-    void add(int ndmg, Fraction nprobability) {
+    void add(uint32_t ndmg, Fraction nprobability) {
         for (size_t i = 0; i < count; ++i) {
             if (dmg(i) == ndmg) {
                 probability(i) += nprobability;
@@ -86,11 +86,13 @@ struct State : StateBase {
         assert(count != 0xFFFFFFFF);
         int idx = count++;
         assert(byte_size() <= STATE_CHUNK_SIZE);
-        dmg(idx) = ndmg;
-        probability(idx) = nprobability;
+        new (get_result(idx)) Result {
+            nprobability,
+            ndmg
+        };
     }
 
-    void update(int ndmg, Fraction nprobability) {
+    void update(uint32_t ndmg, Fraction nprobability) {
         for (size_t idx = 0; idx < count; ++idx) {
             dmg(idx) += ndmg;
             probability(idx) *= nprobability;
@@ -172,7 +174,7 @@ struct State : StateBase {
         assert(n_p_my_ntrg <= 0x0F);
         assert(n_p_op_cx   <= 0x0F);
         assert(n_p_op_ncx  <= 0x0F);
-        count = 0;
+        this->~State();
         stack = n_stack;
         active = 1;
         p_my_trg  = n_p_my_trg;

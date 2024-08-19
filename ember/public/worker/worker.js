@@ -128,15 +128,11 @@ const imports = {
   }
 };
 
-let reset_memory;
-let module = WebAssembly.instantiateStreaming(fetch('engine.wasm'), imports).then(x => {
+let module = WebAssembly.compileStreaming(fetch('engine.wasm')).then(x => {
   module = x;
-  const memory = new Uint8Array(module.instance.exports.memory.buffer);
-  reset_memory = new Uint8Array(memory);
 });
 function reset() {
-  const memory = new Uint8Array(module.instance.exports.memory.buffer);
-  memory.set(reset_memory);
+  module.instance = new WebAssembly.Instance(module, imports);
   // free bigint stuff
   BIGINT_USED.splice(0);
   BIGINT_FREE.splice(0);

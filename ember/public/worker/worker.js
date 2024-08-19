@@ -1,143 +1,186 @@
 import compiler from './compiler.js';
 
-let ENGINE_RESULT = [];
-
-let MEM_CACHE;
-function GET_MEM_CACHE() {
-  const instance = module.instance;
-  if (MEM_CACHE?.instance !== instance) {
-    const buffer = instance.exports.memory.buffer;
-    MEM_CACHE = {
-      instance,
-      buffer,
-      uint32: new Uint32Array(buffer),
-      double: new Float64Array(buffer)
-    };
-  }
-  return MEM_CACHE;
-}
-
-function write_uint32(dest, value) {
-  GET_MEM_CACHE().uint32[dest >> 2] = value;
-}
-
-function write_double(dest, value) {
-  GET_MEM_CACHE().double[dest >> 3] = value;
-}
-
-const BIGINT_USED = [];
-const BIGINT_FREE = [];
-function StoreBigInt(value) {
-  const id = BIGINT_FREE.length ? BIGINT_FREE.pop() : BIGINT_USED.length;
-  BIGINT_USED[id] = value;
-  return id;
-}
-function DestroyBigInt(idx) {
-  BIGINT_FREE.push(idx);
-}
-function GetBigInt(idx) {
-  return BIGINT_USED[idx];
-}
-
 class EngineError extends Error {}
 
-const imports = {
-  engine: {
-    dump(data_id, size) {
-      ENGINE_RESULT = [...GET_MEM_CACHE().double.subarray(data_id >> 3, (data_id >> 3) + size)];
-    },
-    assert(message_ptr, message_size, file_ptr, file_size, line) {
-      const decoder = new TextDecoder();
-      let message = decoder.decode(new Uint8Array(module.instance.exports.memory.buffer, message_ptr, message_size));
-      let file = decoder.decode(new Uint8Array(module.instance.exports.memory.buffer, file_ptr, file_size));
-      throw new EngineError(`condition \`${message}\` @${file}:${line} failed!`);
-    }
-  },
-  bigint: {
-    create(id_ptr, high, low) {
-      const value = (BigInt(high) << 32n) + BigInt(low);
-      write_uint32(id_ptr, StoreBigInt(value));
-    },
-    copy(id_ptr, id) {
-      write_uint32(id_ptr, StoreBigInt(GetBigInt(id)));
-    },
-    destroy(id) {
-      DestroyBigInt(id);
-    },
-    add(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a + b;
-      write_uint32(id_ptr, StoreBigInt(res));
-    },
-    sub(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a - b;
-      write_uint32(id_ptr, StoreBigInt(res));
-    },
-    div(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a / b;
-      write_uint32(id_ptr, StoreBigInt(res));
-    },
-    mul(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a * b;
-      write_uint32(id_ptr, StoreBigInt(res));
-    },
-    mod(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a % b;
-      write_uint32(id_ptr, StoreBigInt(res));
-    },
-    gcd(id_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
+class Imports {
+  result;
 
-      let [d, e] = [a, b];
-      while (e) {
-        [d, e] = [e, d % e];
+  setup(instance) {
+    let memory;
+    let memory_uint32;
+    let memory_double;
+    let bigint_used = [];
+    let bigint_free = [];
+
+    Object.defineProperties(this, {
+      memory: {
+        get() {
+          if (!memory?.buffer.byteLength) {
+            memory = instance.exports.memory;
+          }
+          return memory;
+        }
+      },
+      memory_uint32: {
+        get() {
+          if (!memory_uint32?.buffer.byteLength) {
+            memory_uint32 = new Uint32Array(this.memory.buffer);
+          }
+          return memory_uint32;
+        }
+      },
+      memory_double: {
+        get() {
+          if (!memory_double?.buffer.byteLength) {
+            memory_double = new Float64Array(this.memory.buffer);
+          }
+          return memory_double;
+        }
+      },
+      StoreBigInt: {
+        value: function (value) {
+          const id = bigint_free.length ? bigint_free.pop() : bigint_used.length;
+          bigint_used[id] = value;
+          return id;
+        }
+      },
+      DestroyBigInt: {
+        value: function (idx) {
+          bigint_free.push(idx);
+        }
+      },
+      GetBigInt: {
+        value: function (idx) {
+          return bigint_used[idx];
+        }
       }
-
-      write_uint32(id_ptr, StoreBigInt(d));
-    },
-    double(double_ptr, a_id) {
-      const a = GetBigInt(a_id);
-      write_double(double_ptr, Number(a));
-    },
-    equal(res_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a === b;
-      write_uint32(res_ptr, res);
-    },
-    greater(res_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a > b;
-      write_uint32(res_ptr, res);
-    },
-    less(res_ptr, a_id, b_id) {
-      const a = GetBigInt(a_id);
-      const b = GetBigInt(b_id);
-      const res = a < b;
-      write_uint32(res_ptr, res);
-    },
+    });
   }
-};
+
+  write_uint32(dest, value) {
+    this.memory_uint32[dest >> 2] = value;
+  }
+
+  write_double(dest, value) {
+    this.memory_double[dest >> 3] = value;
+  }
+
+  constructor(module) {
+    this.module = module;
+    this.engine = {
+      dump: this.engine_dump.bind(this),
+      assert: this.engine_assert.bind(this)
+    };
+    this.bigint = {
+      create: this.bigint_create.bind(this),
+      copy: this.bigint_copy.bind(this),
+      destroy: this.bigint_destroy.bind(this),
+      add: this.bigint_add.bind(this),
+      sub: this.bigint_sub.bind(this),
+      div: this.bigint_div.bind(this),
+      mul: this.bigint_mul.bind(this),
+      mod: this.bigint_mod.bind(this),
+      gcd: this.bigint_gcd.bind(this),
+      double: this.bigint_double.bind(this),
+      equal: this.bigint_equal.bind(this),
+      greater: this.bigint_greater.bind(this),
+      less: this.bigint_less.bind(this)
+    };
+  }
+
+  engine_dump(data_id, size) {
+    this.result = [...this.memory_double.subarray(data_id >> 3, (data_id >> 3) + size)];
+  }
+  engine_assert(message_ptr, message_size, file_ptr, file_size, line) {
+    const decoder = new TextDecoder();
+    let message = decoder.decode(new Uint8Array(this.memory.buffer, message_ptr, message_size));
+    let file = decoder.decode(new Uint8Array(this.memory.buffer, file_ptr, file_size));
+    throw new EngineError(`condition \`${message}\` @${file}:${line} failed!`);
+  }
+
+  bigint_create(id_ptr, high, low) {
+    const value = (BigInt(high) << 32n) + BigInt(low);
+    this.write_uint32(id_ptr, this.StoreBigInt(value));
+  }
+  bigint_copy(id_ptr, id) {
+    this.write_uint32(id_ptr, this.StoreBigInt(this.GetBigInt(id)));
+  }
+  bigint_destroy(id) {
+    this.DestroyBigInt(id);
+  }
+  bigint_add(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a + b;
+    this.write_uint32(id_ptr, this.StoreBigInt(res));
+  }
+  bigint_sub(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a - b;
+    this.write_uint32(id_ptr, this.StoreBigInt(res));
+  }
+  bigint_div(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a / b;
+    this.write_uint32(id_ptr, this.StoreBigInt(res));
+  }
+  bigint_mul(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a * b;
+    this.write_uint32(id_ptr, this.StoreBigInt(res));
+  }
+  bigint_mod(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a % b;
+    this.write_uint32(id_ptr, this.StoreBigInt(res));
+  }
+  bigint_gcd(id_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+
+    let [d, e] = [a, b];
+    while (e) {
+      [d, e] = [e, d % e];
+    }
+
+    this.write_uint32(id_ptr, this.StoreBigInt(d));
+  }
+  bigint_double(double_ptr, a_id) {
+    const a = this.GetBigInt(a_id);
+    this.write_double(double_ptr, Number(a));
+  }
+  bigint_equal(res_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a === b;
+    this.write_uint32(res_ptr, res);
+  }
+  bigint_greater(res_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a > b;
+    this.write_uint32(res_ptr, res);
+  }
+  bigint_less(res_ptr, a_id, b_id) {
+    const a = this.GetBigInt(a_id);
+    const b = this.GetBigInt(b_id);
+    const res = a < b;
+    this.write_uint32(res_ptr, res);
+  }
+}
 
 let module = WebAssembly.compileStreaming(fetch('engine.wasm')).then(x => {
   module = x;
 });
+
 function reset() {
-  module.instance = new WebAssembly.Instance(module, imports);
-  // free bigint stuff
-  BIGINT_USED.splice(0);
-  BIGINT_FREE.splice(0);
+  module.imports = new Imports();
+  module.instance = new WebAssembly.Instance(module, module.imports);
+  module.imports.setup(module.instance);
 }
 
 const pushs = Object.freeze({
@@ -227,7 +270,7 @@ self.addEventListener('message', async (e) => {
     const end = performance.now();
     performance.measure('execute', { start, end });
 
-    const dmg = ENGINE_RESULT;
+    const dmg = module.imports.result;
     const dmg_sum = dmg.reduce((p, c) => p + c);
     let mean = dmg.reduce((p, c, i) => p + c * i, 0) * dmg_sum;
 

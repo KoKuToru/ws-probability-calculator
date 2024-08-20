@@ -78,6 +78,7 @@ struct Engine {
         }
         size += 1;
         double* result = reinterpret_cast<double*>(calloc(1, size * sizeof(double)));
+        assert_oom(result != nullptr);
         for (const State* state : inputs) {
             for (size_t i = 0; i < state->count; ++i) {
                 auto dmg = state->dmg(i);

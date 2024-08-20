@@ -13,20 +13,20 @@ struct StateStream {
 
     StateStream() {
         tmp = reinterpret_cast<State*>(malloc(STATE_CHUNK_SIZE));
-        assert(tmp != nullptr);
+        assert_oom(tmp != nullptr);
         next = reinterpret_cast<State*>(malloc(STATE_CHUNK_SIZE));
-        assert(next != nullptr);
+        assert_oom(next != nullptr);
 
         chunk_reserved = STATE_CHUNK_SIZE / sizeof(State*);
         chunk = reinterpret_cast<State**>(malloc(chunk_reserved * sizeof(State*)));
-        assert(chunk != nullptr);
+        assert_oom(chunk != nullptr);
         std::fill(chunk, chunk + chunk_reserved, nullptr);
         chunk[0] = next;
         chunk_idx = 0;
 
         order_reserved = STATE_CHUNK_SIZE / sizeof(State*);
         order = reinterpret_cast<State**>(malloc(order_reserved * sizeof(State*)));
-        assert(order != nullptr);
+        assert_oom(order != nullptr);
         order_idx = 0;
     }
 
@@ -72,13 +72,13 @@ struct StateStream {
             // allocate more memory for chunk list
             chunk_reserved += STATE_CHUNK_SIZE / sizeof(State*);
             chunk = reinterpret_cast<State**>(realloc(chunk, chunk_reserved * sizeof(State*)));
-            assert(chunk != nullptr);
+            assert_oom(chunk != nullptr);
             std::fill(chunk + chunk_idx, chunk + chunk_reserved, nullptr);
         }
         if (!chunk[chunk_idx]) {
             // allocate chunk
             next = reinterpret_cast<State*>(malloc(STATE_CHUNK_SIZE));
-            assert(next != nullptr);
+            assert_oom(next != nullptr);
             chunk[chunk_idx] = next;
         }
         if (!next) {
@@ -98,7 +98,7 @@ struct StateStream {
             // allocate more memory for order list
             order_reserved += STATE_CHUNK_SIZE / sizeof(State*);
             order = reinterpret_cast<State**>(realloc(order, order_reserved * sizeof(State*)));
-            assert(order != nullptr);
+            assert_oom(order != nullptr);
         }
 
         // put it in

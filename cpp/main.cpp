@@ -85,7 +85,7 @@ int main() {
         }
         // not using new directly because it adds lots of stuff to wasm
         void* memory = malloc(sizeof(Engine));
-        assert(memory);
+        assert_oom(memory != nullptr);
         e = new(memory) Engine();
         return e;
     }

@@ -1,6 +1,7 @@
 import compiler from './compiler.js';
 
 class EngineError extends Error {}
+class EngineOutOfMemory extends Error {}
 
 class Imports {
   result;
@@ -69,7 +70,8 @@ class Imports {
     this.module = module;
     this.engine = {
       dump: this.engine_dump.bind(this),
-      assert: this.engine_assert.bind(this)
+      assert: this.engine_assert.bind(this),
+      oom: this.engine_oom.bind(this)
     };
     this.bigint = {
       create: this.bigint_create.bind(this),
@@ -96,6 +98,12 @@ class Imports {
     let message = decoder.decode(new Uint8Array(this.memory.buffer, message_ptr, message_size));
     let file = decoder.decode(new Uint8Array(this.memory.buffer, file_ptr, file_size));
     throw new EngineError(`condition \`${message}\` @${file}:${line} failed!`);
+  }
+  engine_oom(message_ptr, message_size, file_ptr, file_size, line) {
+    const decoder = new TextDecoder();
+    let message = decoder.decode(new Uint8Array(this.memory.buffer, message_ptr, message_size));
+    let file = decoder.decode(new Uint8Array(this.memory.buffer, file_ptr, file_size));
+    throw new EngineOutOfMemory(`condition \`${message}\` @${file}:${line} failed!`);
   }
 
   bigint_create(id_ptr, high, low) {
@@ -242,11 +250,11 @@ self.addEventListener('message', async (e) => {
     await module;
   }
 
-  reset(); //< reset everything
-
   try {
     var   data    = e.data;
     var   code    = compiler(data.code);
+
+    reset(); //< reset everything
     const actions = build_actions(module.instance.exports, code);
 
     const op_cx  = data.op_cx;
@@ -291,6 +299,18 @@ self.addEventListener('message', async (e) => {
       mean: mean
     });
   } catch (ex) {
+    if (
+      ex instanceof RangeError || //< probably out of memory
+      ex instanceof EngineOutOfMemory
+    ) {
+      console.error(ex);
+      e.ports[0].postMessage({
+        data,
+        outofmemory: true,
+        error: 'Out Of Memory',
+        code
+      });
+    }
     if (ex instanceof EngineError) {
       console.error(ex);
       e.ports[0].postMessage({

@@ -3,43 +3,56 @@ export default async function *execute(queue, signal) {
   const parallel_size = Math.max(1, (navigator.hardwareConcurrency ?? 2) - 1);
   const workers = Array(parallel_size).fill(null).map(() => {
     const worker = new Worker('./worker/worker.js', {type: 'module'})
-    worker.promise = new Promise(r => r());
+    worker.promise = null;
     return worker;
   });
   try {
+    const mqueue = queue.toReversed();
+    let mwait = 0;
     // for each item
-    for (const item of queue) {
-      // search free worker
-      let worker = null;
-      while (!worker) {
-        const free = (await Promise.race(workers.map(x => x.promise.then(() => [x.promise]))))[0];
-        signal.throwIfAborted();
-        worker = workers.find(x => x.promise === free);
+    while (mwait || mqueue.length) {
+      signal.throwIfAborted();
+
+      let worker;
+      if (mqueue.length) {
+        // search free worker
+        worker = workers.find(x => !x.promise);
+        if (!worker) {
+          const promises = workers.map((x,i) => x.promise.then(() => i));
+          const free = await Promise.race(promises);
+          worker = workers[free];
+        }
+      } else {
+        // search busy worker
+        worker = workers.find(x => x.promise);
+        if (!worker) {
+          worker = workers[0];
+        }
       }
 
-      signal.throwIfAborted();
       const res = await worker.promise;
-      signal.throwIfAborted();
       if (res) {
+        mwait -= 1;
+        if ('outofmemory' in res) {
+          mqueue.push(res.data);
+          if (workers.length > 1) {
+            worker.terminate();
+            workers.splice(workers.indexOf(worker), 1);
+            continue;
+          }
+        }
         yield res;
       }
-      signal.throwIfAborted();
 
-      // send request
-      const channel = new MessageChannel();
-      worker.promise = new Promise(r => channel.port1.onmessage = ({data}) => r(data));
-      worker.postMessage(item, [ channel.port2 ]);
-    }
-
-    // return last results
-    for (const worker of workers) {
-      signal.throwIfAborted();
-      const res = await worker.promise;
-      signal.throwIfAborted();
-      if (res) {
-        yield res;
+      if (mqueue.length) {
+        // send request
+        const channel = new MessageChannel();
+        worker.promise = new Promise(r => channel.port1.onmessage = ({data}) => r(data));
+        worker.postMessage(mqueue.pop(), [ channel.port2 ]);
+        mwait += 1;
+      } else {
+        worker.promise = null;
       }
-      signal.throwIfAborted();
     }
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {

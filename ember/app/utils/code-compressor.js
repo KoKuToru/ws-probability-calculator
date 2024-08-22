@@ -1,7 +1,7 @@
 function _compress(code, text) {
   text ??= null;
 
-  const short = code.short ?? (text ? '!' : '');
+  const short = code.short ?? (text ? `!${code.indent}`  : '');
 
   if (!code.short && text) {
     text.push(code.text);
@@ -93,10 +93,12 @@ export function decompress(code, text, indent = 0) {
     }
     [children, code] = decompressChildren(code, text, indent + 2);
     if (l === '!') {
+      const i = /^([0-9]*)/.exec(code[0])[0];
+      code = code.slice(i.length);
       res.push({
         text: text.shift(),
         children,
-        indent
+        indent: i.length ? parseInt(i) : indent
       });
     } else {
       const t = [syntax.find(x => x.short === l).name, ...params];

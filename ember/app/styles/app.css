@@ -44,7 +44,7 @@ body {
   overflow: visible;
 }
 .code-section:has(.settings > .section[data-open]) > .section > div {
-  padding-right: calc(15rem + 1px);
+  padding-right: calc(16rem + 1px);
 }
 
 .overview-section {
@@ -109,12 +109,11 @@ body {
 }
 
 .settings {
-  max-width: 15rem;
+  max-width: 16rem;
   width: 100%;
   margin-top: calc(-1em - 5px - 5px);
   z-index: 0;
   position: absolute;
-  background: white;
   right: 0;
   top: 0;
 }
@@ -122,6 +121,40 @@ body {
   bottom: 0;
   border-left: 1px solid black;
   z-index: 2;
+}
+.settings > .section > div {
+  display: grid;
+  grid-template-columns: 1fr 9ch 9ch;
+  align-items: center;
+  padding: 5px;
+  scrollbar-gutter: unset;
+}
+.settings > .section > div > div {
+  text-align: center;
+  font-size: calc(1em / 1.2);
+}
+
+.settings hr {
+  grid-column-start: 1;
+  grid-column-end: -1;
+  border: none;
+}
+
+input {
+  padding: 0;
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1em;
+  background: white;
+  border: 1px dotted gray;
+  margin-left: -1px;
+  margin-top: -1px;
+  text-align: center;
+  overflow:visible;
+}
+input:invalid {
+  color: #b25454df;
+  font-style: normal;
 }
 
 summary {
@@ -203,6 +236,9 @@ div:has(> .code) {
   display: grid;
   padding: 5px;
   padding-top: 0px;
+}
+.code-section :has(.settings > .section[data-open]) .code {
+  min-height: 10.5em;
 }
 
 .code > div,

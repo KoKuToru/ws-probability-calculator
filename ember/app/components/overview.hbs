@@ -17,7 +17,15 @@
       {{did-insert this.calculate this.state.code this.state.overview_open}}
       {{did-update this.calculate this.state.code this.state.overview_open}}
 
-      {{did-update this.forceCalculate this.state.result}}
+      {{did-update this.forceCalculate
+        this.state.result
+        this.state.my_deck_trg
+        this.state.my_deck_ds
+        this.state.my_waitingroom_trg
+        this.state.my_waitingroom_ds
+        this.state.op_waitingroom_cx
+        this.state.op_waitingroom_ds
+      }}
 
       {{did-insert this.scrollIntoView}}
     >

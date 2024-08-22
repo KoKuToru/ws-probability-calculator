@@ -64,6 +64,37 @@ export default class ProbabilityComponent extends Component {
   @action isSelectedDmg(col) {
     return this.state.selected_dmg === col;
   }
+  @action getTitle(row) {
+    const res = this.state.result.get(...row);
+    if (res) {
+      console.log(res.data);
+      const u1 = Math.max(0, 15-res.data.my_trg -res.data.my_w_trg);
+      const u2 = Math.max(0, 50-res.data.my_size-res.data.my_w_size);
+      const u3 = Math.max(0, 8 -res.data.op_cx  -res.data.op_w_cx);
+      const u4 = Math.max(0, 50-res.data.op_size-res.data.op_w_size);
+      function n(format, ...params) {
+        const res = [];
+        for (let i = 0, j = 0; i < format.length; ++i) {
+          if (i != 0) {
+            res.push(`${params[j++]}`.padStart(2, '0'));
+          }
+          res.push(format[i]);
+        }
+        return res.join('');
+      }
+      const r = [
+        n`my_deck\n\ttrg ${res.data.my_trg} / ${res.data.my_size} ds`,
+        n`my_waitingroom\n\ttrg ${res.data.my_w_trg} / ${res.data.my_w_size} ds`,
+        n`my_unused\n\ttrg ${u1} / ${u2} ds`,
+        n``,
+        n`op_deck\n\tcx ${res.data.op_cx} / ${res.data.op_size} ds`,
+        n`op_waitingroom\n\tcx ${res.data.op_w_cx} / ${res.data.op_w_size} ds`,
+        n`op_unused\n\tcx ${u3} / ${u4} ds`,
+      ].join('\n');
+      console.log(r);
+      return r;
+    }
+  }
 
   @action getCellValue(x, y) {
     const res = this.state.result.get(...x);

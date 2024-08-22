@@ -95,9 +95,18 @@ int main() {
         int op_cx,
         int op_ncx,
         int w_op_cx,
-        int w_op_ncx
+        int w_op_ncx,
+        int my_trg,
+        int my_ntrg,
+        int w_my_trg,
+        int w_my_ntrg
     ) {
-        lazy_engine()->reset(op_cx, op_ncx, w_op_cx, w_op_ncx);
+        lazy_engine()->reset(
+            op_cx, op_ncx,
+            w_op_cx, w_op_ncx,
+            my_trg, my_ntrg,
+            w_my_trg, w_my_ntrg
+        );
     }
 
     __attribute__((export_name("burn"), visibility("default"), flatten))

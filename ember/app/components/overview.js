@@ -187,22 +187,113 @@ export default class OverviewTable extends Component {
 
     const signal = this.#abort_controller.signal;
 
-    const queue = [];
+    const my_trg    = parseInt(this.state.my_deck_trg);
+    const my_size   = parseInt(this.state.my_deck_ds);
+    const my_w_trg  = parseInt(this.state.my_waitingroom_trg);
+    const my_w_size = parseInt(this.state.my_waitingroom_ds);
+    const op_w_cx   = parseW(this.state.op_waitingroom_cx);
+    const op_w_size = parseW(this.state.op_waitingroom_ds);
+
+    this.state.code_error = '';
+    if (my_trg < 0 || my_trg > 15) {
+      this.state.code_error = 'my_deck trg must be 0-15';
+      return;
+    }
+    if (my_size < 0 || my_size > 50) {
+      this.state.code_error = 'my_deck ds must be 0-50';
+      return;
+    }
+    if (my_w_trg < 0 || my_w_trg > 15) {
+      this.state.code_error = 'my_deck trg must be 0-15';
+      return;
+    }
+    if (my_w_size < 0 || my_w_size > 50) {
+      this.state.code_error = 'my_deck ds must be 0-50';
+      return;
+    }
+    if (my_trg > my_size) {
+      this.state.code_error = 'my_deck trg must be 0-ds';
+      return;
+    }
+    if (my_w_trg > my_w_size) {
+      this.state.code_error = 'my_waitingroom trg must be 0-ds';
+      return;
+    }
+    if (my_trg + my_w_trg > 15) {
+      this.state.code_error = 'my_deck + my_waitingroom trg must be 0-15';
+      return;
+    }
+    if (my_size + my_w_size > 50) {
+      this.state.code_error = 'my_deck + my_waitingroom ds must be 0-50';
+      return;
+    }
+    if (op_w_cx[0] < 0 || op_w_cx[0] > 8) {
+      this.state.code_error = 'op_waitingroom cx must be 0-8';
+      return;
+    }
+    if (op_w_size[0] < 0 || op_w_size[0] > 50) {
+      this.state.code_error = 'op_waitingroom ds must be 0-50';
+      return;
+    }
+    if (op_w_cx[0] > op_w_size[0]) {
+      this.state.code_error = 'op_waitingroom cx must be 0-ds';
+      return;
+    }
+    if (op_w_cx[1] && op_w_cx[1] !== 'cx') {
+      this.state.code_error = 'op_waitingroom cx can only use cx';
+    }
+    if (op_w_size[1] && op_w_size[1] !== 'ds') {
+      this.state.code_error = 'op_waitingroom ds can only use ds';
+    }
+
+
+    let queue = [];
     const priority = new Set([...this.state.selected]);
     for (const value of priority) {
       const [cx, ds] = value.split(',').map(x => parseInt(x));
-      queue.push({ op_cx: cx, op_size: ds, code });
+      queue.push({cx, ds})
     }
     if (this.state.overview_open) {
       for (let ds = 1; ds <= 50; ++ds)
-      for (let cx = 0; cx <= Math.min(ds, 8); ++cx) {
+      for (let cx = 0; cx <= 8; ++cx) {
         if (!priority.has([cx, ds].join())) {
-          if (ds + (8 - cx) <= 50) {
-            queue.push({ op_cx: cx, op_size: ds, code });
-          }
+          queue.push({cx, ds});
         }
       }
     }
+    queue.forEach(x => {
+      const cx = x.cx;
+      const ds = x.ds;
+      Object.assign(x, {
+        my_trg,
+        my_size,
+        my_w_trg,
+        my_w_size,
+        op_cx: cx,
+        op_size: ds,
+        op_w_cx: op_w_cx.length == 1 ? op_w_cx[0] : Math.max(0, op_w_cx[0] - cx),
+        code
+      });
+      x.op_w_size = op_w_size.length == 1 ? op_w_size[0] : Math.max(x.op_w_cx, op_w_size[0] - ds);
+    });
+    queue = queue.filter(x => {
+      // sanity checks
+      const res = [
+        // op
+        Math.min(x.op_cx, x.op_w_cx, x.op_size, x.op_w_size) >= 0,
+        x.op_size + x.op_w_size <= 50,
+        x.op_cx + x.op_w_cx <= 8,
+        x.op_cx <= x.op_size,
+        x.op_w_cx <= x.op_w_size,
+        // my
+        Math.min(x.my_trg, x.my_w_trg, x.my_size, x.my_w_size) >= 0,
+        x.my_size + x.my_w_size <= 50,
+        x.my_trg + x.my_w_trg <= 15,
+        x.my_trg <= x.my_size,
+        x.my_w_trg <= x.my_w_size
+      ];
+      return !res.some(x => !x);
+    });
 
     let first = true;
     let error = null;
@@ -285,4 +376,10 @@ export default class OverviewTable extends Component {
     const min_y = this.state.selected.reduce((p, c) => Math.min(p, parseInt(c.split(',')[1])), 50);
     el.querySelector(`[data-cx="${min_x}"][data-ds="${min_y}"]`)?.scrollIntoView?.();
   }
+}
+
+function parseW(x) {
+  x = `${x}`.split('-').map(x => x.trim());
+  x[0] = parseInt(x);
+  return x;
 }

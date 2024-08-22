@@ -47,16 +47,20 @@ struct Engine {
         int op_cx = 8,
         int op_ncx = 22,
         int w_op_cx = 0,
-        int w_op_ncx = 20
+        int w_op_ncx = 20,
+        int my_trg = 15,
+        int my_ntrg = 35,
+        int w_my_trg = 0,
+        int w_my_ntrg = 0
     ) {
         inputs.reset();
         inputs->clear(
             0, //< stack
             0, 0, 0, 0, //< pending stats
-            15, 35, //< my deck
-             0,  0, //< my waiting room
-             op_cx, op_ncx, //< op deck
-             w_op_cx,  w_op_ncx  //< op waiting room
+            my_trg, my_ntrg, //< my deck
+            w_my_trg,  w_my_ntrg, //< my waiting room
+            op_cx, op_ncx, //< op deck
+            w_op_cx,  w_op_ncx  //< op waiting room
         );
         inputs->add(0, 1); //<- intial state
         inputs.commit();

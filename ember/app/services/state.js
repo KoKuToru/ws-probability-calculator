@@ -35,6 +35,14 @@ class Private {
   @tracked settings_open = true;
 
   @tracked selected_dmg = null;
+
+  @tracked my_deck_trg;
+  @tracked my_deck_ds;
+  @tracked my_waitingroom_trg;
+  @tracked my_waitingroom_ds;
+
+  @tracked op_waitingroom_cx;
+  @tracked op_waitingroom_ds;
 }
 
 export default class StateService extends Service {
@@ -52,7 +60,13 @@ export default class StateService extends Service {
       'code_open',
       'selected',
       'code',
-      'result'
+      'result',
+      'my_deck_trg',
+      'my_deck_ds',
+      'my_waitingroom_trg',
+      'my_waitingroom_ds',
+      'op_waitingroom_cx',
+      'op_waitingroom_ds'
     ]) {
       this.#private[k] = d[k];
     }
@@ -87,6 +101,44 @@ export default class StateService extends Service {
       this.#private[k] = d[k];
     }
     this.store();
+  }
+
+  get my_deck_trg() {
+    return this.#private.my_deck_trg ?? 15;
+  }
+  set my_deck_trg(v) {
+    this.#private.my_deck_trg = v;
+  }
+  get my_deck_ds() {
+    return this.#private.my_deck_ds ?? 50;
+  }
+  set my_deck_ds(v) {
+    this.#private.my_deck_ds = v;
+  }
+  get my_waitingroom_trg() {
+    return this.#private.my_waitingroom_trg ?? 0;
+  }
+  set my_waitingroom_trg(v) {
+    this.#private.my_waitingroom_trg = v;
+  }
+  get my_waitingroom_ds() {
+    return this.#private.my_waitingroom_ds ?? 0;
+  }
+  set my_waitingroom_ds(v) {
+    this.#private.my_waitingroom_ds = v;
+  }
+
+  get op_waitingroom_cx() {
+    return this.#private.op_waitingroom_cx ?? '8 - cx';
+  }
+  set op_waitingroom_cx(v) {
+    this.#private.op_waitingroom_cx = v;
+  }
+  get op_waitingroom_ds() {
+    return this.#private.op_waitingroom_ds ?? '50 - ds';
+  }
+  set op_waitingroom_ds(v) {
+    this.#private.op_waitingroom_ds = v;
   }
 
   get loaded() {
@@ -192,8 +244,16 @@ export default class StateService extends Service {
         this.#private.settings_open,
       ].map(x => x ? 1 : 0).join(''),
       this.#private.selected_dmg ?? -1,
-      selected.toString(2).split('').reverse().join('')
-    ]
+      selected.toString(2).split('').reverse().join(''),
+      [
+        this.#private.my_deck_trg,
+        this.#private.my_deck_ds,
+        this.#private.my_waitingroom_trg,
+        this.#private.my_waitingroom_ds,
+        this.#private.op_waitingroom_cx,
+        this.#private.op_waitingroom_ds
+      ].map(x => x ?? null).join(',')
+    ];
     const search = `?${await serializeState(data)}`;
     const a = new URLSearchParams(`?=${search.slice(1)}`).get('');
     const b = new URLSearchParams(`?=${location.search.slice(1)}`).get('');
@@ -214,7 +274,8 @@ export default class StateService extends Service {
           text,
           open,
           dmg,
-          selected
+          selected,
+          settings
         ] = await deserializeState(search);
 
         if (version != CURRENT_VERSION) {
@@ -234,6 +295,15 @@ export default class StateService extends Service {
 
         this.#private.selected = new Set(selected.split('').map((a, b) => a === '1' && [b % 9, Math.floor(b / 9)].join(',')).filter(x => x));
 
+        if (settings) {
+          const s = settings.split(',').map(x => x == '' ? null : x);
+          this.#private.my_deck_trg = s[0];
+          this.#private.my_deck_ds = s[1];
+          this.#private.my_waitingroom_trg = s[2];
+          this.#private.my_waitingroom_ds = s[3];
+          this.#private.op_waitingroom_cx = s[4];
+          this.#private.op_waitingroom_ds = s[5];
+        }
       } catch (e) {
         console.error(e);
         alert('error loading state');

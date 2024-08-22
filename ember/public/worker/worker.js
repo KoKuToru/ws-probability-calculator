@@ -257,18 +257,19 @@ self.addEventListener('message', async (e) => {
     reset(); //< reset everything
     const actions = build_actions(module.instance.exports, code);
 
-    const op_cx  = data.op_cx;
-    const op_ncx = data.op_size - op_cx;
-    const w_op_cx = 8 - op_cx;
-    const w_op_ncx = 50 - 8 - op_ncx;
-
     module.instance.exports.reset(
       // oponent deck:
-      op_cx,
-      op_ncx,
+      data.op_cx,
+      data.op_size - data.op_cx,
       // opponent waiting room:
-      w_op_cx,
-      w_op_ncx
+      data.op_w_cx,
+      data.op_w_size - data.op_w_cx,
+      // my deck:
+      data.my_trg,
+      data.my_size - data.my_trg,
+      // my waiting room:
+      data.my_w_trg,
+      data.my_w_size - data.my_w_trg,
     );
 
     const start = performance.now();

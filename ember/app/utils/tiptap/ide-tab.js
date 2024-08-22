@@ -15,7 +15,8 @@ export default Extension.create({
           pos_start,
           pos_end
         } = getText(editor);
-        if (!nodes.length) {
+        if (!nodes?.length) {
+          editor.chain().insertContent('  ').run();
           return true;
         }
         nodes.reverse(); // makes the position update easier

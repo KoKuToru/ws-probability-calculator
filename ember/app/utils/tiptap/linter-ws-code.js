@@ -30,13 +30,28 @@ export default class WsCode extends LinterPlugin {
         break;
       }
       const o1 = o[1] + p.offset - o[0];
-      const o2 = o1 + p.text.length;
+      const idx = p.text.indexOf(' ');
+      const o2 = o1 + idx;
+      const o3 = o1 + p.text.length;
 
-      this.record(
-        p.error ? 'lint-code-error' : 'lint-code-ok',
-        o1,
-        o2
-      );
+      if (p.error) {
+        this.record(
+          'lint-code-error',
+          o1,
+          o3
+        );
+      } else {
+        this.record(
+          'lint-code-ok lint-code-ok2',
+          o1,
+          o2
+        );
+        this.record(
+          'lint-code-ok',
+          o2,
+          o3
+        );
+      }
     }
 
     return this;

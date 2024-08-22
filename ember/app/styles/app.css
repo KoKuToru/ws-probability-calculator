@@ -573,6 +573,9 @@ code {
   color: black;
   font-style: normal;
 }
+.lint-code-ok2 {
+  font-weight: bold;
+}
 .lint-code-error {
   color: #b25454df;
   text-decoration-line: underline;

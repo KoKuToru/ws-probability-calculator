@@ -617,3 +617,52 @@ code {
 .code li.has-focus::marker {
   content: '▪ ';
 }
+
+/* DARK STYLE */
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: #181818;
+    color: #80858b;
+  }
+  :not(.settings) > .section > summary {
+    background-color: #1f1f1f;
+  }
+  input, .code > div {
+    background-color: #1f1f1f;
+    color: #aaaaaa;
+  }
+  .code .lint-code-ok {
+    color: white;
+  }
+  .header-section {
+    color: white;
+  }
+  .table > div {
+    background-color: #1f1f1f;
+  }
+  .table > .header.row,
+  .table > .header.col,
+  .table > .header.col.row,
+  .table > div:not(.header) {
+    border-color: gray;
+
+  }
+  .table > div > svg > line {
+    stroke: black;
+  }
+  .table > .header.col.row > svg > line {
+    stroke: gray;
+  }
+  .table > .color-0,
+  .table > .color-1,
+  .table > .color-2,
+  .table > .color-3,
+  .table > .color-4,
+  .table > .color-5,
+  .table > .color-6,
+  .table > .color-7,
+  .table > .color-8 {
+    color: black;
+  }
+}

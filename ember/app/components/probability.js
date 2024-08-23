@@ -50,7 +50,7 @@ export default class ProbabilityComponent extends Component {
   }
 
   get cols() {
-    return Array(this.rows.reduce((p, c) => Math.max(p, this.state.result.get(...c)?.dmg?.length ?? 0), 0)).fill().map((_,i) => i);
+    return Array(this.rows.reduce((p, c) => Math.max(p, this.state.result.get(...c)?.dmg?.length ?? 0), 1)).fill().map((_,i) => i);
   }
 
   @action setDmg(dmg, e) {
@@ -67,11 +67,6 @@ export default class ProbabilityComponent extends Component {
   @action getTitle(row) {
     const res = this.state.result.get(...row);
     if (res) {
-      console.log(res.data);
-      const u1 = Math.max(0, 15-res.data.my_trg -res.data.my_w_trg);
-      const u2 = Math.max(0, 50-res.data.my_size-res.data.my_w_size);
-      const u3 = Math.max(0, 8 -res.data.op_cx  -res.data.op_w_cx);
-      const u4 = Math.max(0, 50-res.data.op_size-res.data.op_w_size);
       function n(format, ...params) {
         const res = [];
         for (let i = 0, j = 0; i < format.length; ++i) {
@@ -83,15 +78,15 @@ export default class ProbabilityComponent extends Component {
         return res.join('');
       }
       const r = [
+        res.data.valid ? null : 'INVALID!!\n',
         n`my_deck\n\ttrg ${res.data.my_trg} / ${res.data.my_size} ds`,
         n`my_waitingroom\n\ttrg ${res.data.my_w_trg} / ${res.data.my_w_size} ds`,
-        n`my_unused\n\ttrg ${u1} / ${u2} ds`,
+        n`my_unused\n\ttrg ${res.data.my_u_trg} / ${res.data.my_u_size} ds`,
         n``,
         n`op_deck\n\tcx ${res.data.op_cx} / ${res.data.op_size} ds`,
         n`op_waitingroom\n\tcx ${res.data.op_w_cx} / ${res.data.op_w_size} ds`,
-        n`op_unused\n\tcx ${u3} / ${u4} ds`,
-      ].join('\n');
-      console.log(r);
+        n`op_unused\n\tcx ${res.data.op_u_cx} / ${res.data.op_u_size} ds`,
+      ].filter(x=>x).join('\n');
       return r;
     }
   }
@@ -102,6 +97,9 @@ export default class ProbabilityComponent extends Component {
       return null;
     }
     if (res.error) {
+      if (res.error === 'invalid') {
+        return 'INV';
+      }
       return 'ERR';
     }
     let v = res.dmg_acc[y];
@@ -114,6 +112,9 @@ export default class ProbabilityComponent extends Component {
     v ??= null;
     if (v === null) {
       return null;
+    }
+    if (v === 'INV') {
+      return 'invalid';
     }
     if (v === 'ERR') {
       return 'error';

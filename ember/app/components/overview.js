@@ -74,7 +74,16 @@ export default class OverviewTable extends Component {
       return undefined;
     }
     if (value.error) {
-      return 'error';
+      const cls = ['selectable'];
+      if (this.state.isSelected([value.x, value.y].join())) {
+        cls.push('selected');
+      }
+      if (value.error === 'invalid') {
+        cls.push('invalid');
+      } else {
+        cls.push('error');
+      }
+      return cls.join(' ');
     }
     let idx = null;
     const selected_dmg = this.state.selected_dmg ?? null;
@@ -107,6 +116,9 @@ export default class OverviewTable extends Component {
       return undefined;
     }
     if (value.error) {
+      if (value.error == 'invalid') {
+        return 'INV';
+      }
       return 'ERR';
     }
     const selected_dmg = this.state.selected_dmg ?? null;
@@ -189,10 +201,10 @@ export default class OverviewTable extends Component {
 
     const my_trg    = parseInt(this.state.my_deck_trg);
     const my_size   = parseInt(this.state.my_deck_ds);
-    const my_w_trg  = parseInt(this.state.my_waitingroom_trg);
-    const my_w_size = parseInt(this.state.my_waitingroom_ds);
-    const op_w_cx   = parseW(this.state.op_waitingroom_cx);
-    const op_w_size = parseW(this.state.op_waitingroom_ds);
+    const my_u_trg  = parseInt(this.state.my_unused_trg);
+    const my_u_size = parseInt(this.state.my_unused_ds);
+    const op_u_cx   = parseInt(this.state.op_unused_cx);
+    const op_u_size = parseInt(this.state.op_unused_ds);
 
     this.state.code_error = '';
     if (my_trg < 0 || my_trg > 15) {
@@ -203,49 +215,42 @@ export default class OverviewTable extends Component {
       this.state.code_error = 'my_deck ds must be 0-50';
       return;
     }
-    if (my_w_trg < 0 || my_w_trg > 15) {
-      this.state.code_error = 'my_deck trg must be 0-15';
+    if (my_u_trg < 0 || my_u_trg > 15) {
+      this.state.code_error = 'my_unused trg must be 0-15';
       return;
     }
-    if (my_w_size < 0 || my_w_size > 50) {
-      this.state.code_error = 'my_deck ds must be 0-50';
+    if (my_u_size < 0 || my_u_size > 50) {
+      this.state.code_error = 'my_unused ds must be 0-50';
       return;
     }
     if (my_trg > my_size) {
       this.state.code_error = 'my_deck trg must be 0-ds';
       return;
     }
-    if (my_w_trg > my_w_size) {
-      this.state.code_error = 'my_waitingroom trg must be 0-ds';
+    if (my_u_trg > my_u_size) {
+      this.state.code_error = 'my_unused trg must be 0-ds';
       return;
     }
-    if (my_trg + my_w_trg > 15) {
-      this.state.code_error = 'my_deck + my_waitingroom trg must be 0-15';
+    if (my_trg + my_u_trg > 15) {
+      this.state.code_error = 'my_deck + my_unused trg must be 0-15';
       return;
     }
-    if (my_size + my_w_size > 50) {
-      this.state.code_error = 'my_deck + my_waitingroom ds must be 0-50';
+    if (my_size + my_u_size > 50) {
+      this.state.code_error = 'my_deck + my_unused ds must be 0-50';
       return;
     }
-    if (op_w_cx[0] < 0 || op_w_cx[0] > 8) {
-      this.state.code_error = 'op_waitingroom cx must be 0-8';
+    if (op_u_cx < 0 || op_u_cx > 8) {
+      this.state.code_error = 'op_unused cx must be 0-15';
       return;
     }
-    if (op_w_size[0] < 0 || op_w_size[0] > 50) {
-      this.state.code_error = 'op_waitingroom ds must be 0-50';
+    if (op_u_size < 0 || op_u_size > 50) {
+      this.state.code_error = 'op_unused ds must be 0-50';
       return;
     }
-    if (op_w_cx[0] > op_w_size[0]) {
-      this.state.code_error = 'op_waitingroom cx must be 0-ds';
+    if (op_u_cx > op_u_size) {
+      this.state.code_error = 'op_unused cx must be 0-ds';
       return;
     }
-    if (op_w_cx[1] && op_w_cx[1] !== 'cx') {
-      this.state.code_error = 'op_waitingroom cx can only use cx';
-    }
-    if (op_w_size[1] && op_w_size[1] !== 'ds') {
-      this.state.code_error = 'op_waitingroom ds can only use ds';
-    }
-
 
     let queue = [];
     const priority = new Set([...this.state.selected]);
@@ -261,38 +266,61 @@ export default class OverviewTable extends Component {
         }
       }
     }
+    queue = queue.filter(x => x.cx <= x.ds && 50 - ( 8 - x.cx ) >= x.ds);
     queue.forEach(x => {
       const cx = x.cx;
       const ds = x.ds;
+      const op_cx     = cx;
+      const op_size   = ds;
+      const op_w_cx   = Math.max(-100, 8 - op_cx - op_u_cx);
+      const op_w_size = Math.max(-100, 50 - op_size - op_u_size);
+      const my_w_trg  = Math.max(-100, 15 - my_trg - my_u_trg);
+      const my_w_size = Math.max(-100, 50 - my_size - my_u_size);
+
       Object.assign(x, {
         my_trg,
         my_size,
         my_w_trg,
         my_w_size,
-        op_cx: cx,
-        op_size: ds,
-        op_w_cx: op_w_cx.length == 1 ? op_w_cx[0] : Math.max(0, op_w_cx[0] - cx),
+        my_u_trg,
+        my_u_size,
+        op_cx,
+        op_size,
+        op_w_cx,
+        op_w_size,
+        op_u_cx,
+        op_u_size,
         code
       });
-      x.op_w_size = op_w_size.length == 1 ? op_w_size[0] : Math.max(x.op_w_cx, op_w_size[0] - ds);
     });
     queue = queue.filter(x => {
       // sanity checks
       const res = [
         // op
-        Math.min(x.op_cx, x.op_w_cx, x.op_size, x.op_w_size) >= 0,
-        x.op_size + x.op_w_size <= 50,
-        x.op_cx + x.op_w_cx <= 8,
+        Math.min(x.op_cx, x.op_w_cx, x.op_size, x.op_w_size, x.op_u_cx, x.op_u_size) >= 0,
         x.op_cx <= x.op_size,
         x.op_w_cx <= x.op_w_size,
+        x.op_u_cx <= x.op_u_size,
+        x.op_cx + x.op_w_cx + x.op_u_cx == 8,
+        x.op_size + x.op_w_size + x.op_u_size == 50,
         // my
-        Math.min(x.my_trg, x.my_w_trg, x.my_size, x.my_w_size) >= 0,
-        x.my_size + x.my_w_size <= 50,
-        x.my_trg + x.my_w_trg <= 15,
+        Math.min(x.my_trg, x.my_w_trg, x.my_size, x.my_w_size, x.my_u_trg, x.my_u_size) >= 0,
         x.my_trg <= x.my_size,
-        x.my_w_trg <= x.my_w_size
+        x.my_w_trg <= x.my_w_size,
+        x.my_u_trg <= x.my_u_size,
+        x.my_trg + x.my_w_trg + x.my_u_trg == 15,
+        x.my_size + x.my_w_size + x.my_u_size == 50,
       ];
-      return !res.some(x => !x);
+      x.valid = !res.some(x => !x);
+      if (!x.valid) {
+        this.state.result.set(x.cx, x.ds, {
+          x: x.cx,
+          y: x.ds,
+          data: x,
+          error: 'invalid'
+        });
+      }
+      return x.valid;
     });
 
     let first = true;
@@ -376,10 +404,4 @@ export default class OverviewTable extends Component {
     const min_y = this.state.selected.reduce((p, c) => Math.min(p, parseInt(c.split(',')[1])), 50);
     el.querySelector(`[data-cx="${min_x}"][data-ds="${min_y}"]`)?.scrollIntoView?.();
   }
-}
-
-function parseW(x) {
-  x = `${x}`.split('-').map(x => x.trim());
-  x[0] = parseInt(x);
-  return x;
 }

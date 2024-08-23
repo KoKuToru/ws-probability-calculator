@@ -132,37 +132,10 @@ export default class Code extends Component {
     if (v.trim() === '') {
       v = undefined;
     } else {
-      if (['my_deck_trg', 'my_deck_ds', 'my_waitingroom_trg', 'my_waitingroom_ds'].includes(w)) {
-        v = v.trim();
-        v = parseInt(v);
-        if (isNaN(v)) {
-          v = undefined;
-        }
-      }
-      if (['op_waitingroom_cx', 'op_waitingroom_ds'].includes(w)) {
-        v = /^\s*(-{0,1}[0-9]+)\s*(?:$|(?:-\s*(cx|ds)\s*$))/.exec(v);
-        if (!v) {
-          e.target.setCustomValidity('parse error');
-          e.target.reportValidity();
-          return;
-        }
-        v = v.slice(1, 3);
-        v[0] = parseInt(v[0]);
-        if (w.endsWith('ds') && v[1] && v[1] !== 'ds') {
-          e.target.setCustomValidity('can only use ds');
-          e.target.reportValidity();
-          return;
-        }
-        if (w.endsWith('cx') && v[1] && v[1] !== 'cx') {
-          e.target.setCustomValidity('can only use cx');
-          e.target.reportValidity();
-          return;
-        }
-        if (!v[1]) {
-          v = v[0];
-        } else {
-          v = `${v[0]} - ${v[1]}`;
-        }
+      v = v.trim();
+      v = parseInt(v);
+      if (isNaN(v)) {
+        v = undefined;
       }
     }
     e.target.setCustomValidity('');

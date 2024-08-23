@@ -38,11 +38,11 @@ class Private {
 
   @tracked my_deck_trg;
   @tracked my_deck_ds;
-  @tracked my_waitingroom_trg;
-  @tracked my_waitingroom_ds;
+  @tracked my_unused_trg;
+  @tracked my_unused_ds;
 
-  @tracked op_waitingroom_cx;
-  @tracked op_waitingroom_ds;
+  @tracked op_unused_cx;
+  @tracked op_unused_ds;
 }
 
 export default class StateService extends Service {
@@ -63,10 +63,10 @@ export default class StateService extends Service {
       'result',
       'my_deck_trg',
       'my_deck_ds',
-      'my_waitingroom_trg',
-      'my_waitingroom_ds',
-      'op_waitingroom_cx',
-      'op_waitingroom_ds'
+      'my_unused_trg',
+      'my_unused_ds',
+      'op_unused_cx',
+      'op_unused_ds'
     ]) {
       this.#private[k] = d[k];
     }
@@ -115,30 +115,30 @@ export default class StateService extends Service {
   set my_deck_ds(v) {
     this.#private.my_deck_ds = v;
   }
-  get my_waitingroom_trg() {
-    return this.#private.my_waitingroom_trg ?? 0;
+  get my_unused_trg() {
+    return this.#private.my_unused_trg ?? 0;
   }
-  set my_waitingroom_trg(v) {
-    this.#private.my_waitingroom_trg = v;
+  set my_unused_trg(v) {
+    this.#private.my_unused_trg = v;
   }
-  get my_waitingroom_ds() {
-    return this.#private.my_waitingroom_ds ?? 0;
+  get my_unused_ds() {
+    return this.#private.my_unused_ds ?? 0;
   }
-  set my_waitingroom_ds(v) {
-    this.#private.my_waitingroom_ds = v;
+  set my_unused_ds(v) {
+    this.#private.my_unused_ds = v;
   }
 
-  get op_waitingroom_cx() {
-    return this.#private.op_waitingroom_cx ?? '8 - cx';
+  get op_unused_cx() {
+    return this.#private.op_unused_cx ?? 0;
   }
-  set op_waitingroom_cx(v) {
-    this.#private.op_waitingroom_cx = v;
+  set op_unused_cx(v) {
+    this.#private.op_unused_cx = v;
   }
-  get op_waitingroom_ds() {
-    return this.#private.op_waitingroom_ds ?? '50 - ds';
+  get op_unused_ds() {
+    return this.#private.op_unused_ds ?? 0;
   }
-  set op_waitingroom_ds(v) {
-    this.#private.op_waitingroom_ds = v;
+  set op_unused_ds(v) {
+    this.#private.op_unused_ds = v;
   }
 
   get loaded() {
@@ -248,10 +248,10 @@ export default class StateService extends Service {
       [
         this.#private.my_deck_trg,
         this.#private.my_deck_ds,
-        this.#private.my_waitingroom_trg,
-        this.#private.my_waitingroom_ds,
-        this.#private.op_waitingroom_cx,
-        this.#private.op_waitingroom_ds
+        this.#private.my_unused_trg,
+        this.#private.my_unused_ds,
+        this.#private.op_unused_cx,
+        this.#private.op_unused_ds
       ].map(x => x ?? null).join(',')
     ];
     const search = `?${await serializeState(data)}`;
@@ -299,10 +299,10 @@ export default class StateService extends Service {
           const s = settings.split(',').map(x => x == '' ? null : x);
           this.#private.my_deck_trg = s[0];
           this.#private.my_deck_ds = s[1];
-          this.#private.my_waitingroom_trg = s[2];
-          this.#private.my_waitingroom_ds = s[3];
-          this.#private.op_waitingroom_cx = s[4];
-          this.#private.op_waitingroom_ds = s[5];
+          this.#private.my_unused_trg = s[2];
+          this.#private.my_unused_ds = s[3];
+          this.#private.op_unused_cx = s[4];
+          this.#private.op_unused_ds = s[5];
         }
       } catch (e) {
         console.error(e);

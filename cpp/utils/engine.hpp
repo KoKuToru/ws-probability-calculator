@@ -34,7 +34,7 @@ concept execute_callback_copy = requires(F f, const State* x, StateStream& y) {
 
 template<typename F>
 concept execute_callback = requires(F f) {
-    (execute_callback_inplace<F> || execute_callback_copy<F>);
+    requires(execute_callback_inplace<F> || execute_callback_copy<F>);
 };
 
 struct Engine {
@@ -153,7 +153,10 @@ struct Engine {
                         }
                         output->my_stock(trigger, !trigger);
                         if (output->my_reshuffle()) {
-                            if (!output->my_take(DECK, CLOCK, reshuffle.check() ? TRG : NTRG, probability)) {
+                            if (
+                                auto card = reshuffle.check(std::array{TRG, NTRG});
+                                !card || !output->my_take(DECK, CLOCK, *card, probability)
+                            ) {
                                 // pick failed
                                 return;
                             }
@@ -170,7 +173,10 @@ struct Engine {
                             }
                             if (output->op_reshuffle()) {
                                 reshuffled += 1;
-                                if (!output->op_take(DECK, CLOCK, reshuffle.check() ? CX : NCX, probability)) {
+                                if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
                                     // pick failed
                                     return;
                                 }
@@ -190,7 +196,10 @@ struct Engine {
                             }
                             if (output->op_reshuffle()) {
                                 reshuffled += 1;
-                                if (!output->op_take(DECK, CLOCK, reshuffle.check() ? CX : NCX, probability)) {
+                                 if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
                                     // pick failed
                                     return;
                                 }
@@ -243,7 +252,10 @@ struct Engine {
                             }
                             if (output->op_reshuffle()) {
                                 reshuffled += 1;
-                                if (!output->op_take(DECK, CLOCK, reshuffle.check() ? CX : NCX, probability)) {
+                                 if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
                                     // pick failed
                                     return;
                                 }
@@ -263,7 +275,10 @@ struct Engine {
                             }
                             if (output->op_reshuffle()) {
                                 reshuffled += 1;
-                                if (!output->op_take(DECK, CLOCK, reshuffle.check() ? CX : NCX, probability)) {
+                                if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
                                     // pick failed
                                     return;
                                 }
@@ -311,13 +326,19 @@ struct Engine {
                         output = *state;
 
                         for (int i = 0; i < count; ++i) {
-                            if (!output->op_take(DECK, PENDING, permutation.check() ? CX : NCX, probability)) {
+                            if (
+                                auto card = permutation.check(std::array{CX, NCX});
+                                !card || !output->op_take(DECK, PENDING, *card, probability)
+                            ) {
                                 // pick failed
                                 return;
                             }
                             if (output->op_reshuffle()) {
                                 reshuffled += 1;
-                                if (!output->op_take(DECK, CLOCK, reshuffle.check() ? CX : NCX, probability)) {
+                                if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
                                     // pick failed
                                     return;
                                 }

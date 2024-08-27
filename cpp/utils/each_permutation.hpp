@@ -3,25 +3,32 @@
 
 #include <concepts>
 #include <cstdint>
-
-#include <iostream>
+#include <optional>
 
 struct PermutationState {
     void reset() {
-        idx = 1;
+        idx = 0;
         cmask = 0;
     }
     void next() {
-        idx = 0;
+        idx = idx_unset;
         state += 1;
         mask |= cmask;
     }
-    bool check() {
-        assert(idx != 0); //<- check if reset got called
-        const auto v = state & idx;
-        cmask |= idx;
-        idx <<= 1;
-        return v;
+    template<typename T, size_t S> std::optional<T> check(std::array<T, S> values) {
+        assert(idx != idx_unset); //<- check if reset got called
+        const auto size = values.size();
+        const auto vfull = ~decltype(state){};
+        const auto vmask = vfull >> __builtin_clzll(size - 1);
+        assert(vfull >> idx >= vmask); //<- check if in range
+        const auto v = (state >> idx) & vmask;
+        if (v >= size) {
+            // SKIP
+            return std::nullopt;
+        }
+        cmask |= vmask << idx;
+        idx += 1;
+        return values[v];
     }
     bool done() {
         return (state & mask) == 0;
@@ -38,9 +45,10 @@ struct PermutationState {
 
     private:
     uint64_t state  = 0;
-    uint64_t idx    = 0;
     uint64_t mask   = 0;
     uint64_t cmask  = 0;
+    uint16_t idx    = 0;
+    static constexpr uint16_t idx_unset = ~decltype(idx){};
 };
 
 template<typename F>

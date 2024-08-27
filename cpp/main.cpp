@@ -5,9 +5,9 @@ int main() {
     std::cout << "test permutations:" << std::endl;
     each_permutation([](PermutationState& state) {
         state.reset();
-        int a = state.check();
-        int b = state.check();
-        int c = state.check();
+        int a = *state.check(std::array{0, 1});
+        int b = *state.check(std::array{0, 1});
+        int c = *state.check(std::array{0, 1});
        if (state.skip()) {
             std::cout << "skip: ";
         } else {
@@ -23,12 +23,12 @@ int main() {
     std::cout << "test reshuffle:" << std::endl;
     each_reshuffle([](ReshuffleState& state) {
         state.reset();
-        int a = state.check();
+        int a = *state.check(std::array{0, 1});
         int b = 2;
         if (!a) {
-            b = state.check();
+            b = *state.check(std::array{0, 1});
         }
-        int c = state.check();
+        int c = *state.check(std::array{0, 1});
         if (state.skip()) {
             std::cout << "skip: ";
         } else {

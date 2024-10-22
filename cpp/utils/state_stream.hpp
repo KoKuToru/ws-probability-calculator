@@ -14,6 +14,8 @@ struct StateStream {
     StateStream() {
         tmp = reinterpret_cast<State*>(malloc(STATE_CHUNK_SIZE));
         assert_oom(tmp != nullptr);
+        tmp->count = 0;
+
         next = reinterpret_cast<State*>(malloc(STATE_CHUNK_SIZE));
         assert_oom(next != nullptr);
 
@@ -32,6 +34,7 @@ struct StateStream {
 
     ~StateStream() {
         reset();
+        tmp->~State();
         free(tmp);
         for (size_t i = 0; i < chunk_reserved; ++i) {
             if (!chunk[i]) {
@@ -102,6 +105,7 @@ struct StateStream {
         }
 
         // put it in
+        next->count = 0;
         *next = *tmp;
         order[order_idx] = next;
         assert(order_idx != 0xFFFFFFFF);

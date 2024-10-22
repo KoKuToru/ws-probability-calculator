@@ -75,6 +75,22 @@ int main() {
         e.attack(3); e.flush();
     }
     e.dump();
+
+    // https://kokutoru.github.io/ws-probability-calculator/?*oIHmSg4u2R2fhiOwEoU8Fat4dRdgszu9XcL4YYTp4UHUKOv_.L-0gIOz9o4tiPA1Et68UG2Kclr3Of*f4f4
+    std::cout << "test 3:" << std::endl;
+    e.reset(
+        2, 4 - 2,
+        6, 46 - 6,
+        15, 50 - 15,
+        0, 0
+    );
+    e.mill(2); e.push(PUSH_ICX); e.flush();
+    e.check(0, EQUALS, 0); e.damage(3); e.flush();
+    e.pop(1); e.flush();
+    e.burn(3); e.flush();
+    e.burn(3); e.flush();
+    e.burn(3); e.flush();
+    e.dump();
 }
 #else
 

@@ -113,13 +113,11 @@ struct State : StateBase {
 
     State& operator=(const State& other) {
         for (size_t i = 0; i < count; ++i) {
-            probability(i).~Fraction();
+            get_result(i)->~Result();
         }
-        std::memmove(reinterpret_cast<unsigned char*>(this), reinterpret_cast<const unsigned char*>(&other), sizeof(State));
-        for (size_t i = 0; i < other.count; ++i) {
-            get_result(i)->dmg = other.dmg(i);
-            get_result(i)->probability = other.probability(i);
-        }
+        std::memmove(dynamic_cast<StateBase*>(this), dynamic_cast<const StateBase*>(&other), sizeof(StateBase));
+        count = 0;
+        add(other);
         return *this;
     }
 
@@ -148,7 +146,7 @@ struct State : StateBase {
 
     ~State() {
         for (size_t i = 0; i < count; ++i) {
-            probability(i).~Fraction();
+            get_result(i)->~Result();
         }
         count = 0;
     }

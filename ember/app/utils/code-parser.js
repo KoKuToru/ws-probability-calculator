@@ -16,6 +16,7 @@ export const syntax = [
   { regex: /^each\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'each',   short: 'e', need_parent: true },
   { regex: /^if\s+(cx)\s*$/g,           params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(not\s+cx)\s*$/g,     params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
+  { regex: /^else\s*$/g,                params: [() => null],  name: 'else',   short: 'j', need_prev_sibling: 'if'}
 ];
 
 export function unparse(code) {
@@ -47,8 +48,11 @@ export default function parse(code) {
     code_offset.push({ text: r[1], lineoffset: r.index});
   }
 
-  const parent_stack = [];
-  const ast = code_offset.map(({text, lineoffset}) => {
+  const ast = {
+    children: []
+  };
+  const parent_stack = [ast];
+  for (let {text, lineoffset} of code_offset) {
     let indent = 0;
     let offset = 0;
     for (let i = 0; i < text.length; ++i) {
@@ -91,25 +95,40 @@ export default function parse(code) {
         } else {
           c.short = `${c.short}${c.code.slice(1).join(',')}`;
         }
-        if (!s.need_parent || parent_stack.find(x => ['attack', 'burn', 'mill'].includes(x?.code?.[0]))) {
-          parent_stack.push(c);
-          if (parent) {
-            parent.children.push(c);
-            return null;
+        if (s.need_parent) {
+          if (!parent_stack.find(x => ['attack', 'burn', 'mill'].includes(x?.code?.[0]))) {
+            error = `needs a 'attack'/'burn' or 'mill' as parent`;
+            break;
           }
-          return c;
-        } else {
-          error = 'needs a parent';
+        } else if (s.need_prev_sibling) {
+          var found_if = false;
+          for (let j = parent.children.length - 1; j >= 0; --j) {
+            if ('code' in parent.children[j]) {
+              if (parent.children[j].code[0] !== s.need_prev_sibling) {
+                break;
+              } else {
+                found_if = parent.children[j];
+                break;
+              }
+            }
+          }
+          if (!found_if) {
+            error = `needs a '${s.need_prev_sibling}' as previous sibling`
+            break;
+          }
+          c.code[1] = found_if.code[1];
         }
+
+        parent_stack.push(c);
+        parent.children.push(c);
+        break;
       }
     }
-    const c = { text, indent, error, children: [], offset: lineoffset };
-    if (parent) {
+    if (parent === parent_stack.at(-1)) {
+      const c = { text, indent, error, children: [], offset: lineoffset };
       parent.children.push(c);
-      return null;
     }
-    return c;
-  }).filter(x => x);
+  }
 
-  return ast;
+  return ast.children;
 }

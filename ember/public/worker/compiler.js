@@ -59,6 +59,23 @@ export default function compile(code, code_parents, stack, conditions, limits) {
             throw new Error('stack var not found');
         }
       } break;
+      case 'else': {
+        const name = `push_icx`.toUpperCase();
+        const index = stack.lastIndexOf(name);
+        if (index < 0) {
+          throw new Error('stack var not found');
+        }
+        switch (params[0]) {
+          case 'cx':
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
+            break;
+          case 'ncx':
+            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
+            break;
+          default:
+            throw new Error('stack var not found');
+        }
+      } break;
       case 'attack':
       case 'burn':
       case 'mill':

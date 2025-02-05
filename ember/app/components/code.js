@@ -3,7 +3,7 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 import parseCode, { unparse as unparseCode } from 'ws/utils/code-parser';
 import { compress as compressCode, decompress as decompressCode } from 'ws/utils/code-compressor';
-import { tracked } from '@glimmer/tracking';
+import { tracked, cached } from '@glimmer/tracking';
 
 import { Editor } from '@tiptap/core';
 import Document from '@tiptap/extension-document';
@@ -66,11 +66,11 @@ export default class Code extends Component {
     this.state.code = value;
   }
 
-  get codeParsed() {
+  @cached get codeParsed() {
     return parseCode(this.state.code);
   }
 
-  get compressed() {
+  @cached get compressed() {
     const code = compressCode(this.codeParsed);
     return code;
   }

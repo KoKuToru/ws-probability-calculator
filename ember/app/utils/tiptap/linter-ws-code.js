@@ -37,8 +37,8 @@ export default class WsCode extends LinterPlugin {
       if (p.error) {
         this.record(
           'lint-code-error',
-          o1,
-          o3
+          o1 + p.indent,
+          o3 + p.indent
         );
       } else {
         this.record(

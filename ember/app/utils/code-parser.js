@@ -16,7 +16,7 @@ export const syntax = [
   { regex: /^each\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'each',   short: 'e', need_parent: true },
   { regex: /^if\s+(cx)\s*$/g,           params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(not\s+cx)\s*$/g,     params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
-  { regex: /^else\s*$/g,                params: [() => null],  name: 'else',   short: 'j', need_prev_sibling: 'if'}
+  { regex: /^else\s*$/g,                params: [() => null],  name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']}
 ];
 
 export function unparse(code) {
@@ -104,7 +104,7 @@ export default function parse(code) {
           var found_if = false;
           for (let j = parent.children.length - 1; j >= 0; --j) {
             if ('code' in parent.children[j]) {
-              if (parent.children[j].code[0] !== s.need_prev_sibling) {
+              if (!s.need_prev_sibling.includes(parent.children[j].code[0])) {
                 break;
               } else {
                 found_if = parent.children[j];
@@ -113,7 +113,7 @@ export default function parse(code) {
             }
           }
           if (!found_if) {
-            error = `needs a '${s.need_prev_sibling}' as previous sibling`
+            error = `needs a ${s.need_prev_sibling.join(',')} as previous sibling`
             break;
           }
           c.code[1] = found_if.code[1];

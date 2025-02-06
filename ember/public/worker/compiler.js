@@ -178,7 +178,8 @@ function collect_stack(code, stack) {
         }
         collect_stack(children, stack);
       } break;
-      case 'if': {
+      case 'if':
+      case 'else': {
         const name = `push_icx`.toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);

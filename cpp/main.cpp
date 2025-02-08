@@ -145,6 +145,11 @@ int main() {
         lazy_engine()->mill(amount);
     }
 
+    __attribute__((export_name("reveal"), visibility("default"), flatten))
+    extern "C" void reveal(int amount) {
+        lazy_engine()->reveal(amount);
+    }
+
     __attribute__((export_name("pop"), visibility("default"), flatten))
     extern "C" void pop(int amount) {
         lazy_engine()->pop(amount);

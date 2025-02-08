@@ -363,6 +363,48 @@ struct Engine {
         );
     }
 
+    void reveal(int count) {
+        assert(count > 0);
+        execute(
+            [=](const State* state, StateStream& output) {
+                assert(state->p_my_trg == 0);
+                assert(state->p_my_ntrg == 0);
+                assert(state->p_op_cx == 0);
+                assert(state->p_op_ncx == 0);
+                each_permutation([&](PermutationState& permutation) {
+                    permutation.reset();
+
+                    Fraction probability = 1;
+
+                    output = *state;
+
+                    for (int i = 0; i < count; ++i) {
+                        if (
+                            auto card = permutation.check(std::array{CX, NCX});
+                            !card || !output->op_take(DECK, PENDING, *card, probability)
+                        ) {
+                            // pick failed
+                            return;
+                        }
+                        if (output->op_cx <= 0 && output->op_ncx <= 0) {
+                            // XXX: nothing in deck..
+                            break;
+                        }
+                    }
+
+                    if (permutation.skip()) {
+                        return;
+                    }
+
+                    output->op_reveal(output->p_op_cx, output->p_op_ncx);
+
+                    output->update(0, probability);
+                    output.commit();
+                });
+            }
+        );
+    }
+
     void damage(int dmg) {
         execute(
             [=](State* state) {

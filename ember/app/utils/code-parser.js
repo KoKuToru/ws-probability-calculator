@@ -1,22 +1,24 @@
 export const syntax = [
-  { regex: /^attack\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'attack', short: 'a', need_parent: false },
+  { regex: /^attack\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'attack', short: 'a' },
   { regex: /^attack\s+(cx)\s*$/g,       params: [() => 'cx'],  name: 'attack', short: 'a', need_parent: true },
   { regex: /^attack\s+(not\s+cx)\s*$/g, params: [() => 'ncx'], name: 'attack', short: 'a', need_parent: true },
-  { regex: /^burn\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'burn',   short: 'b', need_parent: false },
+  { regex: /^burn\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'burn',   short: 'b' },
   { regex: /^burn\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'burn',   short: 'b', need_parent: true },
   { regex: /^burn\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'burn',   short: 'b', need_parent: true },
-  { regex: /^mill\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'mill',   short: 'm', need_parent: false },
+  { regex: /^mill\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'mill',   short: 'm' },
   { regex: /^mill\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'mill',   short: 'm', need_parent: true },
   { regex: /^mill\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'mill',   short: 'm', need_parent: true },
-  { regex: /^damage\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'damage', short: 'd', need_parent: false },
+  { regex: /^damage\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'damage', short: 'd' },
   { regex: /^damage\s+(cx)\s*$/g,       params: [() => 'cx'],  name: 'damage', short: 'd', need_parent: true },
   { regex: /^damage\s+(not cx)\s*$/g,   params: [() => 'ncx'], name: 'damage', short: 'd', need_parent: true },
-  { regex: /^repeat\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'repeat', short: 'r', need_parent: false },
+  { regex: /^repeat\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'repeat', short: 'r' },
   { regex: /^each\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'each',   short: 'e', need_parent: true },
   { regex: /^each\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'each',   short: 'e', need_parent: true },
   { regex: /^if\s+(cx)\s*$/g,           params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(not\s+cx)\s*$/g,     params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
-  { regex: /^else\s*$/g,                params: [() => null],  name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']}
+  { regex: /^else\s*$/g,                params: [],            name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
+  { regex: /^reveal\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'reveal', short: 'p' },
+  { regex: /^reveal\s*$/g,              params: [],            name: 'reveal', short: 'p' }
 ];
 
 export function unparse(code) {
@@ -96,8 +98,8 @@ export default function parse(code) {
           c.short = `${c.short}${c.code.slice(1).join(',')}`;
         }
         if (s.need_parent) {
-          if (!parent_stack.find(x => ['attack', 'burn', 'mill'].includes(x?.code?.[0]))) {
-            error = `needs a 'attack'/'burn' or 'mill' as parent`;
+          if (!parent_stack.find(x => ['attack', 'burn', 'mill', 'reveal'].includes(x?.code?.[0]))) {
+            error = `needs a 'attack'/'burn'/'mill' or 'reveal' as parent`;
             break;
           }
         } else if (s.need_prev_sibling) {

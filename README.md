@@ -22,27 +22,33 @@ right now the following commands are supported:
 * `attack DMG`
     * does an attack with trigger check
 * `attack cx` / `attack not cx`
-    * same as `attack DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
+    * same as `attack DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
 * `burn DMG`
     * does an attack without trigger check
 * `burn cx` / `burn not cx`
-    * same as `burn DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
+    * same as `burn DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
 * `mill COUNT`
     * mill cards from opponent (but it into waiting room)
 * `mill cx` / `mill not cx`
-    * same as `mill COUNT` but does it for each cx or not cx from `attack`, `burn` or `mill`
+    * same as `mill COUNT` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
 * `damage DMG`
     * fix damage to opponent
 * `damage cx` / `damage not cx`
-    * same as `damage DMG` but does it for each cx or not cx from `attack`, `burn` or `mill`
+    * same as `damage DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
 * `repeat REPEATS`
     * repeats everything that is indented after
 * `each cx` / `each not cx`
-    * for each cx from `attack`, `burn` or `mill`
+    * for each cx from `attack`, `burn`, `mill` or `reveal`
 * `if cx` / `if not cx`
-    * if `attack`, `burn` (`mill`) has a cx (cancel)
+    * if `attack`, `burn` has a cx (cancel)
+    * if `reveal`, `mill` has at least 1 cx
 * `else`
-    * the opposite of the `if` above
+    * the opposite of the `if` or `each` above
+* `reveal COUNT`
+    * reveals `COUNT` cards from opponent deck
+    * can be used to check for `cx` with `if cx`
+* `reveal`
+    * same as `reveal 1`
 
 everything that is not detected as a command gets ignored, can be used as comment..
 

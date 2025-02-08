@@ -11,35 +11,35 @@
 
 struct StateBase {
     // 0x00:
-    uint64_t stack  :47;
-    uint64_t active :1;
+    __uint128_t stack  :47;
+    __uint128_t active :1;
 
     // 0x08 pending:
-    uint64_t p_my_trg  :4;
-    uint64_t p_my_ntrg :4;
-    uint64_t p_op_cx   :4;
-    uint64_t p_op_ncx  :4;
+    __uint128_t p_my_trg  :4;
+    __uint128_t p_my_ntrg :4;
+    __uint128_t p_op_cx   :4;
+    __uint128_t p_op_ncx  :4;
 
     // 0x10:
-    uint8_t my_trg     :4;
-    uint8_t w_my_trg   :4;
-    uint8_t my_ntrg;
-    uint8_t w_my_ntrg;
+    __uint128_t my_trg     :4;
+    __uint128_t w_my_trg   :4;
+    __uint128_t my_ntrg    :6;
+    __uint128_t w_my_ntrg  :6;
 
     // 0x18 opponent:
-    uint8_t op_cx      :4;
-    uint8_t w_op_cx    :4;
-    uint8_t op_ncx;
-    uint8_t w_op_ncx;
+    __uint128_t op_cx      :4;
+    __uint128_t w_op_cx    :4;
+    __uint128_t r_op_cx    :4;
+    __uint128_t op_ncx     :6;
+    __uint128_t w_op_ncx   :6;
+    __uint128_t r_op_ncx   :6;
 } __attribute__((packed));
 
 struct State : StateBase {
-    // 0x20:
     int32_t count;
 
     private:
 
-    // 0x40
     //XXX: flexible array member 'result' of type 'Result[]' with non-trivial destruction
     std::array<uint8_t, sizeof(Result)> result[];
 
@@ -187,6 +187,8 @@ struct State : StateBase {
         w_my_ntrg = n_w_my_ntrg;
         w_op_cx  = n_w_op_cx;
         w_op_ncx = n_w_op_ncx;
+        r_op_cx = 0;
+        r_op_ncx = 0;
     }
 
     void my_stock(int trg, int ntrg) {
@@ -288,6 +290,13 @@ struct State : StateBase {
         w_op_ncx += ncx;
     }
 
+    void op_reveal(int cx, int ncx) {
+        r_op_cx += cx;
+        r_op_ncx += ncx;
+        op_cx += cx;
+        op_ncx += ncx;
+    }
+
     void op_clock(int cx, int ncx) {
         // does nothing
         // XXX: if we would implement this.. the order of the cards in clock matters
@@ -309,6 +318,66 @@ struct State : StateBase {
         assert(what == CX || what == NCX);
         assert(source == DECK);
         assert(target == WAITINGROOM || target == PENDING || target == CLOCK);
+
+        if (r_op_cx > 0 || r_op_ncx > 0) {
+            switch (what) {
+                case CX:
+                    if (r_op_cx < 1) {
+                        // can't pick
+                        return false;
+                    }
+                    probability *= Fraction(r_op_cx, r_op_cx + r_op_ncx);
+                    r_op_cx -= 1;
+                    op_cx -= 1;
+                    switch (target) {
+                        case WAITINGROOM:
+                            op_waitingroom(1, 0);
+                            break;
+                        case PENDING:
+                            assert(p_op_cx < 0x0F);
+                            p_op_cx += 1;
+                            break;
+                        case CLOCK:
+                            op_clock(1, 0);
+                            break;
+                        case STOCK:
+                            op_stock(1, 0);
+                            break;
+                        default:
+                            assert(true);
+                    }
+                    break;
+                case NCX:
+                    if (r_op_ncx < 1) {
+                        // can't pick
+                        return false;
+                    }
+                    probability *= Fraction(r_op_ncx, r_op_cx + r_op_ncx);
+                    r_op_ncx -= 1;
+                    op_ncx -= 1;
+                    switch (target) {
+                        case WAITINGROOM:
+                            op_waitingroom(0, 1);
+                            break;
+                        case PENDING:
+                            assert(p_op_ncx < 0x0F);
+                            p_op_ncx += 1;
+                            break;
+                        case CLOCK:
+                            op_clock(0, 1);
+                            break;
+                        case STOCK:
+                            op_stock(0, 1);
+                            break;
+                        default:
+                            assert(true);
+                    }
+                    break;
+                default:
+                    assert(true);
+            }
+            return true;
+        }
 
         switch (what) {
             case CX:

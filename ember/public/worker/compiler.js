@@ -163,6 +163,9 @@ function next_limit(cmd, limit) {
     case 'damage':
       new_limits.push([limit, limit]);
       break;
+    case 'reveal':
+      new_limits.push([limit, limit]);
+      break;
   }
   return new_limits;
 }

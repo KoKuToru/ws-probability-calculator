@@ -236,6 +236,11 @@ function build_actions(engine, code) {
       case 'flush':
         res.push([engine.flush]);
         break;
+      case 'reveal':
+        res.push([engine.reveal, params[0] ?? 1]);
+        break;
+      default:
+        throw new EngineError(`Unsupported cmd=${cmd}`);
     }
   }
 

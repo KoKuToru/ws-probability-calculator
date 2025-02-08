@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
+#include <cstdlib>
 
 #include "assert.h"
 #include "consts.hpp"

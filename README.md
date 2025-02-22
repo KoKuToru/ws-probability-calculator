@@ -39,7 +39,7 @@ right now the following commands are supported:
     * repeats everything that is indented after
 * `each cx` / `each not cx` / `each trg` / `each not trg`
     * for each cx from `attack`, `burn`, `mill` or `reveal`
-* `if cx` / `if not cx` / `if trg` / `if not trg`
+* `if cx` / `if not cx` / `if trg` / `if not trg` / `if cx and trg` / `if trg and cx` / `if not cx and trg` / `if trg and not cx` / `if cx and not trg` / `if not trg and cx` / `if not cx and not trg` / `if not trg and not cx`
     * if `attack`, `burn` has a cx (cancel)
     * if `reveal`, `mill` has at least 1 cx
     * if `attack` has a trg (+1 soul)

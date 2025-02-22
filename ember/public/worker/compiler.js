@@ -32,7 +32,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
         }
       } break;
       case 'each': {
-        const name = `push_e${params[0]}`.toUpperCase();
+        const name = `PUSH_E${params[0].toUpperCase()}`;
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
@@ -42,52 +42,49 @@ export default function compile(code, code_parents, stack, conditions, limits) {
           res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]], limits));
         }
       } break;
-      case 'if': {
-        const name = {
-          'cx': `push_icx`,
-          'ncx': `push_icx`,
-          'trg': `push_itrg`,
-          'ntrg': `push_itrg`,
-        }[params[0]].toUpperCase();
-        const index = stack.lastIndexOf(name);
-        if (index < 0) {
-          throw new Error('stack var not found');
-        }
-        switch (params[0]) {
-          case 'cx':
-          case 'trg':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
-            break;
-          case 'ncx':
-          case 'ntrg':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
-            break;
-          default:
-            throw new Error('stack var not found');
-        }
-      } break;
+      case 'if':
       case 'else': {
-        const name = {
-          'cx': `push_icx`,
-          'ncx': `push_icx`,
-          'trg': `push_itrg`,
-          'ntrg': `push_itrg`,
-        }[params[0]].toUpperCase();;
-        const index = stack.lastIndexOf(name);
-        if (index < 0) {
-          throw new Error('stack var not found');
-        }
-        switch (params[0]) {
-          case 'cx':
-          case 'trg':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
-            break;
-          case 'ncx':
-          case 'ntrg':
-            res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
-            break;
-          default:
+        const names = {
+          'cx': [{ what: `PUSH_ICX`, op: `NOT_EQUALS` }],
+          'ncx': [{ what: `PUSH_ICX`, op: `EQUALS` }],
+          'trg': [{ what: `PUSH_ITRG`, op: `NOT_EQUALS` }],
+          'ntrg': [{ what: `PUSH_ITRG`, op: `EQUALS` }],
+          'cxtrg': [{ what: `PUSH_ICX`, op: `NOT_EQUALS` }, { what: `PUSH_ITRG`, op: `NOT_EQUALS` }],
+          'ncxtrg': [{ what: `PUSH_ICX`, op: `EQUALS` }, { what: `PUSH_ITRG`, op: `NOT_EQUALS` }],
+          'cxntrg': [{ what: `PUSH_ICX`, op: `NOT_EQUALS` }, { what: `PUSH_ITRG`, op: `EQUALS` }],
+          'ncxntrg': [{ what: `PUSH_ICX`, op: `EQUALS` }, { what: `PUSH_ITRG`, op: `EQUALS` }],
+        }[params[0]];
+        let nconditions = [];
+        for (let name of names) {
+          const index = stack.lastIndexOf(name.what);
+          if (index < 0) {
             throw new Error('stack var not found');
+          }
+          let op = name.op
+          nconditions = [...nconditions, [index, op, 0]];
+        }
+        if (cmd === 'else') {
+          // fliped conditions
+          for (let i = nconditions.length - 1; i >= 0; --i) {
+            let [index, op, value] = nconditions[i];
+            switch (op) {
+              case 'EQUALS':
+                op = 'NOT_EQUALS'
+                break;
+              case 'NOT_EQUALS':
+                op = 'EQUALS';
+                break;
+              default:
+                throw new Error(`unknown op ${op}`);
+            }
+            const nconditions2 = [
+              ...nconditions.slice(0, i),
+              [ index, op, value ]
+            ];
+            res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions2 ], limits));
+          }
+        } else {
+          res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions ], limits));
         }
       } break;
       case 'attack':
@@ -95,7 +92,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
       case 'mill':
       case 'damage':
         if (['cx', 'ncx', 'trg', 'ntrg'].includes(params[0])) {
-          const name = `push_e${params[0]}`.toUpperCase();
+          const name = `PUSH_E${params[0].toUpperCase()}`;
           const index = stack.lastIndexOf(name);
           if (index < 0) {
             throw new Error('stack var not found');
@@ -189,7 +186,7 @@ function collect_stack(code, stack) {
   for (const [cmd, params, children] of code) {
     switch (cmd) {
       case 'each': {
-        const name = `push_e${params[0]}`.toUpperCase();
+        const name = `PUSH_E${params[0].toUpperCase()}`;
         if (!stack.includes(name)) {
           stack.push(name);
         }
@@ -197,14 +194,20 @@ function collect_stack(code, stack) {
       } break;
       case 'if':
       case 'else': {
-        const name = {
-          'cx': `push_icx`,
-          'ncx': `push_icx`,
-          'trg': `push_itrg`,
-          'ntrg': `push_itrg`,
-        }[params[0]].toUpperCase();
-        if (!stack.includes(name)) {
-          stack.push(name);
+        const names = {
+          'cx': [`PUSH_ICX`],
+          'ncx': [`PUSH_ICX`],
+          'trg': [`PUSH_ITRG`],
+          'ntrg': [`PUSH_ITRG`],
+          'cxtrg': [`PUSH_ICX`, `PUSH_ITRG`],
+          'ncxtrg': [`PUSH_INCX`, `PUSH_ITRG`],
+          'cxntrg': [`PUSH_ICX`, `PUSH_INTRG`],
+          'ncxntrg': [`PUSH_INCX`, `PUSH_INTRG`],
+        }[params[0]];
+        for (let name of names) {
+          if (!stack.includes(name)) {
+            stack.push(name);
+          }
         }
         collect_stack(children, stack);
       } break;
@@ -216,7 +219,7 @@ function collect_stack(code, stack) {
       case 'mill':
       case 'damage':
         if (['cx', 'ncx', 'trg', 'ntrg'].includes(params[0])) {
-          const name = `push_e${params[0]}`.toUpperCase();
+          const name = `PUSH_E${params[0].toUpperCase()}`;
           if (!stack.includes(name)) {
             stack.push(name);
           }

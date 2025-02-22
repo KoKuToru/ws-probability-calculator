@@ -35,6 +35,18 @@ export const syntax = [
   { regex: /^if\s+(not\s+cx)\s*$/g,      params: [() => 'ncx'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(trg)\s*$/g,           params: [() => 'trg'],  name: 'if',     short: 'i', need_parent: true },
   { regex: /^if\s+(not\s+trg)\s*$/g,     params: [() => 'ntrg'], name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(not\s+cx)\s*$/g,      params: [() => 'ncx'],  name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(trg)\s*$/g,           params: [() => 'trg'],  name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(not\s+trg)\s*$/g,     params: [() => 'ntrg'], name: 'if',     short: 'i', need_parent: true },
+  // if and
+  { regex: /^if\s+(cx)\s*and trg\s*$/g,         params: [() => 'cxtrg'],   name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(trg)\s*and cx\s*$/g,         params: [() => 'cxtrg'],   name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(not cx)\s*and trg\s*$/g,     params: [() => 'ncxtrg'],  name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(trg)\s*and not cx\s*$/g,     params: [() => 'ncxtrg'],  name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(cx)\s*and not trg\s*$/g,     params: [() => 'cxntrg'],  name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(not trg)\s*and cx\s*$/g,     params: [() => 'cxntrg'],  name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(not cx)\s*and not trg\s*$/g, params: [() => 'ncxntrg'], name: 'if',  short: 'i', need_parent: true },
+  { regex: /^if\s+(not trg)\s*and not cx\s*$/g, params: [() => 'ncxntrg'], name: 'if',  short: 'i', need_parent: true },
   // else
   { regex: /^else\s*$/g,                 params: [],             name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
   // reveal

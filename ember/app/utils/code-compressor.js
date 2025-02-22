@@ -42,8 +42,23 @@ function decompressParams(code) {
   }
   return [
     code.split(',').map(x => {
-      if (x == 'ncx') {
-        return 'not cx';
+      switch (x) {
+        case 'cx':
+          return 'cx';
+        case 'ncx':
+          return 'not cx';
+        case 'trg':
+          return 'trg';
+        case 'ntrg':
+          return 'not trg';
+        case 'cxtrg':
+          return 'cx and trg';
+        case 'ncxtrg':
+          return 'not cx and trg';
+        case 'cxntrg':
+          return 'cx and not trg';
+        case 'ncxntrg':
+          return 'not cx and not trg';
       }
       const y = parseInt(x);
       if (isNaN(y)) {
@@ -96,7 +111,7 @@ export function decompress(code, text, indent = 0) {
       const i = /^([0-9]*)/.exec(code[0])[0];
       code = code.slice(i.length);
       res.push({
-        text: text.shift(),
+        text: text.shift().trimEnd(),
         children,
         indent: i.length ? parseInt(i) : indent
       });
@@ -105,7 +120,7 @@ export function decompress(code, text, indent = 0) {
       res.push({
         short: l,
         code: t,
-        text: t.join(' '),
+        text: t.join(' ').trimEnd(),
         children,
         indent
       });

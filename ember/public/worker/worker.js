@@ -232,10 +232,18 @@ function build_actions(engine, code) {
         res.push([engine.pop, params[0]]);
         break;
       case 'push':
-        res.push([engine.push, pushs[params[0]]]);
+        if (params[0] in pushs) {
+          res.push([engine.push, pushs[params[0]]]);
+        } else {
+          throw new Error(`unknown push ${params[0]}`);
+        }
         break;
       case 'check':
-        res.push([engine.check, params[0], ops[params[1]], params[2]]);
+        if (params[1] in ops) {
+          res.push([engine.check, params[0], ops[params[1]], params[2]]);
+        } else {
+          throw new Error(`unknown op ${params[1]}`);
+        }
         break;
       case 'flush':
         res.push([engine.flush]);

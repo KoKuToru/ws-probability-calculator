@@ -10,10 +10,25 @@ import { compress, decompress } from '../utils/code-compressor';
 const CURRENT_VERSION = 1;
 
 const DEFAULT_CODE =
-`3 times: attack 3 + burn 1
-repeat 3
+`# demo script with fictional card effects..
+# see help for real examples
+
+procedure a3cb1
   attack 3
-  burn 1`;
+    if cx
+      burn 1
+
+repeat 2
+  execute a3cb1
+
+mill 3
+  each cx
+    burn 2
+  else
+    attack 3
+      if trg
+        damage 1
+`;
 
 class Private {
   @tracked loaded = false;

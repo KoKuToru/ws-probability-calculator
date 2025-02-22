@@ -18,6 +18,11 @@ enum WHAT {
     PUSH_ICX  = 9,
     PUSH_INCX = 10,
 
+    PUSH_ETRG  = 20,
+    PUSH_ENTRG = 21,
+    PUSH_ITRG  = 22,
+    PUSH_INTRG = 23,
+
     DECK        = 11,
     WAITINGROOM = 12,
     PENDING     = 13,

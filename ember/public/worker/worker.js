@@ -192,10 +192,14 @@ function reset() {
 }
 
 const pushs = Object.freeze({
-  PUSH_ECX:   7,
-  PUSH_ENCX:  8,
-  PUSH_ICX:   9,
-  PUSH_INCX: 10
+  PUSH_ECX:    7,
+  PUSH_ENCX:   8,
+  PUSH_ICX:    9,
+  PUSH_INCX:  10,
+  PUSH_ETRG:  20,
+  PUSH_ENTRG: 21,
+  PUSH_ITRG:  22,
+  PUSH_INTRG: 23,
 });
 
 const ops = Object.freeze({

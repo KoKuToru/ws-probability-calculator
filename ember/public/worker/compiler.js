@@ -43,16 +43,23 @@ export default function compile(code, code_parents, stack, conditions, limits) {
         }
       } break;
       case 'if': {
-        const name = `push_icx`.toUpperCase();
+        const name = {
+          'cx': `push_icx`,
+          'ncx': `push_icx`,
+          'trg': `push_itrg`,
+          'ntrg': `push_itrg`,
+        }[params[0]].toUpperCase();
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
         }
         switch (params[0]) {
           case 'cx':
+          case 'trg':
             res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
             break;
           case 'ncx':
+          case 'ntrg':
             res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
             break;
           default:
@@ -60,16 +67,23 @@ export default function compile(code, code_parents, stack, conditions, limits) {
         }
       } break;
       case 'else': {
-        const name = `push_icx`.toUpperCase();
+        const name = {
+          'cx': `push_icx`,
+          'ncx': `push_icx`,
+          'trg': `push_itrg`,
+          'ntrg': `push_itrg`,
+        }[params[0]].toUpperCase();;
         const index = stack.lastIndexOf(name);
         if (index < 0) {
           throw new Error('stack var not found');
         }
         switch (params[0]) {
           case 'cx':
+          case 'trg':
             res.push(...compile(children, code_parents, stack, [...conditions, [index, 'EQUALS', 0]], limits));
             break;
           case 'ncx':
+          case 'ntrg':
             res.push(...compile(children, code_parents, stack, [...conditions, [index, 'NOT_EQUALS', 0]], limits));
             break;
           default:
@@ -80,7 +94,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
       case 'burn':
       case 'mill':
       case 'damage':
-        if (params[0] === 'cx' || params[0] === 'ncx') {
+        if (['cx', 'ncx', 'trg', 'ntrg'].includes(params[0])) {
           const name = `push_e${params[0]}`.toUpperCase();
           const index = stack.lastIndexOf(name);
           if (index < 0) {
@@ -145,26 +159,26 @@ export default function compile(code, code_parents, stack, conditions, limits) {
 }
 
 function get_limit(limits, what) {
-  return limits.at(-1)[what === 'cx' ? 0 : 1];
+  return limits.at(-1)[what];
 }
 
 function next_limit(cmd, limit) {
   const new_limits = [];
   switch (cmd) {
     case 'attack':
-      new_limits.push([1, limit + 1]);
+      new_limits.push({ cx: 1, ncx: limit + 1, trg: 1, ntrg: 1 });
       break;
     case 'burn':
-      new_limits.push([1, limit]);
+      new_limits.push({ cx: 1, ncx: limit, trg: 0, ntrg: 0 });
       break;
     case 'mill':
-      new_limits.push([limit, limit]);
+      new_limits.push({ cx: limit, ncx: limit, trg: 0, ntrg: 0 });
       break;
     case 'damage':
-      new_limits.push([limit, limit]);
+      new_limits.push({ cx: 0, ncx: 0, trg: 0, ntrg: 0 });
       break;
     case 'reveal':
-      new_limits.push([limit, limit]);
+      new_limits.push({ cx: limit, ncx: limit, trg: 0, ntrg: 0 });
       break;
   }
   return new_limits;
@@ -183,7 +197,12 @@ function collect_stack(code, stack) {
       } break;
       case 'if':
       case 'else': {
-        const name = `push_icx`.toUpperCase();
+        const name = {
+          'cx': `push_icx`,
+          'ncx': `push_icx`,
+          'trg': `push_itrg`,
+          'ntrg': `push_itrg`,
+        }[params[0]].toUpperCase();
         if (!stack.includes(name)) {
           stack.push(name);
         }
@@ -196,7 +215,7 @@ function collect_stack(code, stack) {
       case 'burn':
       case 'mill':
       case 'damage':
-        if (params[0] === 'cx' || params[0] === 'ncx') {
+        if (['cx', 'ncx', 'trg', 'ntrg'].includes(params[0])) {
           const name = `push_e${params[0]}`.toUpperCase();
           if (!stack.includes(name)) {
             stack.push(name);

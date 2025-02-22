@@ -1,24 +1,45 @@
 export const syntax = [
-  { regex: /^attack\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'attack', short: 'a' },
-  { regex: /^attack\s+(cx)\s*$/g,       params: [() => 'cx'],  name: 'attack', short: 'a', need_parent: true },
-  { regex: /^attack\s+(not\s+cx)\s*$/g, params: [() => 'ncx'], name: 'attack', short: 'a', need_parent: true },
-  { regex: /^burn\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'burn',   short: 'b' },
-  { regex: /^burn\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'burn',   short: 'b', need_parent: true },
-  { regex: /^burn\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'burn',   short: 'b', need_parent: true },
-  { regex: /^mill\s+([0-9]+)\s*$/g,     params: [parseInt],    name: 'mill',   short: 'm' },
-  { regex: /^mill\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'mill',   short: 'm', need_parent: true },
-  { regex: /^mill\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'mill',   short: 'm', need_parent: true },
-  { regex: /^damage\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'damage', short: 'd' },
-  { regex: /^damage\s+(cx)\s*$/g,       params: [() => 'cx'],  name: 'damage', short: 'd', need_parent: true },
-  { regex: /^damage\s+(not cx)\s*$/g,   params: [() => 'ncx'], name: 'damage', short: 'd', need_parent: true },
-  { regex: /^repeat\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'repeat', short: 'r' },
-  { regex: /^each\s+(cx)\s*$/g,         params: [() => 'cx'],  name: 'each',   short: 'e', need_parent: true },
-  { regex: /^each\s+(not\s+cx)\s*$/g,   params: [() => 'ncx'], name: 'each',   short: 'e', need_parent: true },
-  { regex: /^if\s+(cx)\s*$/g,           params: [() => 'cx'],  name: 'if',     short: 'i', need_parent: true },
-  { regex: /^if\s+(not\s+cx)\s*$/g,     params: [() => 'ncx'], name: 'if',     short: 'i', need_parent: true },
-  { regex: /^else\s*$/g,                params: [],            name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
-  { regex: /^reveal\s+([0-9]+)\s*$/g,   params: [parseInt],    name: 'reveal', short: 'p' },
-  { regex: /^reveal\s*$/g,              params: [],            name: 'reveal', short: 'p' }
+  // attack
+  { regex: /^attack\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'attack', short: 'a' },
+  { regex: /^attack\s+(cx)\s*$/g,        params: [() => 'cx'],   name: 'attack', short: 'a', need_parent: true },
+  { regex: /^attack\s+(not\s+cx)\s*$/g,  params: [() => 'ncx'],  name: 'attack', short: 'a', need_parent: true },
+  { regex: /^attack\s+(trg)\s*$/g,       params: [() => 'trg'],  name: 'attack', short: 'a', need_parent: true },
+  { regex: /^attack\s+(not\s+trg)\s*$/g, params: [() => 'ntrg'], name: 'attack', short: 'a', need_parent: true },
+  // burn
+  { regex: /^burn\s+([0-9]+)\s*$/g,      params: [parseInt],     name: 'burn',   short: 'b' },
+  { regex: /^burn\s+(cx)\s*$/g,          params: [() => 'cx'],   name: 'burn',   short: 'b', need_parent: true },
+  { regex: /^burn\s+(not\s+cx)\s*$/g,    params: [() => 'ncx'],  name: 'burn',   short: 'b', need_parent: true },
+  { regex: /^burn\s+(trg)\s*$/g,         params: [() => 'trg'],  name: 'burn',   short: 'b', need_parent: true },
+  { regex: /^burn\s+(not\s+trg)\s*$/g,   params: [() => 'ntrg'], name: 'burn',   short: 'b', need_parent: true },
+  // mill
+  { regex: /^mill\s+([0-9]+)\s*$/g,      params: [parseInt],     name: 'mill',   short: 'm' },
+  { regex: /^mill\s+(cx)\s*$/g,          params: [() => 'cx'],   name: 'mill',   short: 'm', need_parent: true },
+  { regex: /^mill\s+(not\s+cx)\s*$/g,    params: [() => 'ncx'],  name: 'mill',   short: 'm', need_parent: true },
+  { regex: /^mill\s+(trg)\s*$/g,         params: [() => 'trg'],  name: 'mill',   short: 'm', need_parent: true },
+  { regex: /^mill\s+(not\s+trg)\s*$/g,   params: [() => 'ntrg'], name: 'mill',   short: 'm', need_parent: true },
+  // damage
+  { regex: /^damage\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'damage', short: 'd' },
+  { regex: /^damage\s+(cx)\s*$/g,        params: [() => 'cx'],   name: 'damage', short: 'd', need_parent: true },
+  { regex: /^damage\s+(not cx)\s*$/g,    params: [() => 'ncx'],  name: 'damage', short: 'd', need_parent: true },
+  { regex: /^damage\s+(trg)\s*$/g,       params: [() => 'trg'],  name: 'damage', short: 'd', need_parent: true },
+  { regex: /^damage\s+(not trg)\s*$/g,   params: [() => 'ntrg'], name: 'damage', short: 'd', need_parent: true },
+  // repeat
+  { regex: /^repeat\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'repeat', short: 'r' },
+  // each
+  { regex: /^each\s+(cx)\s*$/g,          params: [() => 'cx'],   name: 'each',   short: 'e', need_parent: true },
+  { regex: /^each\s+(not\s+cx)\s*$/g,    params: [() => 'ncx'],  name: 'each',   short: 'e', need_parent: true },
+  { regex: /^each\s+(trg)\s*$/g,         params: [() => 'trg'],  name: 'each',   short: 'e', need_parent: true },
+  { regex: /^each\s+(not\s+trg)\s*$/g,   params: [() => 'ntrg'], name: 'each',   short: 'e', need_parent: true },
+  // if
+  { regex: /^if\s+(cx)\s*$/g,            params: [() => 'cx'],   name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(not\s+cx)\s*$/g,      params: [() => 'ncx'],  name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(trg)\s*$/g,           params: [() => 'trg'],  name: 'if',     short: 'i', need_parent: true },
+  { regex: /^if\s+(not\s+trg)\s*$/g,     params: [() => 'ntrg'], name: 'if',     short: 'i', need_parent: true },
+  // else
+  { regex: /^else\s*$/g,                 params: [],             name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
+  // reveal
+  { regex: /^reveal\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'reveal', short: 'p' },
+  { regex: /^reveal\s*$/g,               params: [],             name: 'reveal', short: 'p' }
 ];
 
 export function unparse(code) {

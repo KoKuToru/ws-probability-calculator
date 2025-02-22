@@ -422,7 +422,11 @@ struct Engine {
             what == PUSH_ECX ||
             what == PUSH_ENCX ||
             what == PUSH_ICX ||
-            what == PUSH_INCX
+            what == PUSH_INCX ||
+            what == PUSH_ETRG ||
+            what == PUSH_ENTRG ||
+            what == PUSH_ITRG ||
+            what == PUSH_INTRG
         );
         auto idx = stack_size;
         assert(idx * 4 < 47);
@@ -442,6 +446,18 @@ struct Engine {
                         break;
                     case PUSH_INCX:
                         v = (state->p_op_cx == 0) ? 1 : 0;
+                        break;
+                    case PUSH_ETRG:
+                        v = state->p_my_trg;
+                        break;
+                    case PUSH_ENTRG:
+                        v = state->p_my_ntrg;
+                        break;
+                    case PUSH_ITRG:
+                        v = (state->p_my_trg != 0) ? 1 : 0;
+                        break;
+                    case PUSH_INTRG:
+                        v = (state->p_my_trg == 0) ? 1 : 0;
                         break;
                     default:
                         return;

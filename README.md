@@ -21,27 +21,28 @@ right now the following commands are supported:
 
 * `attack DMG`
     * does an attack with trigger check
-* `attack cx` / `attack not cx`
-    * same as `attack DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
+* `attack cx` / `attack not cx` / `attack trg` / `attack not trg`
+    * same as `attack DMG` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `burn DMG`
     * does an attack without trigger check
-* `burn cx` / `burn not cx`
-    * same as `burn DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
+* `burn cx` / `burn not cx` / `burn trg` / `burn not trg`
+    * same as `burn DMG` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `mill COUNT`
     * mill cards from opponent (but it into waiting room)
-* `mill cx` / `mill not cx`
-    * same as `mill COUNT` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
+* `mill cx` / `mill not cx` / `mill trg` / `mill not trg`
+    * same as `mill COUNT` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `damage DMG`
     * fix damage to opponent
-* `damage cx` / `damage not cx`
-    * same as `damage DMG` but does it for each cx or not cx from `attack`, `burn`, `mill` or `reveal`
+* `damage cx` / `damage not cx` / `damage trg` / `damage not trg`
+    * same as `damage DMG` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `repeat REPEATS`
     * repeats everything that is indented after
-* `each cx` / `each not cx`
+* `each cx` / `each not cx` / `each trg` / `each not trg`
     * for each cx from `attack`, `burn`, `mill` or `reveal`
-* `if cx` / `if not cx`
+* `if cx` / `if not cx` / `if trg` / `if not trg`
     * if `attack`, `burn` has a cx (cancel)
     * if `reveal`, `mill` has at least 1 cx
+    * if `attack` has a trg (+1 soul)
 * `else`
     * the opposite of the `if` or `each` above
 * `reveal COUNT`

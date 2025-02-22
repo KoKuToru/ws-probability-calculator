@@ -51,7 +51,11 @@ export const syntax = [
   { regex: /^else\s*$/g,                 params: [],             name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
   // reveal
   { regex: /^reveal\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'reveal', short: 'p' },
-  { regex: /^reveal\s*$/g,               params: [],             name: 'reveal', short: 'p' }
+  { regex: /^reveal\s*$/g,               params: [],             name: 'reveal', short: 'p' },
+  // function
+  { regex: /^procedure\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'procedure', short: 'f', toplevel: true, unique_name: true },
+  // execute
+  { regex: /^execute\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'execute', short: 'c', check_unique_name: true, disallow_children: true },
 ];
 
 export function unparse(code) {
@@ -82,6 +86,10 @@ export default function parse(code) {
     }
     code_offset.push({ text: r[1], lineoffset: r.index});
   }
+
+  const unique_name = new Set();
+  const check_unique_name = [];
+  const disallow_children = [];
 
   const ast = {
     children: []
@@ -125,6 +133,24 @@ export default function parse(code) {
           children: [],
           offset: lineoffset + offset
         };
+        if (s.toplevel && indent != 0) {
+          error = `needs to be toplevel, zero indent`;
+          break;
+        }
+        if (s.unique_name) {
+          const [n] = c.code[1];
+          if (unique_name.has(n)) {
+            error = `name ${n} already in use`;
+            break;
+          }
+          unique_name.add(n);
+        }
+        if (s.check_unique_name) {
+          check_unique_name.push(c);
+        }
+        if (s.disallow_children) {
+          disallow_children.push(c);
+        }
         if (c.code.length > 2) {
           c.short = `${c.short}(${c.code.slice(1).join(',')})`;
         } else {
@@ -162,6 +188,21 @@ export default function parse(code) {
     if (parent === parent_stack.at(-1)) {
       const c = { text, indent, error, children: [], offset: lineoffset };
       parent.children.push(c);
+    }
+  }
+
+  // special check for unique names
+  for (const c of check_unique_name) {
+    const [n] = c.code[1];
+    if (!unique_name.has(n)) {
+      c.error = `there is no function with the name ${n}`;
+    }
+  }
+
+  // speicla check for no children
+  for (const c of disallow_children) {
+    if (c.children?.length ?? 0 != 0) {
+      c.error = `no children allowed`;
     }
   }
 

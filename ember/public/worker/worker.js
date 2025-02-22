@@ -326,7 +326,7 @@ self.addEventListener('message', async (e) => {
         data,
         outofmemory: true,
         error: 'Out Of Memory',
-        code
+        code: code ?? []
       });
     }
     if (ex instanceof EngineError) {
@@ -334,9 +334,14 @@ self.addEventListener('message', async (e) => {
       e.ports[0].postMessage({
         data,
         error: ex.message,
-        code
+        code: code ?? []
       });
     }
+    e.ports[0].postMessage({
+      data,
+      error: ex.message,
+      code: code ?? []
+    });
     throw ex;
   }
 });

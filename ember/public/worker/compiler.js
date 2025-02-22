@@ -17,18 +17,32 @@
   output format:
     code: [action, params]
 */
-export default function compile(code, code_parents, stack, conditions, limits) {
+export default function compile(code, code_parents, stack, conditions, limits, procedures, procedures_disallowed) {
   const res = [];
   stack ??= [];
   conditions ??= [];
   code_parents ??= [];
   limits ??= [];
+  procedures_disallowed ??= [];
+
+  if (procedures === undefined) {
+    procedures = new Map();
+    for (const [cmd, params, children] of code) {
+      if (cmd === 'procedure') {
+        const [n] = params;
+        if (procedures.has(n)) {
+          throw new Error('procedure name not unique');
+        }
+        procedures.set(n, children);
+      }
+    }
+  }
 
   for (const [cmd, params, children] of code) {
     switch (cmd) {
       case 'repeat': {
         for (let i = 0; i < params[0]; ++i) {
-          res.push(...compile(children, code_parents, stack, conditions, limits));
+          res.push(...compile(children, code_parents, stack, conditions, limits, procedures, procedures_disallowed));
         }
       } break;
       case 'each': {
@@ -39,7 +53,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
         }
         const limit = get_limit(limits, params[0]);
         for (let i = 0; i < limit; ++i) {
-          res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]], limits));
+          res.push(...compile(children, code_parents, stack, [...conditions, [index, 'GREATER', i]], limits, procedures, procedures_disallowed));
         }
       } break;
       case 'if':
@@ -81,11 +95,24 @@ export default function compile(code, code_parents, stack, conditions, limits) {
               ...nconditions.slice(0, i),
               [ index, op, value ]
             ];
-            res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions2 ], limits));
+            res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions2 ], limits, procedures, procedures_disallowed));
           }
         } else {
-          res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions ], limits));
+          res.push(...compile(children, code_parents, stack, [ ...conditions, ...nconditions ], limits, procedures, procedures_disallowed));
         }
+      } break;
+      case 'procedure':
+        /* NOOP */
+        break;
+      case 'execute': {
+        const [n] = params;
+        if (!procedures.has(n)) {
+          throw new Error('procedure name not found');
+        }
+        if (procedures_disallowed.includes(n)) {
+          throw new Error('recursive procedure executes are disallowed');
+        }
+        res.push(...compile(procedures.get(n), code_parents, stack, conditions, limits, procedures, [ ...procedures_disallowed, n ]))
       } break;
       case 'attack':
       case 'burn':
@@ -112,7 +139,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
           }
           const new_limits = [...limits, ...next_limit(cmd, limit)];
           const new_conditions = [...conditions, [index, 'GREATER_EQUALS', 1]];
-          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions, new_limits));
+          res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], new_conditions, new_limits, procedures, procedures_disallowed));
           if (nstack.length > 0) {
             for (const c of new_conditions) {
               res.push(['check', c]);
@@ -121,7 +148,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
             res.push(['flush']);
           }
           break;
-        }
+        } /* FALLTHROUGH */
       default: {
         const nstack = collect_stack(children);
         for (const c of conditions) {
@@ -133,7 +160,7 @@ export default function compile(code, code_parents, stack, conditions, limits) {
         }
         res.push(['flush']);
         const new_limits = [...limits, ...next_limit(cmd, params[0])];
-        res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions, new_limits));
+        res.push(...compile(children, [...code_parents, [cmd, params]], [...stack, ...nstack], conditions, new_limits, procedures, procedures_disallowed));
         if (nstack.length > 0) {
           for (const c of conditions) {
             res.push(['check', c]);

@@ -11,7 +11,7 @@
 
 DISCLAIMER: no idea if correct
 
-* [3x Ichika 5HY/W83](https://kokutoru.github.io/ws-probability-calculator/?*9il8zWi5yAC0tHkk9W3LtzdQ9l9XzKZkk5O8_3u-r0aiBTXArcEwwVJ9xGq8bYJM6p3lSDEb_8Qe4*N.jPkhcRxAX-)
+* [3x Ichika 5HY/W83](https://kokutoru.github.io/ws-probability-calculator/?JJCHJfoamKkY5Xvf99yLEqP*14dCUvikDI30S4AK57iY-jWEqVXigV4OrBFb-fwBQ4NVYuf_frSQ0Ql-GoU46bFQwi2z_x3Nf7NS0f2PTt72g9fn0LPCA)
 * [3x Itsuki 5HY/W90](https://kokutoru.github.io/ws-probability-calculator/?mTAdHkyYWiBFjPnSoo9QChNSyPiqZOjsRVTmuHoN*f4xGATxpCl9gkQX_GndfDf..6mU3di3SERXVvTbZmzmQ)
 * [1x Yuyu + 2x Riri ALL/S76](https://kokutoru.github.io/ws-probability-calculator/?DZKAmn1GByl.9WP5beoc5J4Wp7rfGZKu7-8k-OXrerd*pkqVSvuSRo2M1hx5tZbb7D5*Dlxy*PWv8gwj.8xcVFvdNKRjE4B1PZ0Nf0CiMMv8LDD0)
 
@@ -50,6 +50,10 @@ right now the following commands are supported:
     * can be used to check for `cx` with `if cx`
 * `reveal`
     * same as `reveal 1`
+* `procedure NAME`
+    * defines a procedure can be executed with `execute NAME`
+* `execute NAME`
+    * executes a `procedure`, recursive executes are disallowed
 
 everything that is not detected as a command gets ignored, can be used as comment..
 

@@ -30,7 +30,10 @@ export default class WsCode extends LinterPlugin {
         break;
       }
       const o1 = o[1] + p.offset - o[0];
-      const idx = p.text.indexOf(' ');
+      let idx = p.text.indexOf(' ');
+      if (idx == -1) {
+        idx = p.text.length;
+      }
       const o2 = o1 + idx;
       const o3 = o1 + p.text.length;
 

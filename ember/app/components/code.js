@@ -17,6 +17,7 @@ import Linter from 'ws/utils/tiptap/linter';
 import WsCode from 'ws/utils/tiptap/linter-ws-code';
 import FixCopy from 'ws/utils/tiptap/fix-copy';
 import IdeTab from 'ws/utils/tiptap/ide-tab';
+import IdeEnter from 'ws/utils/tiptap/ide-enter';
 
 export default class Code extends Component {
   @service state;
@@ -102,7 +103,8 @@ export default class Code extends Component {
           ]
         }),
         FixCopy,
-        IdeTab
+        IdeTab,
+        IdeEnter
       ],
       content: this.getCode(),
       onUpdate: this.updateCode,

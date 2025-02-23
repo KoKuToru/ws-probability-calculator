@@ -186,7 +186,7 @@ export default function parse(code) {
       }
     }
     if (parent === parent_stack.at(-1)) {
-      const c = { text, indent, error, children: [], offset: lineoffset };
+      const c = { text, indent, error, children: [], offset: lineoffset + offset };
       parent.children.push(c);
     }
   }

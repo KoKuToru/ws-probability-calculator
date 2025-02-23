@@ -40,21 +40,20 @@ export default class WsCode extends LinterPlugin {
       if (p.error) {
         this.record(
           'lint-code-error',
-          o1 + p.indent,
-          o3 + p.indent
-        );
-      } else {
-        this.record(
-          'lint-code-ok lint-code-ok2',
           o1,
-          o2
-        );
-        this.record(
-          'lint-code-ok',
-          o2,
           o3
         );
       }
+      this.record(
+        'lint-code-ok lint-code-ok2',
+        o1,
+        o2
+      );
+      this.record(
+        'lint-code-ok',
+        o2,
+        o3
+      );
     }
 
     return this;

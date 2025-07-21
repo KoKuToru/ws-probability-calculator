@@ -10,7 +10,6 @@ export default Extension.create({
   addKeyboardShortcuts() {
     return {
       Enter: ({ editor }) => {
-        debugger;
         const { state } = editor;
         const { selection } = state;
         const { $from } = selection;

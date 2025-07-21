@@ -314,6 +314,11 @@ struct State : StateBase {
         return true;
     }
 
+    void op_deck_reshuffle() {
+        r_op_cx = 0;
+        r_op_ncx = 0;
+    }
+
     bool op_take(WHAT source, WHAT target, WHAT what, Fraction& probability) {
         assert(what == CX || what == NCX);
         assert(source == DECK);

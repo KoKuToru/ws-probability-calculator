@@ -50,12 +50,16 @@ export const syntax = [
   // else
   { regex: /^else\s*$/g,                 params: [],             name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
   // reveal
-  { regex: /^reveal\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'reveal', short: 'p' },
-  { regex: /^reveal\s*$/g,               params: [],             name: 'reveal', short: 'p' },
+  { regex: /^reveal\s+([0-9]+)\s+remove\s+(cx)\s*$/g, params: [parseInt, ()=>1], name: 'reveal', short: 'p', to_text: (count) => `reveal ${count} remove cx` },
+  { regex: /^reveal\s+remove\s+(cx)\s*$/g,            params: [()=>1,    ()=>1], name: 'reveal', short: 'p', to_text: (count) => `reveal ${count} remove cx` },
+  { regex: /^reveal\s+([0-9]+)\s*$/g,                 params: [parseInt],        name: 'reveal', short: 'p' },
+  { regex: /^(reveal)\s*$/g,                          params: [()=>1],           name: 'reveal', short: 'p' },
   // function
   { regex: /^procedure\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'procedure', short: 'f', toplevel: true, unique_name: true },
   // execute
   { regex: /^execute\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'execute', short: 'c', check_unique_name: true, disallow_children: true },
+  // reshuffle
+  { regex: /^reshuffle\s*/g, params: [], name: 'reshuffle', short: 's', toplevel: true, unique_name: true },
 ];
 
 export function unparse(code) {

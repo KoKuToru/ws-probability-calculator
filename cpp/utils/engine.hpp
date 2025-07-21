@@ -363,7 +363,7 @@ struct Engine {
         );
     }
 
-    void reveal(int count) {
+    void reveal(int count, bool remove_cx) {
         assert(count > 0);
         execute(
             [=](const State* state, StateStream& output) {
@@ -396,11 +396,31 @@ struct Engine {
                         return;
                     }
 
-                    output->op_reveal(output->p_op_cx, output->p_op_ncx);
+                    if (remove_cx) {
+                        output->op_reveal(0, output->p_op_ncx);
+                        output->op_waitingroom(output->p_op_cx, 0);
+                    } else {
+                        output->op_reveal(output->p_op_cx, output->p_op_ncx);
+                    }
 
                     output->update(0, probability);
                     output.commit();
                 });
+            }
+        );
+    }
+
+    void reshuffle() {
+        execute(
+            [=](const State* state, StateStream& output) {
+                assert(state->p_my_trg == 0);
+                assert(state->p_my_ntrg == 0);
+                assert(state->p_op_cx == 0);
+                assert(state->p_op_ncx == 0);
+
+                output = *state;
+                output->op_deck_reshuffle();
+                output.commit();
             }
         );
     }

@@ -146,8 +146,13 @@ int main() {
     }
 
     __attribute__((export_name("reveal"), visibility("default"), flatten))
-    extern "C" void reveal(int amount) {
-        lazy_engine()->reveal(amount);
+    extern "C" void reveal(int amount, bool remove_cx) {
+        lazy_engine()->reveal(amount, remove_cx);
+    }
+
+    __attribute__((export_name("reshuffle"), visibility("default"), flatten))
+    extern "C" void reshuffle() {
+        lazy_engine()->reshuffle();
     }
 
     __attribute__((export_name("pop"), visibility("default"), flatten))

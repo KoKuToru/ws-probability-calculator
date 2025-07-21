@@ -48,8 +48,11 @@ right now the following commands are supported:
 * `reveal COUNT`
     * reveals `COUNT` cards from opponent deck
     * can be used to check for `cx` with `if cx`
-* `reveal`
-    * same as `reveal 1`
+* `reveal COUNT remove cx`
+    * same as `reveal COUNT` but removes `cx` from the revealed cards (moved to waiting room)
+* `reshuffle`
+    * resets revealed cards state
+    * without reveal, reshuffle does nothing, because all possible deck states are calculated with probabilites.
 * `procedure NAME`
     * defines a procedure can be executed with `execute NAME`
 * `execute NAME`

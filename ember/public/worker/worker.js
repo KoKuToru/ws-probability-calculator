@@ -249,7 +249,10 @@ function build_actions(engine, code) {
         res.push([engine.flush]);
         break;
       case 'reveal':
-        res.push([engine.reveal, params[0] ?? 1]);
+        res.push([engine.reveal, params[0] ?? 1, params[1] ?? 0]);
+        break;
+      case 'reshuffle':
+        res.push([engine.reshuffle]);
         break;
       default:
         throw new EngineError(`Unsupported cmd=${cmd}`);

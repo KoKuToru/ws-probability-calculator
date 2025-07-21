@@ -116,11 +116,12 @@ export function decompress(code, text, indent = 0) {
         indent: i.length ? parseInt(i) : indent
       });
     } else {
-      const t = [syntax.find(x => x.short === l).name, ...params];
+      const s = syntax.find(x => x.short === l && x.params.length == params.length) ?? syntax.find(x => x.short === l)
+      const t = [s.name, ...params];
       res.push({
         short: l,
         code: t,
-        text: t.join(' ').trimEnd(),
+        text: s.to_text?.(...params) ?? t.join(' ').trimEnd(),
         children,
         indent
       });

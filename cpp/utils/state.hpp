@@ -291,8 +291,7 @@ struct State : StateBase {
     }
 
     void op_reveal(int cx, int ncx) {
-        assert(cx == 0 || r_op_cx == 0);
-        assert(ncx == 0 || r_op_ncx == 0);
+        assert(r_op_cx == 0 && r_op_ncx == 0);
         r_op_cx += cx;
         r_op_ncx += ncx;
         op_cx += cx;

@@ -50,10 +50,10 @@ export const syntax = [
   // else
   { regex: /^else\s*$/g,                 params: [],             name: 'else',   short: 'j', need_prev_sibling: ['if', 'each']},
   // reveal
-  { regex: /^reveal\s+([0-9]+)\s+remove\s+(cx)\s*$/g, params: [parseInt, ()=>1], name: 'reveal', short: 'p', to_text: (count) => `reveal ${count} remove cx` },
-  { regex: /^reveal\s+remove\s+(cx)\s*$/g,            params: [()=>1,    ()=>1], name: 'reveal', short: 'p', to_text: (count) => `reveal ${count} remove cx` },
-  { regex: /^reveal\s+([0-9]+)\s*$/g,                 params: [parseInt],        name: 'reveal', short: 'p' },
   { regex: /^(reveal)\s*$/g,                          params: [()=>1],           name: 'reveal', short: 'p' },
+  { regex: /^reveal\s+remove\s+(cx)\s*$/g,            params: [()=>1,    ()=>1], name: 'reveal', short: 'p', to_text: (count, remove_cx) => remove_cx ? `reveal ${count??1} remove cx` : `reveal ${count??1}` },
+  { regex: /^reveal\s+([0-9]+)\s*$/g,                 params: [parseInt],        name: 'reveal', short: 'p' },
+  { regex: /^reveal\s+([0-9]+)\s+remove\s+(cx)\s*$/g, params: [parseInt, ()=>1], name: 'reveal', short: 'p', to_text: (count, remove_cx) => remove_cx ? `reveal ${count??1} remove cx` : `reveal ${count??1}` },
   // function
   { regex: /^procedure\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'procedure', short: 'f', toplevel: true, unique_name: true },
   // execute

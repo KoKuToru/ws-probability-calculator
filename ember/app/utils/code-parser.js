@@ -59,7 +59,7 @@ export const syntax = [
   // execute
   { regex: /^execute\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*/g, params: [x => x], name: 'execute', short: 'c', check_unique_name: true, disallow_children: true },
   // reshuffle
-  { regex: /^reshuffle\s*/g, params: [], name: 'reshuffle', short: 's', toplevel: true, unique_name: true },
+  { regex: /^reshuffle\s*/g, params: [], name: 'reshuffle', short: 's' },
 ];
 
 export function unparse(code) {

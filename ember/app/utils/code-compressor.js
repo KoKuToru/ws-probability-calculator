@@ -108,7 +108,7 @@ export function decompress(code, text, indent = 0) {
     }
     [children, code] = decompressChildren(code, text, indent + 2);
     if (l === '!') {
-      const i = /^([0-9]*)/.exec(code[0])[0];
+      const i = /^([0-9]*)/.exec(code)[0];
       code = code.slice(i.length);
       res.push({
         text: text.shift().trimEnd(),

@@ -10,29 +10,28 @@
 #include "fraction.hpp"
 
 struct StateBase {
-    // 0x00:
     __uint128_t stack  :47;
     __uint128_t active :1;
 
-    // 0x08 pending:
+    // myself:
+    __uint128_t my_trg    :4;
     __uint128_t p_my_trg  :4;
-    __uint128_t p_op_cx   :4;
+    __uint128_t w_my_trg  :4;
+    __uint128_t my_ntrg   :6;
     __uint128_t p_my_ntrg :6;
-    __uint128_t p_op_ncx  :6;
+    __uint128_t w_my_ntrg :6;
 
-    // 0x10:
-    __uint128_t my_trg     :4;
-    __uint128_t w_my_trg   :4;
-    __uint128_t my_ntrg    :6;
-    __uint128_t w_my_ntrg  :6;
-
-    // 0x18 opponent:
-    __uint128_t op_cx      :4;
-    __uint128_t w_op_cx    :4;
-    __uint128_t r_op_cx    :4;
-    __uint128_t op_ncx     :6;
-    __uint128_t w_op_ncx   :6;
-    __uint128_t r_op_ncx   :6;
+    // opponent:
+    __uint128_t op_cx    :4;
+    __uint128_t p_op_cx  :4;
+    __uint128_t w_op_cx  :4;
+    __uint128_t r_op_cx  :4;
+    __uint128_t s_op_cx  :4;
+    __uint128_t op_ncx   :6;
+    __uint128_t p_op_ncx :6;
+    __uint128_t w_op_ncx :6;
+    __uint128_t r_op_ncx :6;
+    __uint128_t s_op_ncx :6;
 } __attribute__((packed));
 
 struct State : StateBase {
@@ -189,6 +188,8 @@ struct State : StateBase {
         w_op_ncx = n_w_op_ncx;
         r_op_cx = 0;
         r_op_ncx = 0;
+        s_op_cx = 0;
+        s_op_ncx = 0;
     }
 
     void my_stock(int trg, int ntrg) {
@@ -197,6 +198,10 @@ struct State : StateBase {
     }
 
     void my_waitingroom(int trg, int ntrg) {
+        assert((int)w_my_trg + trg <= 0x0F);
+        assert((int)w_my_ntrg + ntrg <= 0x3F);
+        assert((int)w_my_trg + trg >= 0);
+        assert((int)w_my_ntrg + ntrg >= 0);
         w_my_trg += trg;
         w_my_ntrg += ntrg;
     }
@@ -281,17 +286,33 @@ struct State : StateBase {
     }
 
     void op_stock(int cx, int ncx) {
-        // does nothing
-        // XXX: if we would implement this.. the order of the cards in stock matters
+        assert((int)s_op_cx + cx <= 0x0F);
+        assert((int)s_op_ncx + ncx <= 0x3F);
+        assert((int)s_op_cx + cx >= 0);
+        assert((int)s_op_ncx + ncx >= 0);
+        s_op_cx += cx;
+        s_op_ncx += ncx;
     }
 
     void op_waitingroom(int cx, int ncx) {
+        assert((int)w_op_cx + cx <= 0x0F);
+        assert((int)w_op_ncx + ncx <= 0x3F);
+        assert((int)w_op_cx + cx >= 0);
+        assert((int)w_op_ncx + ncx >= 0);
         w_op_cx += cx;
         w_op_ncx += ncx;
     }
 
     void op_reveal(int cx, int ncx) {
         assert(r_op_cx == 0 && r_op_ncx == 0);
+        assert((int)r_op_cx + cx <= 0x0F);
+        assert((int)r_op_ncx + ncx <= 0x3F);
+        assert((int)op_cx + cx <= 0x0F);
+        assert((int)op_ncx + ncx <= 0x3F);
+        assert((int)r_op_cx + cx >= 0);
+        assert((int)r_op_ncx + ncx >= 0);
+        assert((int)op_cx + cx >= 0);
+        assert((int)op_ncx + ncx >= 0);
         r_op_cx += cx;
         r_op_ncx += ncx;
         op_cx += cx;
@@ -320,9 +341,69 @@ struct State : StateBase {
         r_op_ncx = 0;
     }
 
-    bool op_take(WHAT source, WHAT target, WHAT what, Fraction& probability) {
+    bool op_take_stock(WHAT target, WHAT what, Fraction& probability) {
         assert(what == CX || what == NCX);
-        assert(source == DECK);
+        assert(target == WAITINGROOM || target == PENDING || target == CLOCK);
+
+        switch (what) {
+            case CX:
+                if (s_op_cx < 1) {
+                    // can't pick
+                    return false;
+                }
+                probability *= Fraction(s_op_cx, s_op_cx + s_op_ncx);
+                s_op_cx -= 1;
+                switch (target) {
+                    case WAITINGROOM:
+                        op_waitingroom(1, 0);
+                        break;
+                    case PENDING:
+                        assert(p_op_cx < 0x0F);
+                        p_op_cx += 1;
+                        break;
+                    case CLOCK:
+                        op_clock(1, 0);
+                        break;
+                    case STOCK:
+                        op_stock(1, 0);
+                        break;
+                    default:
+                        assert(true);
+                }
+                break;
+            case NCX:
+                if (s_op_ncx < 1) {
+                    // can't pick
+                    return false;
+                }
+                probability *= Fraction(s_op_ncx, s_op_cx + s_op_ncx);
+                s_op_ncx -= 1;
+                switch (target) {
+                    case WAITINGROOM:
+                        op_waitingroom(0, 1);
+                        break;
+                    case PENDING:
+                        assert(p_op_ncx < 0x3F);
+                        p_op_ncx += 1;
+                        break;
+                    case CLOCK:
+                        op_clock(0, 1);
+                        break;
+                    case STOCK:
+                        op_stock(0, 1);
+                        break;
+                    default:
+                        assert(true);
+                }
+                break;
+            default:
+                assert(true);
+        }
+        return true;
+    }
+
+    bool op_take_deck(WHAT target, WHAT what, Fraction& probability) {
+        assert(what == CX || what == NCX);
         assert(target == WAITINGROOM || target == PENDING || target == CLOCK);
 
         if (r_op_cx > 0 || r_op_ncx > 0) {
@@ -440,6 +521,16 @@ struct State : StateBase {
                 assert(true);
         }
         return true;
+    }
+
+    bool op_take(WHAT source, WHAT target, WHAT what, Fraction& probability) {
+        assert(source == DECK || source == STOCK);
+        if (source == DECK) {
+            return op_take_deck(target, what, probability);
+        } else if (source == STOCK) {
+            return op_take_stock(target, what, probability);
+        }
+        return false;
     }
 };
 

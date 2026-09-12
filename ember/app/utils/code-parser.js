@@ -1,3 +1,24 @@
+function stock_text(name, cx, ncx) {
+  const res = [name];
+  if (cx == -1 && ncx == -1) {
+    /* NOTHING TO DO */
+  } else if (cx >= 0 && ncx == -1) {
+    res.push(cx);
+  } else if (cx >= 0 && ncx == 0) {
+    res.push(cx);
+    res.push('cx');
+  } else if (cx == 0 && ncx >= 0) {
+    res.push(ncx);
+    res.push('not cx');
+  } else if (cx >= 0 && ncx >= 0) {
+    res.push(cx);
+    res.push('cx');
+    res.push(ncx);
+    res.push('not cx');
+  }
+  return res.join(' ');
+}
+
 export const syntax = [
   // attack
   { regex: /^attack\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'attack', short: 'a' },
@@ -17,6 +38,23 @@ export const syntax = [
   { regex: /^mill\s+(not\s+cx)\s*$/g,    params: [() => 'ncx'],  name: 'mill',   short: 'm', need_parent: true },
   { regex: /^mill\s+(trg)\s*$/g,         params: [() => 'trg'],  name: 'mill',   short: 'm', need_parent: true },
   { regex: /^mill\s+(not\s+trg)\s*$/g,   params: [() => 'ntrg'], name: 'mill',   short: 'm', need_parent: true },
+  // stock
+  { regex: /^stock\s+([0-9]+)()\s*$/g,                          params: [parseInt, ()=>-1],   name: 'stock',   short: 'x', to_text: (cx, ncx) => stock_text('stock', cx, ncx) },
+  { regex: /^stock\s+([0-9]+)()\s+cx\s*$/g,                     params: [parseInt, ()=> 0],   name: 'stock',   short: 'x', to_text: (cx, ncx) => stock_text('stock', cx, ncx) },
+  { regex: /^stock\s+()([0-9]+)\s+not\s+cx\s*$/g,               params: [()=> 0, parseInt],   name: 'stock',   short: 'x', to_text: (cx, ncx) => stock_text('stock', cx, ncx) },
+  { regex: /^stock\s+([0-9]+)\s+cx\s+([0-9]+)\s+not\s+cx\s*$/g, params: [parseInt, parseInt], name: 'stock',   short: 'x', to_text: (cx, ncx) => stock_text('stock', cx, ncx) },
+  // stockswap
+  { regex: /^stockswap()()\s*$/g,                                   params: [()=>-1, ()=>-1],     name: 'stockswap',   short: 'y', to_text: (cx, ncx) => stock_text('stockswap', cx, ncx) },
+  { regex: /^stockswap\s+([0-9]+)()\s*$/g,                          params: [parseInt, ()=>-1],   name: 'stockswap',   short: 'y', to_text: (cx, ncx) => stock_text('stockswap', cx, ncx) },
+  { regex: /^stockswap\s+([0-9]+)()\s+cx\s*$/g,                     params: [parseInt, ()=> 0],   name: 'stockswap',   short: 'y', to_text: (cx, ncx) => stock_text('stockswap', cx, ncx) },
+  { regex: /^stockswap\s+()([0-9]+)\s+not\s+cx\s*$/g,               params: [()=> 0, parseInt],   name: 'stockswap',   short: 'y', to_text: (cx, ncx) => stock_text('stockswap', cx, ncx) },
+  { regex: /^stockswap\s+([0-9]+)\s+cx\s+([0-9]+)\s+not\s+cx\s*$/g, params: [parseInt, parseInt], name: 'stockswap',   short: 'y', to_text: (cx, ncx) => stock_text('stockswap', cx, ncx) },
+  // stockshuffle
+  { regex: /^stockshuffle()()\s*$/g,                                   params: [()=>-1, ()=>-1],     name: 'stockshuffle',   short: 'z', to_text: (cx, ncx) => stock_text('stockshuffle', cx, ncx) },
+  { regex: /^stockshuffle\s+([0-9]+)()\s*$/g,                          params: [parseInt, ()=>-1],   name: 'stockshuffle',   short: 'z', to_text: (cx, ncx) => stock_text('stockshuffle', cx, ncx) },
+  { regex: /^stockshuffle\s+([0-9]+)()\s+cx\s*$/g,                     params: [parseInt, ()=> 0],   name: 'stockshuffle',   short: 'z', to_text: (cx, ncx) => stock_text('stockshuffle', cx, ncx) },
+  { regex: /^stockshuffle\s+()([0-9]+)\s+not\s+cx\s*$/g,               params: [()=> 0, parseInt],   name: 'stockshuffle',   short: 'z', to_text: (cx, ncx) => stock_text('stockshuffle', cx, ncx) },
+  { regex: /^stockshuffle\s+([0-9]+)\s+cx\s+([0-9]+)\s+not\s+cx\s*$/g, params: [parseInt, parseInt], name: 'stockshuffle',   short: 'z', to_text: (cx, ncx) => stock_text('stockshuffle', cx, ncx) },
   // damage
   { regex: /^damage\s+([0-9]+)\s*$/g,    params: [parseInt],     name: 'damage', short: 'd' },
   { regex: /^damage\s+(cx)\s*$/g,        params: [() => 'cx'],   name: 'damage', short: 'd', need_parent: true },

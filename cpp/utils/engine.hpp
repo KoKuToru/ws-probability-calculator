@@ -128,6 +128,209 @@ struct Engine {
         free(result);
     }
 
+    void stock(int cx, int ncx) {
+        assert(
+            (cx >= 0 && ncx == -1) ||
+            (cx >= 0 && ncx >= 0)
+        );
+        execute(
+            [=](const State* state, StateStream& output) {
+                assert(state->p_my_trg == 0);
+                assert(state->p_my_ntrg == 0);
+                assert(state->p_op_cx == 0);
+                assert(state->p_op_ncx == 0);
+                each_permutation([&](PermutationState& permutation) {
+                    each_reshuffle([&](ReshuffleState& reshuffle) {
+                        permutation.reset();
+                        reshuffle.reset();
+
+                        int l_cx = 0;
+                        int l_ncx = 0;
+                        int count = 0;
+                        if (cx >= 0 && ncx == -1) {
+                            // take a count
+                            count = l_cx = l_ncx = cx;
+                        } else {
+                            // take limited
+                            l_cx = cx;
+                            l_ncx = ncx;
+                            count = l_cx + l_ncx;
+                        }
+
+                        int reshuffled = 0;
+                        Fraction probability = 1;
+
+                        output = *state;
+
+                        for (int i = 0; i < count; ++i) {
+                            if (
+                                auto card = permutation.check(std::array{CX, NCX});
+                                !card ||
+                                (card == CX && state->p_op_cx == l_cx) ||
+                                (card == NCX && state->p_op_ncx == l_ncx) ||
+                                !output->op_take(DECK, PENDING, *card, probability)
+                            ) {
+                                // pick failed or limit reached
+                                return;
+                            }
+                            if (output->op_reshuffle()) {
+                                reshuffled += 1;
+                                if (
+                                    auto card = reshuffle.check(std::array{CX, NCX});
+                                    !card || !output->op_take(DECK, CLOCK, *card, probability)
+                                ) {
+                                    // pick failed
+                                    return;
+                                }
+                            }
+                            if (output->op_cx <= 0 && output->op_ncx <= 0) {
+                                // XXX: nothing in deck..
+                                return;
+                            }
+                        }
+
+                        if (permutation.skip() || reshuffle.skip()) {
+                            return;
+                        }
+
+                        output->op_stock(output->p_op_cx, output->p_op_ncx);
+
+                        output->update(reshuffled, probability);
+                        output.commit();
+                    });
+                });
+            }
+        );
+    }
+
+    void stockswap(int cx, int ncx) {
+        assert(
+            (cx == -1 && ncx == -1) ||
+            (cx >= 0 && ncx == -1) ||
+            (cx >= 0 && ncx >= 0)
+        );
+        execute(
+            [=](const State* state, StateStream& output) {
+                assert(state->p_my_trg == 0);
+                assert(state->p_my_ntrg == 0);
+                assert(state->p_op_cx == 0);
+                assert(state->p_op_ncx == 0);
+                each_permutation([&](PermutationState& permutation) {
+                    permutation.reset();
+
+                    int l_cx = 0;
+                    int l_ncx = 0;
+                    int count = 0;
+                    if (cx == - 1 && ncx == -1) {
+                        // take all
+                        l_cx = state->s_op_cx;
+                        l_ncx = state->s_op_ncx;
+                        count = l_cx + l_ncx;
+                    } else if (cx >= 0 && ncx == -1) {
+                        // take a count
+                        count = l_cx = l_ncx = cx;
+                    } else {
+                        // take limited
+                        l_cx = cx;
+                        l_ncx = ncx;
+                        count = l_cx + l_ncx;
+                    }
+
+                    Fraction probability = 1;
+
+                    output = *state;
+
+                    for (int i = 0; i < count; ++i) {
+                        if (
+                            auto card = permutation.check(std::array{CX, NCX});
+                            !card ||
+                            (card == CX && output->p_op_cx == l_cx) ||
+                            (card == NCX && output->p_op_ncx == l_ncx) ||
+                            !output->op_take(STOCK, PENDING, *card, probability)
+                        ) {
+                            // pick failed or limit reached
+                            return;
+                        }
+                    }
+
+                    if (permutation.skip()) {
+                        return;
+                    }
+
+                    output->op_waitingroom(output->p_op_cx, output->p_op_ncx);
+
+                    output->update(0, probability);
+                    output.commit();
+                });
+            }
+        );
+    }
+
+    void stockshuffle(int cx, int ncx) {
+        assert(
+            (cx == -1 && ncx == -1) ||
+            (cx >= 0 && ncx == -1) ||
+            (cx >= 0 && ncx >= 0)
+        );
+        execute(
+            [=](const State* state, StateStream& output) {
+                assert(state->p_my_trg == 0);
+                assert(state->p_my_ntrg == 0);
+                assert(state->p_op_cx == 0);
+                assert(state->p_op_ncx == 0);
+                each_permutation([&](PermutationState& permutation) {
+                    permutation.reset();
+
+                    int l_cx = 0;
+                    int l_ncx = 0;
+                    int count = 0;
+                    if (cx == - 1 && ncx == -1) {
+                        // take all
+                        l_cx = state->s_op_cx;
+                        l_ncx = state->s_op_ncx;
+                        count = l_cx + l_ncx;
+                    } else if (cx >= 0 && ncx == -1) {
+                        // take a count
+                        count = l_cx = l_ncx = cx;
+                    } else {
+                        // take limited
+                        l_cx = cx;
+                        l_ncx = ncx;
+                        count = l_cx + l_ncx;
+                    }
+
+                    Fraction probability = 1;
+
+                    output = *state;
+
+                    for (int i = 0; i < count; ++i) {
+                        if (
+                            auto card = permutation.check(std::array{CX, NCX});
+                            !card ||
+                            (card == CX && output->p_op_cx == l_cx) ||
+                            (card == NCX && output->p_op_ncx == l_ncx) ||
+                            !output->op_take(STOCK, PENDING, *card, probability)
+                        ) {
+                            // pick failed or limit reached
+                            return;
+                        }
+                    }
+
+                    if (permutation.skip()) {
+                        return;
+                    }
+
+                    output->op_cx += output->p_op_cx;
+                    output->op_ncx += output->p_op_ncx;
+                    output->op_deck_reshuffle();
+
+                    output->update(0, probability);
+                    output.commit();
+                });
+            }
+        );
+    }
+
     void attack(int try_dmg) {
         assert(try_dmg > 0);
         execute(

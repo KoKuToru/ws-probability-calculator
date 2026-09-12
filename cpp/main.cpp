@@ -125,6 +125,21 @@ int main() {
         );
     }
 
+    __attribute__((export_name("stock"), visibility("default"), flatten))
+    extern "C" void stock(int cx, int ncx) {
+        lazy_engine()->stock(cx, ncx);
+    }
+
+    __attribute__((export_name("stockswap"), visibility("default"), flatten))
+    extern "C" void stockswap(int cx, int ncx) {
+        lazy_engine()->stockswap(cx, ncx);
+    }
+
+    __attribute__((export_name("stockshuffle"), visibility("default"), flatten))
+    extern "C" void stockshuffle(int cx, int ncx) {
+        lazy_engine()->stockshuffle(cx, ncx);
+    }
+
     __attribute__((export_name("burn"), visibility("default"), flatten))
     extern "C" void burn(int try_dmg) {
         lazy_engine()->burn(try_dmg);

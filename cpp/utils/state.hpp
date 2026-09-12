@@ -16,9 +16,9 @@ struct StateBase {
 
     // 0x08 pending:
     __uint128_t p_my_trg  :4;
-    __uint128_t p_my_ntrg :4;
     __uint128_t p_op_cx   :4;
-    __uint128_t p_op_ncx  :4;
+    __uint128_t p_my_ntrg :6;
+    __uint128_t p_op_ncx  :6;
 
     // 0x10:
     __uint128_t my_trg     :4;
@@ -169,9 +169,9 @@ struct State : StateBase {
         assert(n_my_trg    <= 0x0F);
         assert(n_op_cx     <= 0x0F);
         assert(n_p_my_trg  <= 0x0F);
-        assert(n_p_my_ntrg <= 0x0F);
+        assert(n_p_my_ntrg <= 0x3F);
         assert(n_p_op_cx   <= 0x0F);
-        assert(n_p_op_ncx  <= 0x0F);
+        assert(n_p_op_ncx  <= 0x3F);
         this->~State();
         stack = n_stack;
         active = 1;
@@ -249,7 +249,7 @@ struct State : StateBase {
                         my_waitingroom(0, 1);
                         break;
                     case PENDING:
-                        assert(p_my_ntrg < 0x0F);
+                        assert(p_my_ntrg < 0x3F);
                         p_my_ntrg += 1;
                         break;
                     case CLOCK:
@@ -366,7 +366,7 @@ struct State : StateBase {
                             op_waitingroom(0, 1);
                             break;
                         case PENDING:
-                            assert(p_op_ncx < 0x0F);
+                            assert(p_op_ncx < 0x3F);
                             p_op_ncx += 1;
                             break;
                         case CLOCK:
@@ -423,7 +423,7 @@ struct State : StateBase {
                         op_waitingroom(0, 1);
                         break;
                     case PENDING:
-                        assert(p_op_ncx < 0x0F);
+                        assert(p_op_ncx < 0x3F);
                         p_op_ncx += 1;
                         break;
                     case CLOCK:

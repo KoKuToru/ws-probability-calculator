@@ -5,8 +5,8 @@ cd cpp
 bash build.sh ../ember/public/worker
 cd ..
 cd ember
-yarn
-yarn build --output-path ../docs
+npx yarn
+npx yarn build --output-path ../docs
 cd ..
 git rm -rf --cached .
 git add docs

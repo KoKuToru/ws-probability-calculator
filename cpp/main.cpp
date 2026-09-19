@@ -126,18 +126,18 @@ int main() {
     }
 
     __attribute__((export_name("stock"), visibility("default"), flatten))
-    extern "C" void stock(int cx, int ncx) {
-        lazy_engine()->stock(cx, ncx);
+    extern "C" void stock(int count) {
+        lazy_engine()->stock(count);
     }
 
     __attribute__((export_name("stockswap"), visibility("default"), flatten))
-    extern "C" void stockswap(int cx, int ncx) {
-        lazy_engine()->stockswap(cx, ncx);
+    extern "C" void stockswap() {
+        lazy_engine()->stockswap();
     }
 
     __attribute__((export_name("stockshuffle"), visibility("default"), flatten))
-    extern "C" void stockshuffle(int cx, int ncx) {
-        lazy_engine()->stockshuffle(cx, ncx);
+    extern "C" void stockshuffle() {
+        lazy_engine()->stockshuffle();
     }
 
     __attribute__((export_name("burn"), visibility("default"), flatten))

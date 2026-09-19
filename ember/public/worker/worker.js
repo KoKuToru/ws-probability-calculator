@@ -255,13 +255,13 @@ function build_actions(engine, code) {
         res.push([engine.reshuffle]);
         break;
       case 'stock':
-        res.push([engine.stock, params[0], params[1]]);
+        res.push([engine.stock, params[0]]);
         break;
       case 'stockswap':
-        res.push([engine.stockswap, params[0], params[1]]);
+        res.push([engine.stockswap]);
         break;
       case 'stockshuffle':
-        res.push([engine.stockshuffle, params[0], params[1]]);
+        res.push([engine.stockshuffle]);
         break;
       default:
         throw new EngineError(`Unsupported cmd=${cmd}`);

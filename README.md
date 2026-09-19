@@ -28,7 +28,7 @@ right now the following commands are supported:
 * `burn cx` / `burn not cx` / `burn trg` / `burn not trg`
     * same as `burn DMG` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `mill COUNT`
-    * mill cards from opponent (but it into waiting room)
+    * mill cards from opponent and puts the cards into waiting room
 * `mill cx` / `mill not cx` / `mill trg` / `mill not trg`
     * same as `mill COUNT` but does it for each cx, not cx, trg, or not trg from `attack`, `burn`, `mill` or `reveal`
 * `damage DMG`
@@ -51,12 +51,19 @@ right now the following commands are supported:
 * `reveal COUNT remove cx`
     * same as `reveal COUNT` but removes `cx` from the revealed cards (moved to waiting room)
 * `reshuffle`
+    * reshuffles the deck
     * resets revealed cards state
     * without reveal, reshuffle does nothing, because all possible deck states are calculated with probabilites.
 * `procedure NAME`
     * defines a procedure can be executed with `execute NAME`
 * `execute NAME`
     * executes a `procedure`, recursive executes are disallowed
+* `stock COUNT`
+    * same as `mill COUNT` but puts the cards into into stock
+* `stockshuffle`
+    * moves the stock into deck, then executes `reshuffle` followed by `stock COUNT`
+* `stockswap`
+    * moves the stock into waitingroom, then executes `stock COUNT`
 
 everything that is not detected as a command gets ignored, can be used as comment..
 
